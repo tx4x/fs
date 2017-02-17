@@ -105,7 +105,6 @@ var promisedChmod = Q.denodeify(fs.chmod);
 
 function checkWhatAlreadyOccupiesPathAsync(path: string) {
   return new Promise((resolve, reject) => {
-
     promisedStat(path)
       .then(stat => {
         if ((stat as Stats).isFile()) {
@@ -127,8 +126,7 @@ function checkWhatAlreadyOccupiesPathAsync(path: string) {
 };
 
 function checkExistingFileFulfillsCriteriaAsync(path: string, stat: Stats, criteria) {
-  var mode = normalizeFileMode(stat.mode);
-
+  const mode = normalizeFileMode(stat.mode);
   var checkContent = function () {
     var deferred = Q.defer();
 
@@ -156,7 +154,7 @@ function checkExistingFileFulfillsCriteriaAsync(path: string, stat: Stats, crite
   };
 
   return checkContent()
-    .then(function (contentReplaced) {
+    .then(contentReplaced => {
       if (!contentReplaced) {
         return checkMode();
       }

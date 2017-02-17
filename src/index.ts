@@ -9,3 +9,6 @@ import {} from './streams'
 import {} from './rename'
 import {} from './move'
 import {} from './file'
+import {} from './find'
+import {} from './inspect'
+

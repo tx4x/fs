@@ -22,13 +22,13 @@ import * as read from './read';
 // It provides the public API, and resolves all paths regarding to
 // passed cwdPath, or default process.cwd() if cwdPath was not specified.
 export const jetpackContext = function (cwdPath) {
-  var getCwdPath = function () {
+  let getCwdPath = function () {
     return cwdPath || process.cwd();
   };
 
-  var cwd = function (path?: string, ...end) {
-    var args;
-    var pathParts;
+  let cwd = function (path?: string, ...end) {
+    let args;
+    let pathParts;
 
     // return current CWD if no arguments specified...
     if (arguments.length === 0) {
@@ -42,25 +42,25 @@ export const jetpackContext = function (cwdPath) {
   };
 
   // resolves path to inner CWD path of this jetpack instance
-  var resolvePath = function (path) {
+  let resolvePath = function (path) {
     return pathUtil.resolve(getCwdPath(), path);
   };
 
-  var getPath = function () {
+  let getPath = function () {
     // add CWD base path as first element of arguments array
     Array.prototype.unshift.call(arguments, getCwdPath());
     return pathUtil.resolve.apply(null, arguments);
   };
 
-  var normalizeOptions = function (options) {
-    var opts = options || {};
+  let normalizeOptions = function (options) {
+    let opts = options || {};
     opts.cwd = getCwdPath();
     return opts;
   };
 
   // API
 
-  var api = {
+  let api = {
     cwd: cwd,
     path: getPath,
 
@@ -90,15 +90,15 @@ export const jetpackContext = function (cwdPath) {
     },
 
     dir: function (path, criteria) {
-      var normalizedPath;
+      let normalizedPath;
       dir.validateInput('dir', path, criteria);
       normalizedPath = resolvePath(path);
       dir.sync(normalizedPath, criteria);
       return cwd(normalizedPath);
     },
     dirAsync: function (path, criteria) {
-      var deferred = Q.defer();
-      var normalizedPath;
+      let deferred = Q.defer();
+      let normalizedPath;
       dir.validateInput('dirAsync', path, criteria);
       normalizedPath = resolvePath(path);
       dir.async(normalizedPath, criteria)
@@ -123,8 +123,8 @@ export const jetpackContext = function (cwdPath) {
       return this;
     },
     fileAsync: function (path, criteria) {
-      var deferred = Q.defer();
-      var that = this;
+      let deferred = Q.defer();
+      let that = this;
       file.validateInput('fileAsync', path, criteria);
       file.async(resolvePath(path), criteria)
         .then(function () {

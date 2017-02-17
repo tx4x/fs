@@ -11,4 +11,8 @@ import {} from './move'
 import {} from './file'
 import {} from './find'
 import {} from './inspect'
+import {} from './inspect_tree'
+import {} from './list'
+import {} from './remove'
+
 

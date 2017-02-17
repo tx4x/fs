@@ -7,7 +7,7 @@ var inspect = require('./inspect');
 var matcher = require('./utils/matcher');
 var validate = require('./utils/validate');
 
-var validateInput = function (methodName, path, options) {
+export function validateInput(methodName: string, path: string, options: any) {
   var methodSignature = methodName + '([path], options)';
   validate.argument(methodSignature, 'path', path, ['string']);
   validate.options(methodSignature, 'options', options, {
@@ -18,7 +18,7 @@ var validateInput = function (methodName, path, options) {
   });
 };
 
-var normalizeOptions = function (options) {
+function normalizeOptions(options?: any) {
   var opts = options || {};
   // defaults:
   if (opts.files === undefined) {
@@ -33,21 +33,21 @@ var normalizeOptions = function (options) {
   return opts;
 };
 
-var processFoundObjects = function (foundObjects, cwd) {
-  return foundObjects.map(function (inspectObj) {
+function processFoundObjects(foundObjects: any, cwd: string) {
+  return foundObjects.map(inspectObj => {
     return pathUtil.relative(cwd, inspectObj.absolutePath);
   });
 };
 
-var generatePathDoesntExistError = function (path) {
-  var err = new Error("Path you want to find stuff in doesn't exist " + path);
-  err.code = 'ENOENT';
+function generatePathDoesntExistError(path: string) {
+  const err = new Error("Path you want to find stuff in doesn't exist " + path);
+  err['code'] = 'ENOENT';
   return err;
 };
 
-var generatePathNotDirectoryError = function (path) {
-  var err = new Error('Path you want to find stuff in must be a directory ' + path);
-  err.code = 'ENOTDIR';
+function generatePathNotDirectoryError(path: string) {
+  const err = new Error('Path you want to find stuff in must be a directory ' + path);
+  err['code'] = 'ENOTDIR';
   return err;
 };
 
@@ -55,16 +55,15 @@ var generatePathNotDirectoryError = function (path) {
 // Sync
 // ---------------------------------------------------------
 
-var findSync = function (path, options) {
-  var foundInspectObjects = [];
-  var matchesAnyOfGlobs = matcher.create(path, options.matching);
-
+function findSync(path: string, options: any) {
+  const foundInspectObjects = [];
+  const matchesAnyOfGlobs = matcher.create(path, options.matching);
   treeWalker.sync(path, {
     maxLevelsDeep: options.recursive ? Infinity : 1,
     inspectOptions: {
       absolutePath: true
     }
-  }, function (itemPath, item) {
+  }, (itemPath, item) => {
     if (itemPath !== path && matchesAnyOfGlobs(itemPath)) {
       if ((item.type === 'file' && options.files === true)
         || (item.type === 'dir' && options.directories === true)) {
@@ -72,12 +71,11 @@ var findSync = function (path, options) {
       }
     }
   });
-
   return processFoundObjects(foundInspectObjects, options.cwd);
 };
 
-var findSyncInit = function (path, options) {
-  var entryPointInspect = inspect.sync(path);
+function sync(path: string, options: any) {
+  const entryPointInspect = inspect.sync(path);
   if (entryPointInspect === undefined) {
     throw generatePathDoesntExistError(path);
   } else if (entryPointInspect.type !== 'dir') {
@@ -91,52 +89,40 @@ var findSyncInit = function (path, options) {
 // Async
 // ---------------------------------------------------------
 
-var findAsync = function (path, options) {
-  var deferred = Q.defer();
-  var foundInspectObjects = [];
-  var matchesAnyOfGlobs = matcher.create(path, options.matching);
-
-  var walker = treeWalker.stream(path, {
-    maxLevelsDeep: options.recursive ? Infinity : 1,
-    inspectOptions: {
-      absolutePath: true
-    }
-  })
-  .on('readable', function () {
-    var data = walker.read();
-    var item;
-    if (data && data.path !== path && matchesAnyOfGlobs(data.path)) {
-      item = data.item;
-      if ((item.type === 'file' && options.files === true)
-        || (item.type === 'dir' && options.directories === true)) {
-        foundInspectObjects.push(item);
+function findAsync(path: string, options: any) {
+  return new Promise((resolve, reject) => {
+    const foundInspectObjects = [];
+    const matchesAnyOfGlobs = matcher.create(path, options.matching);
+    const walker = treeWalker.stream(path, {
+      maxLevelsDeep: options.recursive ? Infinity : 1,
+      inspectOptions: {
+        absolutePath: true
       }
-    }
-  })
-  .on('error', deferred.reject)
-  .on('end', function () {
-    deferred.resolve(processFoundObjects(foundInspectObjects, options.cwd));
+    }).on('readable', () => {
+      const data = walker.read();
+      let item: any;
+      if (data && data.path !== path && matchesAnyOfGlobs(data.path)) {
+        item = data.item;
+        if ((item.type === 'file' && options.files === true)
+          || (item.type === 'dir' && options.directories === true)) {
+          foundInspectObjects.push(item);
+        }
+      }
+    }).on('error', reject)
+      .on('end', () => {
+        resolve(processFoundObjects(foundInspectObjects, options.cwd));
+      });
   });
-
-  return deferred.promise;
 };
 
-var findAsyncInit = function (path, options) {
+export function async(path: string, options: any) {
   return inspect.async(path)
-  .then(function (entryPointInspect) {
-    if (entryPointInspect === undefined) {
-      throw generatePathDoesntExistError(path);
-    } else if (entryPointInspect.type !== 'dir') {
-      throw generatePathNotDirectoryError(path);
-    }
-    return findAsync(path, normalizeOptions(options));
-  });
+    .then(function (entryPointInspect) {
+      if (entryPointInspect === undefined) {
+        throw generatePathDoesntExistError(path);
+      } else if (entryPointInspect.type !== 'dir') {
+        throw generatePathNotDirectoryError(path);
+      }
+      return findAsync(path, normalizeOptions(options));
+    });
 };
-
-// ---------------------------------------------------------
-// API
-// ---------------------------------------------------------
-
-exports.validateInput = validateInput;
-exports.sync = findSyncInit;
-exports.async = findAsyncInit;

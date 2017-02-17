@@ -1,13 +1,15 @@
-import * as fs from 'fs';
-const crypto = require('crypto');
+//import * as fs from 'fs';
+import { Stats, readlinkSync, statSync, lstatSync, stat, lstat, readlink, createReadStream, readFileSync } from 'fs';
 import * as  pathUtil from "path";
 import * as Q from 'q';
-import {argument,options} from './utils/validate';
+import { argument, options } from './utils/validate';
+import { createHash } from 'crypto';
 
-var supportedChecksumAlgorithms = ['md5', 'sha1', 'sha256', 'sha512'];
+export const supportedChecksumAlgorithms: string[] = ['md5', 'sha1', 'sha256', 'sha512'];
 
-export function validateInput(methodName:string, path:string, options:any):void {
-  const methodSignature:string = methodName + '(path, [options])';
+
+export function validateInput(methodName: string, path: string, options: any): void {
+  const methodSignature: string = methodName + '(path, [options])';
   argument(methodSignature, 'path', path, ['string']);
   options(methodSignature, 'options', options, {
     checksum: ['string'],
@@ -25,7 +27,7 @@ export function validateInput(methodName:string, path:string, options:any):void 
 };
 
 function createInspectObj(path, options, stat) {
-  let obj:any = {};
+  let obj: any = {};
   obj.name = pathUtil.basename(path);
   if (stat.isFile()) {
     obj.type = 'file';
@@ -58,29 +60,28 @@ function createInspectObj(path, options, stat) {
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-function fileChecksum(path:string, algo:string) {
-  const hash = crypto.createHash(algo);
-  const data = fs.readFileSync(path);
+function fileChecksum(path: string, algo: string) {
+  const hash = createHash(algo);
+  const data = readFileSync(path);
   hash.update(data);
   return hash.digest('hex');
 };
 
-function addExtraFieldsSync(path:string, inspectObj:any, options:any) {
+function addExtraFieldsSync(path: string, inspectObj: any, options: any) {
   if (inspectObj.type === 'file' && options.checksum) {
     inspectObj[options.checksum] = fileChecksum(path, options.checksum);
   } else if (inspectObj.type === 'symlink') {
-    inspectObj.pointsAt = fs.readlinkSync(path);
+    inspectObj.pointsAt = readlinkSync(path);
   }
 };
 
-var inspectSync = function (path, options) {
-  var statOperation = fs.statSync;
-  var stat;
-  var inspectObj;
+export function sync(path, options?: any) {
+  let statOperation = statSync;
+  let stat: Stats;
+  let inspectObj: any;
   options = options || {};
-
   if (options.symlinks) {
-    statOperation = fs.lstatSync;
+    statOperation = lstatSync;
   }
 
   try {
@@ -93,10 +94,8 @@ var inspectSync = function (path, options) {
     }
     throw err;
   }
-
   inspectObj = createInspectObj(path, options, stat);
   addExtraFieldsSync(path, inspectObj, options);
-
   return inspectObj;
 };
 
@@ -104,44 +103,43 @@ var inspectSync = function (path, options) {
 // Async
 // ---------------------------------------------------------
 
-var promisedStat = Q.denodeify(fs.stat);
-var promisedLstat = Q.denodeify(fs.lstat);
-var promisedReadlink = Q.denodeify(fs.readlink);
+const promisedStat = Q.denodeify(stat);
+const promisedLstat = Q.denodeify(lstat);
+const promisedReadlink = Q.denodeify(readlink);
 
-var fileChecksumAsync = function (path, algo) {
-  var deferred = Q.defer();
-
-  var hash = crypto.createHash(algo);
-  var s = fs.createReadStream(path);
-  s.on('data', function (data) {
-    hash.update(data);
+function fileChecksumAsync(path: string, algo: string) {
+  return new Promise((resolve, reject) => {
+    const hash = createHash(algo);
+    const s = createReadStream(path);
+    s.on('data', data => {
+      hash.update(data);
+    });
+    s.on('end', () => {
+      resolve(hash.digest('hex'));
+    });
+    s.on('error', reject);
   });
-  s.on('end', function () {
-    deferred.resolve(hash.digest('hex'));
-  });
-  s.on('error', deferred.reject);
-
-  return deferred.promise;
 };
 
-var addExtraFieldsAsync = function (path, inspectObj, options) {
-  if (inspectObj.type === 'file' && options.checksum) {
-    return fileChecksumAsync(path, options.checksum)
-    .then(function (checksum) {
-      inspectObj[options.checksum] = checksum;
-      return inspectObj;
-    });
-  } else if (inspectObj.type === 'symlink') {
-    return promisedReadlink(path)
-    .then(function (linkPath) {
-      inspectObj.pointsAt = linkPath;
-      return inspectObj;
-    });
-  }
-  return new Q(inspectObj);
+function addExtraFieldsAsync(path: string, inspectObj, options) {
+  return new Promise((resolve, reject) => {
+    if (inspectObj.type === 'file' && options.checksum) {
+      return fileChecksumAsync(path, options.checksum)
+        .then(checksum => {
+          inspectObj[options.checksum] = checksum;
+          return inspectObj;
+        });
+    } else if (inspectObj.type === 'symlink') {
+      return promisedReadlink(path)
+        .then(linkPath => {
+          inspectObj.pointsAt = linkPath;
+          return inspectObj;
+        });
+    }
+  });
 };
 
-var inspectAsync = function (path, options) {
+export function async(path: string, options) {
   var deferred = Q.defer();
   var statOperation = promisedStat;
   options = options || {};
@@ -151,29 +149,21 @@ var inspectAsync = function (path, options) {
   }
 
   statOperation(path)
-  .then(function (stat) {
-    var inspectObj = createInspectObj(path, options, stat);
-    addExtraFieldsAsync(path, inspectObj, options)
-    .then(deferred.resolve, deferred.reject);
-  })
-  .catch(function (err) {
-    // Detection if path exists
-    if (err.code === 'ENOENT') {
-      // Doesn't exist. Return undefined instead of throwing.
-      deferred.resolve(undefined);
-    } else {
-      deferred.reject(err);
-    }
-  });
+    .then(function (stat) {
+      var inspectObj = createInspectObj(path, options, stat);
+      addExtraFieldsAsync(path, inspectObj, options)
+        .then(deferred.resolve, deferred.reject);
+    })
+    .catch(function (err) {
+      // Detection if path exists
+      if (err.code === 'ENOENT') {
+        // Doesn't exist. Return undefined instead of throwing.
+        deferred.resolve(undefined);
+      } else {
+        deferred.reject(err);
+      }
+    });
 
   return deferred.promise;
 };
 
-// ---------------------------------------------------------
-// API
-// ---------------------------------------------------------
-
-exports.supportedChecksumAlgorithms = supportedChecksumAlgorithms;
-exports.validateInput = validateInput;
-exports.sync = inspectSync;
-exports.async = inspectAsync;

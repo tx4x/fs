@@ -63,7 +63,6 @@ function checkExistingDirectoryFulfillsCriteriaSync(path: string, stat: Stats, c
       chmodSync(path, criteria.mode);
     }
   };
-
   const checkEmptiness = function () {
     let list: string[];
     if (criteria.empty) {
@@ -74,7 +73,6 @@ function checkExistingDirectoryFulfillsCriteriaSync(path: string, stat: Stats, c
       });
     }
   };
-
   checkMode();
   checkEmptiness();
 };

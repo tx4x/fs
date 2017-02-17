@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as Q from 'q';
 import { argument } from './utils/validate';
-export function validateInput(methodName, path) {
-  var methodSignature = methodName + '(path)';
+export function validateInput(methodName: string, path: string) {
+  const methodSignature = methodName + '(path)';
   argument(methodSignature, 'path', path, ['string']);
 };
 
@@ -34,22 +34,21 @@ export function sync(path) {
 // ---------------------------------------------------------
 
 export function async(path) {
-  var deferred = Q.defer();
-  fs.stat(path, function (err, stat) {
-    if (err) {
-      if (err.code === 'ENOENT' || err.code === 'ENOTDIR') {
-        deferred.resolve(false);
+  return new Promise((resolve, reject) => {
+    fs.stat(path, function (err, stat) {
+      if (err) {
+        if (err.code === 'ENOENT' || err.code === 'ENOTDIR') {
+          resolve(false);
+        } else {
+          reject(err);
+        }
+      } else if (stat.isDirectory()) {
+        resolve('dir');
+      } else if (stat.isFile()) {
+        resolve('file');
       } else {
-        deferred.reject(err);
+        resolve('other');
       }
-    } else if (stat.isDirectory()) {
-      deferred.resolve('dir');
-    } else if (stat.isFile()) {
-      deferred.resolve('file');
-    } else {
-      deferred.resolve('other');
-    }
+    });
   });
-
-  return deferred.promise;
 };

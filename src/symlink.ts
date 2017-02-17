@@ -1,14 +1,12 @@
-'use strict';
-
 import * as Q from 'q';
 import * as fs from 'fs';
-var mkdirp = require('mkdirp');
+import * as mkdirp from 'mkdirp';
 import * as  pathUtil from "path";
-//var validate = require('./utils/validate');
 import { argument, options } from './utils/validate';
+import * as denodeify from 'denodeify';
 
 export function validateInput(methodName, symlinkValue, path) {
-  var methodSignature = methodName + '(symlinkValue, path)';
+  const methodSignature = methodName + '(symlinkValue, path)';
   argument(methodSignature, 'symlinkValue', symlinkValue, ['string']);
   argument(methodSignature, 'path', path, ['string']);
 };
@@ -38,15 +36,15 @@ export function sync(symlinkValue, path): void {
 var promisedSymlink = Q.denodeify(fs.symlink);
 var promisedMkdirp = Q.denodeify(mkdirp);
 
-export function async(symlinkValue, path): Promise<null> {
-  return new Promise<null>((resolve, reject) => {
+export function async(symlinkValue, path) {
+  return new Promise((resolve, reject) => {
     promisedSymlink(symlinkValue, path)
       .then(resolve)
-      .catch(function (err) {
+      .catch(err => {
         if (err.code === 'ENOENT') {
           // Parent directories don't exist. Just create them and rety.
           promisedMkdirp(pathUtil.dirname(path))
-            .then(function () {
+            .then(() => {
               return promisedSymlink(symlinkValue, path);
             })
             .then(resolve, reject);

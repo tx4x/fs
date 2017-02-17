@@ -83,8 +83,8 @@ function createBrandNewFileSync(path, criteria) {
 }
 ;
 function sync(path, passedCriteria) {
-    var criteria = getCriteriaDefaults(passedCriteria);
-    var stat = checkWhatAlreadyOccupiesPathSync(path);
+    const criteria = getCriteriaDefaults(passedCriteria);
+    const stat = checkWhatAlreadyOccupiesPathSync(path);
     if (stat !== undefined) {
         checkExistingFileFulfillsCriteriaSync(path, stat, criteria);
     }
@@ -97,8 +97,8 @@ exports.sync = sync;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-var promisedStat = Q.denodeify(fs.stat);
-var promisedChmod = Q.denodeify(fs.chmod);
+const promisedStat = Q.denodeify(fs.stat);
+const promisedChmod = Q.denodeify(fs.chmod);
 function checkWhatAlreadyOccupiesPathAsync(path) {
     return new Promise((resolve, reject) => {
         promisedStat(path)
@@ -126,21 +126,21 @@ function checkWhatAlreadyOccupiesPathAsync(path) {
 function checkExistingFileFulfillsCriteriaAsync(path, stat, criteria) {
     const mode = mode_1.normalizeFileMode(stat.mode);
     const checkContent = function () {
-        var deferred = Q.defer();
-        if (criteria.content !== undefined) {
-            write_1.async(path, criteria.content, {
-                mode: mode,
-                jsonIndent: criteria.jsonIndent
-            })
-                .then(function () {
-                deferred.resolve(true);
-            })
-                .catch(deferred.reject);
-        }
-        else {
-            deferred.resolve(false);
-        }
-        return deferred.promise;
+        return new Promise((resolve, reject) => {
+            if (criteria.content !== undefined) {
+                write_1.async(path, criteria.content, {
+                    mode: mode,
+                    jsonIndent: criteria.jsonIndent
+                })
+                    .then(function () {
+                    resolve(true);
+                })
+                    .catch(reject);
+            }
+            else {
+                resolve(false);
+            }
+        });
     };
     const checkMode = function () {
         if (criteria.mode !== undefined && criteria.mode !== mode) {

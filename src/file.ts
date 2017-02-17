@@ -87,8 +87,8 @@ function createBrandNewFileSync(path: string, criteria) {
 };
 
 export function sync(path: string, passedCriteria) {
-  var criteria = getCriteriaDefaults(passedCriteria);
-  var stat = checkWhatAlreadyOccupiesPathSync(path);
+  const criteria = getCriteriaDefaults(passedCriteria);
+  const stat: Stats = checkWhatAlreadyOccupiesPathSync(path);
   if (stat !== undefined) {
     checkExistingFileFulfillsCriteriaSync(path, stat, criteria);
   } else {
@@ -100,8 +100,8 @@ export function sync(path: string, passedCriteria) {
 // Async
 // ---------------------------------------------------------
 
-var promisedStat = Q.denodeify(fs.stat);
-var promisedChmod = Q.denodeify(fs.chmod);
+const promisedStat = Q.denodeify(fs.stat);
+const promisedChmod = Q.denodeify(fs.chmod);
 
 function checkWhatAlreadyOccupiesPathAsync(path: string) {
   return new Promise((resolve, reject) => {
@@ -128,22 +128,20 @@ function checkWhatAlreadyOccupiesPathAsync(path: string) {
 function checkExistingFileFulfillsCriteriaAsync(path: string, stat: Stats, criteria) {
   const mode = normalizeFileMode(stat.mode);
   const checkContent = function () {
-    var deferred = Q.defer();
-
-    if (criteria.content !== undefined) {
-      writeASync(path, criteria.content, {
-        mode: mode,
-        jsonIndent: criteria.jsonIndent
-      })
-        .then(function () {
-          deferred.resolve(true);
+    return new Promise((resolve, reject) => {
+      if (criteria.content !== undefined) {
+        writeASync(path, criteria.content, {
+          mode: mode,
+          jsonIndent: criteria.jsonIndent
         })
-        .catch(deferred.reject);
-    } else {
-      deferred.resolve(false);
-    }
-
-    return deferred.promise;
+          .then(function () {
+            resolve(true);
+          })
+          .catch(reject);
+      } else {
+        resolve(false);
+      }
+    });
   };
 
   const checkMode = function () {

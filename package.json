@@ -1,8 +1,15 @@
 {
-  "name": "fs-jetpack",
+  "name": "fs-jetpack-ts",
   "description": "Better file system API",
-  "version": "0.11.0",
-  "author": "Jakub Szwacz <jakub@szwacz.com>",
+  "version": "0.11.3",
+  "contributors": [
+    {
+      "name" : "Jakub Szwacz"
+    },
+    {
+      "name" : "xblox"
+    }
+  ],
   "dependencies": {
     "denodeify": "^1.2.1",
     "minimatch": "^3.0.3",
@@ -36,15 +43,16 @@
     "build": "tsc"
   },
   "main": "main.js",
-  "homepage": "https://github.com/szwacz/fs-jetpack",
+  "homepage": "https://github.com/xblox/fs-jetpack",
   "repository": {
     "type": "git",
-    "url": "https://github.com/szwacz/fs-jetpack.git"
+    "url": "https://github.com/xblox/fs-jetpack.git"
   },
   "license": "MIT",
   "keywords": [
     "fs",
-    "file system"
+    "file system",
+    "typescript"
   ],
   "pre-commit": [
     "lint",

@@ -6,14 +6,15 @@ var exists = require('./exists');
 import { create as matcher } from './utils/matcher';
 import { normalizeFileMode as fileMode } from './utils/mode';
 var treeWalker = require('./utils/tree_walker');
-var validate = require('./utils/validate');
+
+import {argument,options} from './utils/validate';
 var write = require('./write');
 
 var validateInput = function (methodName, from, to, options): void {
   var methodSignature = methodName + '(from, to, [options])';
-  validate.argument(methodSignature, 'from', from, ['string']);
-  validate.argument(methodSignature, 'to', to, ['string']);
-  validate.options(methodSignature, 'options', options, {
+  argument(methodSignature, 'from', from, ['string']);
+  argument(methodSignature, 'to', to, ['string']);
+  options(methodSignature, 'options', options, {
     overwrite: ['boolean'],
     matching: ['string', 'array of string']
   });
@@ -142,12 +143,9 @@ var checksBeforeCopyingAsync = function (from, to, opts) {
 
 var copyFileAsync = function (from, to, mode, retriedAttempt) {
   var deferred = Q.defer();
-
   var readStream = fs.createReadStream(from);
   var writeStream = fs.createWriteStream(to, { mode: mode });
-
   readStream.on('error', deferred.reject);
-
   writeStream.on('error', function (err) {
     var toDirPath = pathUtil.dirname(to);
 

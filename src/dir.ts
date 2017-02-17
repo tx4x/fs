@@ -1,5 +1,5 @@
 import * as pathUtil from 'path';
-import { stat, chmod, chmodSync, readdirSync, readdir } from 'fs';
+import { stat, statSync, chmod, chmodSync, readdirSync, readdir } from 'fs';
 const Q = require('q');
 import * as mkdirp from 'mkdirp';
 import * as rimraf from 'rimraf';
@@ -40,7 +40,7 @@ var checkWhatAlreadyOccupiesPathSync = function (path) {
   var stat;
 
   try {
-    stat = fs.statSync(path);
+    stat = statSync(path);
   } catch (err) {
     // Detection if path already exists
     if (err.code !== 'ENOENT') {

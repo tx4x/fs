@@ -38,7 +38,7 @@ var isValidTypeDefinition = function (typeStr) {
   });
 };
 
-var detectType = function (value) {
+var detectType = function (value):string {
   if (value === null) {
     return 'null';
   }
@@ -71,7 +71,7 @@ var detectTypeDeep = function (value) {
   return type;
 };
 
-var validateArray = function (argumentValue, typeToCheck) {
+var validateArray = function (argumentValue, typeToCheck):boolean {
   var allowedTypeInArray = extractTypeFromArrayOfNotation(typeToCheck);
 
   if (detectType(argumentValue) !== 'array') {
@@ -83,7 +83,8 @@ var validateArray = function (argumentValue, typeToCheck) {
   });
 };
 
-export function argument(methodName, argumentName, argumentValue, argumentMustBe) {
+export function argument(methodName:string, argumentName:string, argumentValue:string, argumentMustBe):boolean {
+  
   var isOneOfAllowedTypes = argumentMustBe.some(function (type) {
     if (!isValidTypeDefinition(type)) {
       throw new Error('Unknown type "' + type + '"');
@@ -100,6 +101,7 @@ export function argument(methodName, argumentName, argumentValue, argumentMustBe
     throw new Error('Argument "' + argumentName + '" passed to ' + methodName + ' must be '
       + prettyPrintTypes(argumentMustBe) + '. Received ' + detectTypeDeep(argumentValue));
   }
+  return false;
 };
 
 export function options(methodName, optionsObjName, obj, allowedOptions) {

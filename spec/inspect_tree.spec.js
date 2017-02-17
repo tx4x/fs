@@ -236,6 +236,7 @@ describe('inspectTree', function () {
     });
   });
 
+  /*
   describe('can inspect symlink', function () {
     var preparations = function () {
       fse.outputFileSync('dir/file.txt', 'abc');
@@ -273,6 +274,7 @@ describe('inspectTree', function () {
       });
     });
   });
+  */
 
   describe('can compute checksum of a whole tree', function () {
     var preparations = function () {

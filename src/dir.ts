@@ -1,33 +1,31 @@
 import * as pathUtil from 'path';
-import { stat, statSync, chmod, chmodSync, readdirSync, readdir } from 'fs';
+import { Stats, stat, statSync, chmod, chmodSync, readdirSync, readdir } from 'fs';
 const Q = require('q');
-import * as mkdirp from 'mkdirp';
+import { sync as mkdirp } from 'mkdirp';
 import * as rimraf from 'rimraf';
-
-var modeUtil = require('./utils/mode');
-var validate = require('./utils/validate');
-
-var validateInput = function (methodName, path, criteria) {
-  var methodSignature = methodName + '(path, [criteria])';
-  validate.argument(methodSignature, 'path', path, ['string']);
-  validate.options(methodSignature, 'criteria', criteria, {
+import { normalizeFileMode as modeUtil } from './utils/mode';
+import { argument, options } from './utils/validate';
+export function validateInput(methodName: string, path: string, criteria: any) {
+  const methodSignature = methodName + '(path, [criteria])';
+  argument(methodSignature, 'path', path, ['string']);
+  options(methodSignature, 'criteria', criteria, {
     empty: ['boolean'],
     mode: ['string', 'number']
   });
 };
 
-var getCriteriaDefaults = function (passedCriteria) {
-  var criteria = passedCriteria || {};
+function getCriteriaDefaults(passedCriteria?: any) {
+  const criteria = passedCriteria || {};
   if (typeof criteria.empty !== 'boolean') {
     criteria.empty = false;
   }
   if (criteria.mode !== undefined) {
-    criteria.mode = modeUtil.normalizeFileMode(criteria.mode);
+    criteria.mode = modeUtil(criteria.mode);
   }
   return criteria;
 };
 
-var generatePathOccupiedByNotDirectoryError = function (path) {
+function generatePathOccupiedByNotDirectoryError(path: string): Error {
   return new Error('Path ' + path + ' exists but is not a directory.' +
     ' Halting jetpack.dir() call for safety reasons.');
 };
@@ -36,9 +34,8 @@ var generatePathOccupiedByNotDirectoryError = function (path) {
 // Sync
 // ---------------------------------------------------------
 
-var checkWhatAlreadyOccupiesPathSync = function (path) {
-  var stat;
-
+function checkWhatAlreadyOccupiesPathSync(path: string):Stats {
+  let stat: Stats;
   try {
     stat = statSync(path);
   } catch (err) {
@@ -55,20 +52,20 @@ var checkWhatAlreadyOccupiesPathSync = function (path) {
   return stat;
 };
 
-var createBrandNewDirectorySync = function (path, criteria) {
+function createBrandNewDirectorySync(path: string, criteria: any) {
   mkdirp.sync(path, { mode: criteria.mode });
 };
 
-var checkExistingDirectoryFulfillsCriteriaSync = function (path, stat, criteria) {
-  var checkMode = function () {
-    var mode = modeUtil.normalizeFileMode(stat.mode);
+function checkExistingDirectoryFulfillsCriteriaSync(path: string, stat: Stats, criteria: any) {
+  const checkMode = function () {
+    const mode = modeUtil(stat.mode);
     if (criteria.mode !== undefined && criteria.mode !== mode) {
       chmodSync(path, criteria.mode);
     }
   };
 
-  var checkEmptiness = function () {
-    var list;
+  const checkEmptiness = function () {
+    let list: string[];
     if (criteria.empty) {
       // Delete everything inside this directory
       list = readdirSync(path);
@@ -96,13 +93,13 @@ export function sync(path, passedCriteria) {
 // Async
 // ---------------------------------------------------------
 
-var promisedStat = Q.denodeify(stat);
-var promisedChmod = Q.denodeify(chmod);
-var promisedReaddir = Q.denodeify(readdir);
-var promisedRimraf = Q.denodeify(rimraf);
-var promisedMkdirp = Q.denodeify(mkdirp);
+const promisedStat = Q.denodeify(stat);
+const promisedChmod = Q.denodeify(chmod);
+const promisedReaddir = Q.denodeify(readdir);
+const promisedRimraf = Q.denodeify(rimraf);
+const promisedMkdirp = Q.denodeify(mkdirp);
 
-var checkWhatAlreadyOccupiesPathAsync = function (path) {
+function checkWhatAlreadyOccupiesPathAsync(path: string) {
   var deferred = Q.defer();
   promisedStat(path)
     .then(function (stat: any) {
@@ -126,73 +123,66 @@ var checkWhatAlreadyOccupiesPathAsync = function (path) {
 };
 
 // Delete all files and directores inside given directory
-var emptyAsync = function (path) {
-  var deferred = Q.defer();
+function emptyAsync(path: string) {
+  return new Promise((resolve, reject) => {
+    promisedReaddir(path)
+      .then(function (list: any[]) {
+        const doOne = function (index) {
+          let subPath: string;
+          if (index === list.length) {
+            resolve();
+          } else {
+            subPath = pathUtil.resolve(path, list[index]);
+            promisedRimraf(subPath).then(function () {
+              doOne(index + 1);
+            });
+          }
+        };
 
-  promisedReaddir(path)
-    .then(function (list: any[]) {
-      var doOne = function (index) {
-        var subPath;
-        if (index === list.length) {
-          deferred.resolve();
-        } else {
-          subPath = pathUtil.resolve(path, list[index]);
-          promisedRimraf(subPath).then(function () {
-            doOne(index + 1);
-          });
-        }
-      };
-
-      doOne(0);
-    })
-    .catch(deferred.reject);
-
-  return deferred.promise;
+        doOne(0);
+      })
+      .catch(reject);
+  });
 };
 
-var checkExistingDirectoryFulfillsCriteriaAsync = function (path, stat, criteria) {
-  var deferred = Q.defer();
-
-  var checkMode = function () {
-    var mode = modeUtil.normalizeFileMode(stat.mode);
-    if (criteria.mode !== undefined && criteria.mode !== mode) {
-      return promisedChmod(path, criteria.mode);
-    }
-    return new Q();
-  };
-
-  var checkEmptiness = function () {
-    if (criteria.empty) {
-      return emptyAsync(path);
-    }
-    return new Q();
-  };
-
-  checkMode()
-    .then(checkEmptiness)
-    .then(deferred.resolve, deferred.reject);
-
-  return deferred.promise;
+function checkExistingDirectoryFulfillsCriteriaAsync(path: string, stat: Stats, criteria: any) {
+  return new Promise((resolve, reject) => {
+    const checkMode = function () {
+      const mode = modeUtil(stat.mode);
+      if (criteria.mode !== undefined && criteria.mode !== mode) {
+        return promisedChmod(path, criteria.mode);
+      }
+      return new Q();
+    };
+    const checkEmptiness = function () {
+      if (criteria.empty) {
+        return emptyAsync(path);
+      }
+      return new Q();
+    };
+    checkMode()
+      .then(checkEmptiness)
+      .then(resolve, reject);
+  });
 };
 
-var createBrandNewDirectoryAsync = function (path, criteria) {
+function createBrandNewDirectoryAsync(path: string, criteria: any) {
   return promisedMkdirp(path, { mode: criteria.mode });
 };
 
 export function async(path: string, passedCriteria) {
-  var deferred = Q.defer();
-  var criteria = getCriteriaDefaults(passedCriteria);
+  return new Promise((resolve, reject) => {
+    const criteria = getCriteriaDefaults(passedCriteria);
+    checkWhatAlreadyOccupiesPathAsync(path)
+      .then(stat => {
+        if (stat !== undefined) {
+          return checkExistingDirectoryFulfillsCriteriaAsync(path, stat, criteria);
+        }
+        return createBrandNewDirectoryAsync(path, criteria);
+      })
+      .then(resolve, reject);
 
-  checkWhatAlreadyOccupiesPathAsync(path)
-    .then(function (stat) {
-      if (stat !== undefined) {
-        return checkExistingDirectoryFulfillsCriteriaAsync(path, stat, criteria);
-      }
-      return createBrandNewDirectoryAsync(path, criteria);
-    })
-    .then(deferred.resolve, deferred.reject);
-
-  return deferred.promise;
+  });
 };
 
 // ---------------------------------------------------------

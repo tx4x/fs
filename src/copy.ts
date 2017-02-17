@@ -83,7 +83,7 @@ function copySymlinkSync(from: string, to: string) {
 };
 
 function copyItemSync(from: string, inspectData: any, to: string) {
-  let mode = fileMode(inspectData.mode);
+  const mode = fileMode(inspectData.mode);
   if (inspectData.type === 'dir') {
     mkdirp(to, { mode: parseInt(mode), fs: null });
   } else if (inspectData.type === 'file') {

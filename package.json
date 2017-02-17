@@ -26,7 +26,8 @@
     "test-with-coverage": "istanbul cover node_modules/.bin/_mocha -- 'spec/**/*.spec.js'",
     "lint": "eslint .",
     "release-start": "release-assist --start",
-    "release-finish": "release-assist --finish"
+    "release-finish": "release-assist --finish",
+    "dev": "nodemon -w src -x ts-node src/index.ts"
   },
   "main": "main.js",
   "homepage": "https://github.com/szwacz/fs-jetpack",

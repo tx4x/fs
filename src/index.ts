@@ -16,4 +16,7 @@ import {} from './inspect_tree'
 import {} from './list'
 import {} from './remove'
 
+import {} from './jetpack'
+
+
 

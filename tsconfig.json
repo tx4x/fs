@@ -16,9 +16,7 @@
     "./src/**/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    "./src/prototypes/**",
-    "./src/wamp/**"
+    "node_modules"
   ],
   "atom": {
     "rewriteTsconfig": true

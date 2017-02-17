@@ -35,7 +35,6 @@ export function sync(path) {
 
 export function async(path) {
   var deferred = Q.defer();
-
   fs.stat(path, function (err, stat) {
     if (err) {
       if (err.code === 'ENOENT' || err.code === 'ENOTDIR') {
@@ -54,7 +53,3 @@ export function async(path) {
 
   return deferred.promise;
 };
-
-// ---------------------------------------------------------
-// API
-// ---------------------------------------------------------

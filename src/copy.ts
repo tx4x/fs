@@ -1,15 +1,15 @@
 import * as  pathUtil from "path";
 import * as fs from 'fs';
 import * as Q from 'q';
-import * as mkdirp from 'mkdirp';
+import { Opts, sync as mkdirp } from 'mkdirp';
 var exists = require('./exists');
 import { create as matcher } from './utils/matcher';
-import {normalizeFileMode as fileMode} from './utils/mode';
+import { normalizeFileMode as fileMode } from './utils/mode';
 var treeWalker = require('./utils/tree_walker');
 var validate = require('./utils/validate');
 var write = require('./write');
 
-var validateInput = function (methodName, from, to, options) {
+var validateInput = function (methodName, from, to, options): void {
   var methodSignature = methodName + '(from, to, [options])';
   validate.argument(methodSignature, 'from', from, ['string']);
   validate.argument(methodSignature, 'to', to, ['string']);
@@ -86,9 +86,9 @@ var copySymlinkSync = function (from, to) {
 };
 
 var copyItemSync = function (from, inspectData, to) {
-  var mode = fileMode.normalizeFileMode(inspectData.mode);
+  let mode = fileMode(inspectData.mode);
   if (inspectData.type === 'dir') {
-    mkdirp.sync(to, { mode: mode });
+    mkdirp(to, { mode: parseInt(mode), fs: null });
   } else if (inspectData.type === 'file') {
     copyFileSync(from, to, mode);
   } else if (inspectData.type === 'symlink') {
@@ -204,7 +204,7 @@ var copySymlinkAsync = function (from, to) {
 };
 
 var copyItemAsync = function (from, inspectData, to) {
-  var mode = fileMode.normalizeFileMode(inspectData.mode);
+  var mode = fileMode(inspectData.mode);
   if (inspectData.type === 'dir') {
     return promisedMkdirp(to, { mode: mode });
   } else if (inspectData.type === 'file') {

@@ -1,29 +1,26 @@
 import * as fs from 'fs';
-let Q = require('q');
-var write = require('./write');
-var validate = require('./utils/validate');
-
-export function validateInput(methodName, path, data, options) {
-  var methodSignature = methodName + '(path, data, [options])';
-  validate.argument(methodSignature, 'path', path, ['string']);
-  validate.argument(methodSignature, 'data', data, ['string', 'buffer']);
-  validate.options(methodSignature, 'options', options, {
+import * as Q from 'q';
+import { sync as writeSync, async as writeASync } from './write';
+import { argument, options } from './utils/validate';
+export function validateInput(methodName: string, path: string, data: any, options: any) {
+  const methodSignature = methodName + '(path, data, [options])';
+  argument(methodSignature, 'path', path, ['string']);
+  argument(methodSignature, 'data', data, ['string', 'buffer']);
+  options(methodSignature, 'options', options, {
     mode: ['string', 'number']
   });
 };
-
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-
-export function appendSync(path, data, options) {
+export function sync(path, data, options) {
   try {
     fs.appendFileSync(path, data, options);
   } catch (err) {
     if (err.code === 'ENOENT') {
       // Parent directory doesn't exist, so just pass the task to `write`,
       // which will create the folder and file.
-      write.sync(path, data, options);
+      writeSync(path, data, options);
     } else {
       throw err;
     }
@@ -33,23 +30,19 @@ export function appendSync(path, data, options) {
 // ---------------------------------------------------------
 // ASYNC
 // ---------------------------------------------------------
-
-var promisedAppendFile = Q.denodeify(fs.appendFile);
-
-export function appendAsync (path, data, options) {
-  var deferred = Q.defer();
-
-  promisedAppendFile(path, data, options)
-    .then(deferred.resolve)
-    .catch(function (err) {
-      if (err.code === 'ENOENT') {
-        // Parent directory doesn't exist, so just pass the task to `write`,
-        // which will create the folder and file.
-        write.async(path, data, options).then(deferred.resolve, deferred.reject);
-      } else {
-        deferred.reject(err);
-      }
-    });
-
-  return deferred.promise;
+const promisedAppendFile = Q.denodeify(fs.appendFile);
+export function async(path, data, options) {
+  return new Promise((resolve, reject) => {
+    promisedAppendFile(path, data, options)
+      .then(resolve)
+      .catch(err => {
+        if (err.code === 'ENOENT') {
+          // Parent directory doesn't exist, so just pass the task to `write`,
+          // which will create the folder and file.
+          writeASync(path, data, options).then(resolve, reject);
+        } else {
+          reject(err);
+        }
+      });
+  });
 };

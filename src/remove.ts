@@ -5,7 +5,6 @@ export function validateInput(methodName: string, path: string) {
   const methodSignature = methodName + '([path])';
   argument(methodSignature, 'path', path, ['string', 'undefined']);
 };
-
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------

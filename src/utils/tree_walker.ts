@@ -1,17 +1,13 @@
 /* eslint no-underscore-dangle:0 */
-
-var Readable = require('stream').Readable;
-var pathUtil = require('path');
-var inspect = require('../inspect');
-var list = require('../list');
-
+import { Readable } from 'stream';
+import * as  pathUtil from "path";
+import { sync as inspectSync, async as inspectASync } from '../inspect';
+import { sync as listSync, async as listASync } from '../list';
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-
-export function sync(path, options, callback, currentLevel) {
-  var item = inspect.sync(path, options.inspectOptions);
-
+export function sync(path, options, callback, currentLevel?: number) {
+  const item = inspectSync(path, options.inspectOptions);
   if (options.maxLevelsDeep === undefined) {
     options.maxLevelsDeep = Infinity;
   }
@@ -21,7 +17,7 @@ export function sync(path, options, callback, currentLevel) {
 
   callback(path, item);
   if (item && item.type === 'dir' && currentLevel < options.maxLevelsDeep) {
-    list.sync(path).forEach(function (child) {
+    listSync(path).forEach(function (child) {
       sync(path + pathUtil.sep + child, options, callback, currentLevel + 1);
     });
   }
@@ -33,19 +29,19 @@ export function sync(path, options, callback, currentLevel) {
 
 export function stream(path, options) {
   var rs = new Readable({ objectMode: true });
-  var nextTreeNode = {
+  let nextTreeNode = {
     path: path,
     parent: undefined,
     level: 0
   };
-  var running = false;
-  var readSome;
+  let running: boolean = false;
+  let readSome;
 
-  var error = function (err) {
+  const error = function (err) {
     rs.emit('error', err);
   };
 
-  var findNextUnprocessedNode = function (node) {
+  const findNextUnprocessedNode = function (node) {
     if (node.nextSibling) {
       return node.nextSibling;
     } else if (node.parent) {
@@ -54,7 +50,7 @@ export function stream(path, options) {
     return undefined;
   };
 
-  var pushAndContinueMaybe = function (data) {
+  const pushAndContinueMaybe = function (data) {
     var theyWantMore = rs.push(data);
     running = false;
     if (!nextTreeNode) {
@@ -70,43 +66,41 @@ export function stream(path, options) {
   }
 
   readSome = function () {
-    let theNode:any = nextTreeNode;
+    let theNode: any = nextTreeNode;
     running = true;
-    inspect.async(theNode.path, options.inspectOptions)
-    .then(function (inspected) {
-      theNode.inspected = inspected;
-      if (inspected && inspected.type === 'dir' && theNode.level < options.maxLevelsDeep) {
-        list.async(theNode.path)
-        .then(function (childrenNames) {
-          var children = childrenNames.map(function (name) {
-            return {
-              name: name,
-              path: theNode.path + pathUtil.sep + name,
-              parent: theNode,
-              level: theNode.level + 1
-            };
-          });
-          children.forEach(function (child, index) {
-            child.nextSibling = children[index + 1];
-          });
+    inspectASync(theNode.path, options.inspectOptions)
+      .then(function (inspected) {
+        theNode.inspected = inspected;
+        if (inspected && (inspected as any).type === 'dir' && theNode.level < options.maxLevelsDeep) {
+          listASync(theNode.path)
+            .then(function (childrenNames: string[]) {
+              let children = childrenNames.map(function (name) {
+                return {
+                  name: name,
+                  path: theNode.path + pathUtil.sep + name,
+                  parent: theNode,
+                  level: theNode.level + 1
+                };
+              });
+              children.forEach(function (child, index) {
+                (child as any).nextSibling = children[index + 1];
+              });
 
-          nextTreeNode = children[0] || findNextUnprocessedNode(theNode);
+              nextTreeNode = children[0] || findNextUnprocessedNode(theNode);
+              pushAndContinueMaybe({ path: theNode.path, item: inspected });
+            })
+            .catch(error);
+        } else {
+          nextTreeNode = findNextUnprocessedNode(theNode);
           pushAndContinueMaybe({ path: theNode.path, item: inspected });
-        })
-        .catch(error);
-      } else {
-        nextTreeNode = findNextUnprocessedNode(theNode);
-        pushAndContinueMaybe({ path: theNode.path, item: inspected });
-      }
-    })
-    .catch(error);
+        }
+      })
+      .catch(error);
   };
-
-  rs._read = function () {
+  rs['_read'] = function () {
     if (!running) {
       readSome();
     }
   };
-
   return rs;
 };

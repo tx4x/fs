@@ -1,6 +1,7 @@
 import {} from './append'
 import {} from './copy'
 import {} from './utils/mode'
+import {} from './utils/tree_walker'
 import {} from './exists'
 import {} from './dir'
 import {} from './write'

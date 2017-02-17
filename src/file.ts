@@ -127,7 +127,7 @@ function checkWhatAlreadyOccupiesPathAsync(path: string) {
 
 function checkExistingFileFulfillsCriteriaAsync(path: string, stat: Stats, criteria) {
   const mode = normalizeFileMode(stat.mode);
-  var checkContent = function () {
+  const checkContent = function () {
     var deferred = Q.defer();
 
     if (criteria.content !== undefined) {
@@ -146,7 +146,7 @@ function checkExistingFileFulfillsCriteriaAsync(path: string, stat: Stats, crite
     return deferred.promise;
   };
 
-  var checkMode = function () {
+  const checkMode = function () {
     if (criteria.mode !== undefined && criteria.mode !== mode) {
       return promisedChmod(path, criteria.mode);
     }

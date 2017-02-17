@@ -53,7 +53,7 @@ function checkWhatAlreadyOccupiesPathSync(path: string):Stats {
 };
 
 function createBrandNewDirectorySync(path: string, criteria: any) {
-  mkdirp.sync(path, { mode: criteria.mode });
+  mkdirp(path, { mode: criteria.mode, fs:null });
 };
 
 function checkExistingDirectoryFulfillsCriteriaSync(path: string, stat: Stats, criteria: any) {

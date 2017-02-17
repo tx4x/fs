@@ -1,16 +1,14 @@
-'use strict';
-
 import * as  pathUtil from "path";
 import * as Q from 'q';
-var treeWalker = require('./utils/tree_walker');
-var inspect = require('./inspect');
-var matcher = require('./utils/matcher');
-var validate = require('./utils/validate');
+import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
+import { sync as inspectSync, async as inspectASync } from './inspect';
+import { create as matcher } from './utils/matcher'
+import { argument, options } from './utils/validate';
 
-export function validateInput(methodName: string, path: string, options: any) {
-  var methodSignature = methodName + '([path], options)';
-  validate.argument(methodSignature, 'path', path, ['string']);
-  validate.options(methodSignature, 'options', options, {
+export function validateInput(methodName: string, path: string, options: any): void {
+  const methodSignature = methodName + '([path], options)';
+  argument(methodSignature, 'path', path, ['string']);
+  options(methodSignature, 'options', options, {
     matching: ['string', 'array of string'],
     files: ['boolean'],
     directories: ['boolean'],
@@ -57,8 +55,8 @@ function generatePathNotDirectoryError(path: string) {
 
 function findSync(path: string, options: any) {
   const foundInspectObjects = [];
-  const matchesAnyOfGlobs = matcher.create(path, options.matching);
-  treeWalker.sync(path, {
+  const matchesAnyOfGlobs = matcher(path, options.matching);
+  treeWalkerSync(path, {
     maxLevelsDeep: options.recursive ? Infinity : 1,
     inspectOptions: {
       absolutePath: true
@@ -75,13 +73,12 @@ function findSync(path: string, options: any) {
 };
 
 function sync(path: string, options: any) {
-  const entryPointInspect = inspect.sync(path);
+  const entryPointInspect = inspectSync(path);
   if (entryPointInspect === undefined) {
     throw generatePathDoesntExistError(path);
   } else if (entryPointInspect.type !== 'dir') {
     throw generatePathNotDirectoryError(path);
   }
-
   return findSync(path, normalizeOptions(options));
 };
 
@@ -92,8 +89,8 @@ function sync(path: string, options: any) {
 function findAsync(path: string, options: any) {
   return new Promise((resolve, reject) => {
     const foundInspectObjects = [];
-    const matchesAnyOfGlobs = matcher.create(path, options.matching);
-    const walker = treeWalker.stream(path, {
+    const matchesAnyOfGlobs = matcher(path, options.matching);
+    const walker = treeWalkerStream(path, {
       maxLevelsDeep: options.recursive ? Infinity : 1,
       inspectOptions: {
         absolutePath: true
@@ -116,11 +113,11 @@ function findAsync(path: string, options: any) {
 };
 
 export function async(path: string, options: any) {
-  return inspect.async(path)
-    .then(function (entryPointInspect) {
+  return inspectASync(path)
+    .then(entryPointInspect => {
       if (entryPointInspect === undefined) {
         throw generatePathDoesntExistError(path);
-      } else if (entryPointInspect.type !== 'dir') {
+      } else if ((entryPointInspect as any).type !== 'dir') {
         throw generatePathNotDirectoryError(path);
       }
       return findAsync(path, normalizeOptions(options));

@@ -139,7 +139,7 @@ function addExtraFieldsAsync(path: string, inspectObj, options) {
   });
 };
 
-export function async(path: string, options) {
+export function async(path: string, options?:any) {
   var deferred = Q.defer();
   var statOperation = promisedStat;
   options = options || {};

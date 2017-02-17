@@ -7,8 +7,8 @@ const list_1 = require("./list");
 const validate_1 = require("./utils/validate");
 function validateInput(methodName, path, options) {
     const methodSignature = methodName + '(path, options)';
-    validate_1.argument(methodSignature, 'path', path, ['string']);
-    options(methodSignature, 'options', options, {
+    validate_1.validateArgument(methodSignature, 'path', path, ['string']);
+    validate_1.validateOptions(methodSignature, 'options', options, {
         checksum: ['string'],
         relativePath: ['boolean']
     });

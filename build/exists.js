@@ -1,9 +1,9 @@
 "use strict";
-const fs = require("fs");
+const fs_1 = require("fs");
 const validate_1 = require("./utils/validate");
 function validateInput(methodName, path) {
     const methodSignature = methodName + '(path)';
-    validate_1.argument(methodSignature, 'path', path, ['string']);
+    validate_1.validateArgument(methodSignature, 'path', path, ['string']);
 }
 exports.validateInput = validateInput;
 ;
@@ -11,9 +11,9 @@ exports.validateInput = validateInput;
 // Sync
 // ---------------------------------------------------------
 function sync(path) {
-    var stat;
+    let stat;
     try {
-        stat = fs.statSync(path);
+        stat = fs_1.statSync(path);
         if (stat.isDirectory()) {
             return 'dir';
         }
@@ -36,7 +36,7 @@ exports.sync = sync;
 // ---------------------------------------------------------
 function async(path) {
     return new Promise((resolve, reject) => {
-        fs.stat(path, function (err, stat) {
+        fs_1.stat(path, function (err, stat) {
             if (err) {
                 if (err.code === 'ENOENT' || err.code === 'ENOTDIR') {
                     resolve(false);

@@ -2,13 +2,12 @@ import * as pathUtil from "path";
 import * as fs from 'fs';
 import * as Q from 'q';
 import * as mkdirp from 'mkdirp';
-import { argument, options } from './utils/validate';
-
+import { validateArgument, validateOptions } from './utils/validate';
 export function validateInput(methodName: string, path: string, data, options): void {
   var methodSignature = methodName + '(path, data, [options])';
-  argument(methodSignature, 'path', path, ['string']);
-  argument(methodSignature, 'data', data, ['string', 'buffer', 'object', 'array']);
-  options(methodSignature, 'options', options, {
+  validateArgument(methodSignature, 'path', path, ['string']);
+  validateArgument(methodSignature, 'data', data, ['string', 'buffer', 'object', 'array']);
+  validateOptions(methodSignature, 'options', options, {
     atomic: ['boolean'],
     jsonIndent: ['number']
   });
@@ -16,7 +15,6 @@ export function validateInput(methodName: string, path: string, data, options): 
 
 // Temporary file extensions used for atomic file overwriting.
 const newExt: string = '.__new__';
-
 function serializeToJsonMaybe(data, jsonIndent: number): string {
   let indent: number = jsonIndent;
   if (typeof indent !== 'number') {
@@ -33,7 +31,6 @@ function serializeToJsonMaybe(data, jsonIndent: number): string {
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-
 function writeFileSync(path: string, data: any | string, options?: any): void {
   try {
     fs.writeFileSync(path, data, options);
@@ -70,11 +67,9 @@ export function sync(path: string, data: string, options?: any) {
 // ---------------------------------------------------------
 // ASYNC
 // ---------------------------------------------------------
-
-var promisedRename = Q.denodeify(fs.rename);
-var promisedWriteFile = Q.denodeify(fs.writeFile);
-var promisedMkdirp = Q.denodeify(mkdirp);
-
+const promisedRename = Q.denodeify(fs.rename);
+const promisedWriteFile = Q.denodeify(fs.writeFile);
+const promisedMkdirp = Q.denodeify(mkdirp);
 function writeFileAsync(path: string, data: string, options?: any): Promise<null> {
   return new Promise<null>((resolve, reject) => {
     promisedWriteFile(path, data, options)
@@ -109,7 +104,7 @@ function writeAtomicAsync(path: string, data: string, options?: any) {
       })
       .then(resolve, reject);
   });
-};
+}
 
 export function async(path: string, data: string, options?: any) {
   let opts: any = options || {};

@@ -2,12 +2,12 @@ import { createHash } from 'crypto';
 import * as  pathUtil from "path";
 import * as Q from 'q';
 import { sync as inspectSync, async as inspectASync, supportedChecksumAlgorithms } from './inspect';
-import { sync as listSync, async as listASync } from './list'
-import { argument, options } from './utils/validate';
+import { sync as listSync, async as listASync } from './list';
+import { validateArgument, validateOptions } from './utils/validate';
 export function validateInput(methodName: string, path: string, options: any): void {
   const methodSignature = methodName + '(path, options)';
-  argument(methodSignature, 'path', path, ['string']);
-  options(methodSignature, 'options', options, {
+  validateArgument(methodSignature, 'path', path, ['string']);
+  validateOptions(methodSignature, 'options', options, {
     checksum: ['string'],
     relativePath: ['boolean']
   });
@@ -79,7 +79,7 @@ function inspectTreeNodeAsync(path: string, options, parent) {
   return new Promise((resolve, reject) => {
     function inspectAllChildren(treeBranch) {
       var subDirDeferred = Q.defer();
-      listASync(path).then(function (children:any) {
+      listASync(path).then(function (children: any) {
         var doNext = function (index) {
           let subPath;
           if (index === children.length) {

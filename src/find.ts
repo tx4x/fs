@@ -1,14 +1,12 @@
 import * as  pathUtil from "path";
-import * as Q from 'q';
 import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
 import { sync as inspectSync, async as inspectASync } from './inspect';
-import { create as matcher } from './utils/matcher'
-import { argument, options } from './utils/validate';
-
-export function validateInput(methodName: string, path: string, options: any): void {
+import { create as matcher } from './utils/matcher';
+import { validateArgument, validateOptions } from './utils/validate';
+export function validateInput(methodName: string, path: string, _options: any): void {
   const methodSignature = methodName + '([path], options)';
-  argument(methodSignature, 'path', path, ['string']);
-  options(methodSignature, 'options', options, {
+  validateArgument(methodSignature, 'path', path, ['string']);
+  validateOptions(methodSignature, 'options', validateOptions, {
     matching: ['string', 'array of string'],
     files: ['boolean'],
     directories: ['boolean'],
@@ -52,7 +50,6 @@ function generatePathNotDirectoryError(path: string) {
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-
 function findSync(path: string, options: any) {
   const foundInspectObjects = [];
   const matchesAnyOfGlobs = matcher(path, options.matching);
@@ -72,7 +69,7 @@ function findSync(path: string, options: any) {
   return processFoundObjects(foundInspectObjects, options.cwd);
 };
 
-function sync(path: string, options: any) {
+export function sync(path: string, options: any) {
   const entryPointInspect = inspectSync(path);
   if (entryPointInspect === undefined) {
     throw generatePathDoesntExistError(path);

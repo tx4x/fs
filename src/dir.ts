@@ -4,11 +4,11 @@ const Q = require('q');
 import { sync as mkdirp } from 'mkdirp';
 import * as rimraf from 'rimraf';
 import { normalizeFileMode as modeUtil } from './utils/mode';
-import { argument, options } from './utils/validate';
+import { validateArgument, validateOptions } from './utils/validate';
 export function validateInput(methodName: string, path: string, criteria: any) {
   const methodSignature = methodName + '(path, [criteria])';
-  argument(methodSignature, 'path', path, ['string']);
-  options(methodSignature, 'criteria', criteria, {
+  validateArgument(methodSignature, 'path', path, ['string']);
+  validateOptions(methodSignature, 'criteria', criteria, {
     empty: ['boolean'],
     mode: ['string', 'number']
   });
@@ -181,10 +181,4 @@ export function async(path: string, passedCriteria) {
       .then(resolve, reject);
 
   });
-};
-
-// ---------------------------------------------------------
-// API
-// ---------------------------------------------------------
-
-module.exports.validateInput = validateInput;
+}

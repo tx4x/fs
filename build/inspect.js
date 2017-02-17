@@ -1,5 +1,4 @@
 "use strict";
-//import * as fs from 'fs';
 const fs_1 = require("fs");
 const pathUtil = require("path");
 const Q = require("q");
@@ -8,8 +7,8 @@ const crypto_1 = require("crypto");
 exports.supportedChecksumAlgorithms = ['md5', 'sha1', 'sha256', 'sha512'];
 function validateInput(methodName, path, options) {
     const methodSignature = methodName + '(path, [options])';
-    validate_1.argument(methodSignature, 'path', path, ['string']);
-    options(methodSignature, 'options', options, {
+    validate_1.validateArgument(methodSignature, 'path', path, ['string']);
+    validate_1.validateOptions(methodSignature, 'options', options, {
         checksum: ['string'],
         mode: ['boolean'],
         times: ['boolean'],
@@ -136,7 +135,6 @@ function addExtraFieldsAsync(path, inspectObj, options) {
         }
     });
 }
-;
 function async(path, options) {
     var deferred = Q.defer();
     var statOperation = promisedStat;
@@ -163,5 +161,4 @@ function async(path, options) {
     return deferred.promise;
 }
 exports.async = async;
-;
 //# sourceMappingURL=inspect.js.map

@@ -4,7 +4,7 @@ const rimraf_1 = require("rimraf");
 const validate_1 = require("./utils/validate");
 function validateInput(methodName, path) {
     const methodSignature = methodName + '([path])';
-    validate_1.argument(methodSignature, 'path', path, ['string', 'undefined']);
+    validate_1.validateArgument(methodSignature, 'path', path, ['string', 'undefined']);
 }
 exports.validateInput = validateInput;
 ;

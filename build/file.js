@@ -6,8 +6,8 @@ const validate_1 = require("./utils/validate");
 const write_1 = require("./write");
 function validateInput(methodName, path, criteria) {
     const methodSignature = methodName + '(path, [criteria])';
-    validate_1.argument(methodSignature, 'path', path, ['string']);
-    validate_1.options(methodSignature, 'criteria', criteria, {
+    validate_1.validateArgument(methodSignature, 'path', path, ['string']);
+    validate_1.validateOptions(methodSignature, 'criteria', criteria, {
         content: ['string', 'buffer', 'object', 'array'],
         jsonIndent: ['number'],
         mode: ['string', 'number']

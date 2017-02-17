@@ -33,7 +33,7 @@ var isValidTypeDefinition = function (typeStr) {
         return validType === typeStr;
     });
 };
-var detectType = function (value) {
+const detectType = function (value) {
     if (value === null) {
         return 'null';
     }
@@ -45,7 +45,7 @@ var detectType = function (value) {
     }
     return typeof value;
 };
-var onlyUniqueValuesInArrayFilter = function (value, index, self) {
+const onlyUniqueValuesInArrayFilter = function (value, index, self) {
     return self.indexOf(value) === index;
 };
 var detectTypeDeep = function (value) {
@@ -70,7 +70,7 @@ var validateArray = function (argumentValue, typeToCheck) {
         return detectType(element) === allowedTypeInArray;
     });
 };
-function argument(methodName, argumentName, argumentValue, argumentMustBe) {
+function validateArgument(methodName, argumentName, argumentValue, argumentMustBe) {
     var isOneOfAllowedTypes = argumentMustBe.some(function (type) {
         if (!isValidTypeDefinition(type)) {
             throw new Error('Unknown type "' + type + '"');
@@ -86,15 +86,15 @@ function argument(methodName, argumentName, argumentValue, argumentMustBe) {
     }
     return false;
 }
-exports.argument = argument;
+exports.validateArgument = validateArgument;
 ;
-function options(methodName, optionsObjName, obj, allowedOptions) {
+function validateOptions(methodName, optionsObjName, obj, allowedOptions) {
     if (obj !== undefined) {
-        argument(methodName, optionsObjName, obj, ['object']);
+        validateArgument(methodName, optionsObjName, obj, ['object']);
         Object.keys(obj).forEach(function (key) {
             var argName = optionsObjName + '.' + key;
             if (allowedOptions.hasOwnProperty(key)) {
-                argument(methodName, argName, obj[key], allowedOptions[key]);
+                validateArgument(methodName, argName, obj[key], allowedOptions[key]);
             }
             else {
                 throw new Error('Unknown argument "' + argName + '" passed to ' + methodName);
@@ -102,6 +102,6 @@ function options(methodName, optionsObjName, obj, allowedOptions) {
         });
     }
 }
-exports.options = options;
+exports.validateOptions = validateOptions;
 ;
 //# sourceMappingURL=validate.js.map

@@ -6,8 +6,8 @@ const pathUtil = require("path");
 const validate_1 = require("./utils/validate");
 function validateInput(methodName, symlinkValue, path) {
     const methodSignature = methodName + '(symlinkValue, path)';
-    validate_1.argument(methodSignature, 'symlinkValue', symlinkValue, ['string']);
-    validate_1.argument(methodSignature, 'path', path, ['string']);
+    validate_1.validateArgument(methodSignature, 'symlinkValue', symlinkValue, ['string']);
+    validate_1.validateArgument(methodSignature, 'path', path, ['string']);
 }
 exports.validateInput = validateInput;
 ;
@@ -30,12 +30,11 @@ function sync(symlinkValue, path) {
     }
 }
 exports.sync = sync;
-;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-var promisedSymlink = Q.denodeify(fs.symlink);
-var promisedMkdirp = Q.denodeify(mkdirp);
+const promisedSymlink = Q.denodeify(fs.symlink);
+const promisedMkdirp = Q.denodeify(mkdirp);
 function async(symlinkValue, path) {
     return new Promise((resolve, reject) => {
         promisedSymlink(symlinkValue, path)
@@ -56,5 +55,4 @@ function async(symlinkValue, path) {
     });
 }
 exports.async = async;
-;
 //# sourceMappingURL=symlink.js.map

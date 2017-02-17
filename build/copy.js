@@ -7,14 +7,14 @@ const mkdirp_1 = require("mkdirp");
 const exists_1 = require("./exists");
 const matcher_1 = require("./utils/matcher");
 const mode_1 = require("./utils/mode");
-var treeWalker = require('./utils/tree_walker');
+const tree_walker_1 = require("./utils/tree_walker");
 const validate_1 = require("./utils/validate");
 const write_1 = require("./write");
 function validateInput(methodName, from, to, options) {
     const methodSignature = methodName + '(from, to, [options])';
-    validate_1.argument(methodSignature, 'from', from, ['string']);
-    validate_1.argument(methodSignature, 'to', to, ['string']);
-    options(methodSignature, 'options', options, {
+    validate_1.validateArgument(methodSignature, 'from', from, ['string']);
+    validate_1.validateArgument(methodSignature, 'to', to, ['string']);
+    validate_1.validateOptions(methodSignature, 'options', options, {
         overwrite: ['boolean'],
         matching: ['string', 'array of string']
     });
@@ -101,7 +101,7 @@ function copyItemSync(from, inspectData, to) {
 function sync(from, to, options) {
     const opts = parseOptions(options, from);
     checksBeforeCopyingSync(from, to, opts);
-    treeWalker.sync(from, {
+    tree_walker_1.sync(from, {
         inspectOptions: {
             mode: true,
             symlinks: true
@@ -218,7 +218,7 @@ function async(from, to, options) {
             .then(function () {
             let allFilesDelivered = false;
             let filesInProgress = 0;
-            const stream = treeWalker.stream(from, {
+            const stream = tree_walker_1.stream(from, {
                 inspectOptions: {
                     mode: true,
                     symlinks: true

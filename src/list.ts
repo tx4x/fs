@@ -1,9 +1,9 @@
-import { readdirSync, readdir, Stats, readlinkSync, statSync, lstatSync, stat, lstat, readlink, createReadStream, readFileSync } from 'fs';
+import { readdirSync, readdir } from 'fs';
 import * as Q from 'q';
-import { argument, options } from './utils/validate';
+import { validateArgument } from './utils/validate';
 export function validateInput(methodName: string, path: string) {
   const methodSignature = methodName + '(path)';
-  argument(methodSignature, 'path', path, ['string', 'undefined']);
+  validateArgument(methodSignature, 'path', path, ['string', 'undefined']);
 };
 
 // ---------------------------------------------------------

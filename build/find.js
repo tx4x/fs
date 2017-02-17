@@ -4,10 +4,10 @@ const tree_walker_1 = require("./utils/tree_walker");
 const inspect_1 = require("./inspect");
 const matcher_1 = require("./utils/matcher");
 const validate_1 = require("./utils/validate");
-function validateInput(methodName, path, options) {
+function validateInput(methodName, path, _options) {
     const methodSignature = methodName + '([path], options)';
-    validate_1.argument(methodSignature, 'path', path, ['string']);
-    options(methodSignature, 'options', options, {
+    validate_1.validateArgument(methodSignature, 'path', path, ['string']);
+    validate_1.validateOptions(methodSignature, 'options', validate_1.validateOptions, {
         matching: ['string', 'array of string'],
         files: ['boolean'],
         directories: ['boolean'],
@@ -81,6 +81,7 @@ function sync(path, options) {
     }
     return findSync(path, normalizeOptions(options));
 }
+exports.sync = sync;
 ;
 // ---------------------------------------------------------
 // Async

@@ -1,14 +1,14 @@
 import * as  pathUtil from "path";
 import * as fs from 'fs';
 import * as Q from 'q';
-import { Opts, sync as mkdirp } from 'mkdirp';
+import { sync as mkdirp } from 'mkdirp';
 import { async as existsAsync, sync as existsSync } from './exists';
-import { argument, options } from './utils/validate';
+import { validateArgument } from './utils/validate';
 
 export function validateInput(methodName: string, from: string, to: string) {
   const methodSignature: string = methodName + '(from, to)';
-  argument(methodSignature, 'from', from, ['string']);
-  argument(methodSignature, 'to', to, ['string']);
+  validateArgument(methodSignature, 'from', from, ['string']);
+  validateArgument(methodSignature, 'to', to, ['string']);
 };
 
 function generateSourceDoesntExistError(path): Error {

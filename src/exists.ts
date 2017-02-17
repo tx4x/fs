@@ -1,9 +1,9 @@
-import * as fs from 'fs';
-import * as Q from 'q';
-import { argument } from './utils/validate';
+import { Stats, statSync, stat } from 'fs';
+import { validateArgument } from './utils/validate';
+
 export function validateInput(methodName: string, path: string) {
   const methodSignature = methodName + '(path)';
-  argument(methodSignature, 'path', path, ['string']);
+  validateArgument(methodSignature, 'path', path, ['string']);
 };
 
 // ---------------------------------------------------------
@@ -11,9 +11,9 @@ export function validateInput(methodName: string, path: string) {
 // ---------------------------------------------------------
 
 export function sync(path) {
-  var stat;
+  let stat: Stats;
   try {
-    stat = fs.statSync(path);
+    stat = statSync(path);
     if (stat.isDirectory()) {
       return 'dir';
     } else if (stat.isFile()) {
@@ -35,7 +35,7 @@ export function sync(path) {
 
 export function async(path) {
   return new Promise((resolve, reject) => {
-    fs.stat(path, function (err, stat) {
+    stat(path, function (err, stat) {
       if (err) {
         if (err.code === 'ENOENT' || err.code === 'ENOTDIR') {
           resolve(false);

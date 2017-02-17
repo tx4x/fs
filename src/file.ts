@@ -2,13 +2,13 @@ import * as fs from 'fs';
 import { Stats } from 'fs';
 import * as Q from 'q';
 import { normalizeFileMode } from './utils/mode';
-import { argument, options } from './utils/validate';
+import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync, async as writeASync } from './write';
 
 export function validateInput(methodName: string, path, criteria: string) {
   const methodSignature = methodName + '(path, [criteria])';
-  argument(methodSignature, 'path', path, ['string']);
-  options(methodSignature, 'criteria', criteria, {
+  validateArgument(methodSignature, 'path', path, ['string']);
+  validateOptions(methodSignature, 'criteria', criteria, {
     content: ['string', 'buffer', 'object', 'array'],
     jsonIndent: ['number'],
     mode: ['string', 'number']

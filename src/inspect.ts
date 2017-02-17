@@ -1,17 +1,13 @@
-//import * as fs from 'fs';
 import { Stats, readlinkSync, statSync, lstatSync, stat, lstat, readlink, createReadStream, readFileSync } from 'fs';
 import * as  pathUtil from "path";
 import * as Q from 'q';
-import { argument, options } from './utils/validate';
+import { validateArgument, validateOptions } from './utils/validate';
 import { createHash } from 'crypto';
-
 export const supportedChecksumAlgorithms: string[] = ['md5', 'sha1', 'sha256', 'sha512'];
-
-
 export function validateInput(methodName: string, path: string, options: any): void {
   const methodSignature: string = methodName + '(path, [options])';
-  argument(methodSignature, 'path', path, ['string']);
-  options(methodSignature, 'options', options, {
+  validateArgument(methodSignature, 'path', path, ['string']);
+  validateOptions(methodSignature, 'options', options, {
     checksum: ['string'],
     mode: ['boolean'],
     times: ['boolean'],
@@ -137,7 +133,7 @@ function addExtraFieldsAsync(path: string, inspectObj, options) {
         });
     }
   });
-};
+}
 
 export function async(path: string, options?:any) {
   var deferred = Q.defer();
@@ -165,5 +161,5 @@ export function async(path: string, options?:any) {
     });
 
   return deferred.promise;
-};
+}
 

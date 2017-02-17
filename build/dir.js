@@ -8,8 +8,8 @@ const mode_1 = require("./utils/mode");
 const validate_1 = require("./utils/validate");
 function validateInput(methodName, path, criteria) {
     const methodSignature = methodName + '(path, [criteria])';
-    validate_1.argument(methodSignature, 'path', path, ['string']);
-    validate_1.options(methodSignature, 'criteria', criteria, {
+    validate_1.validateArgument(methodSignature, 'path', path, ['string']);
+    validate_1.validateOptions(methodSignature, 'criteria', criteria, {
         empty: ['boolean'],
         mode: ['string', 'number']
     });
@@ -183,9 +183,4 @@ function async(path, passedCriteria) {
     });
 }
 exports.async = async;
-;
-// ---------------------------------------------------------
-// API
-// ---------------------------------------------------------
-module.exports.validateInput = validateInput;
 //# sourceMappingURL=dir.js.map

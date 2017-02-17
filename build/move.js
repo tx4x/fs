@@ -7,8 +7,8 @@ const exists_1 = require("./exists");
 const validate_1 = require("./utils/validate");
 function validateInput(methodName, from, to) {
     const methodSignature = methodName + '(from, to)';
-    validate_1.argument(methodSignature, 'from', from, ['string']);
-    validate_1.argument(methodSignature, 'to', to, ['string']);
+    validate_1.validateArgument(methodSignature, 'from', from, ['string']);
+    validate_1.validateArgument(methodSignature, 'to', to, ['string']);
 }
 exports.validateInput = validateInput;
 ;

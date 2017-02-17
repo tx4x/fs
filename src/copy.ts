@@ -1,19 +1,19 @@
 import * as  pathUtil from "path";
 import * as fs from 'fs';
-import { Stats, readlinkSync, symlinkSync, statSync, lstatSync, stat, lstat, readlink, createReadStream, readFileSync } from 'fs';
+import { symlinkSync, readFileSync } from 'fs';
 const Q = require('q');
-import { Opts, sync as mkdirp } from 'mkdirp';
+import { sync as mkdirp } from 'mkdirp';
 import { sync as existsSync, async as existsASync } from './exists';
 import { create as matcher } from './utils/matcher';
 import { normalizeFileMode as fileMode } from './utils/mode';
-var treeWalker = require('./utils/tree_walker');
-import { argument, options } from './utils/validate';
-import { sync as writeSync, async as writeASync } from './write';
+import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
+import { validateArgument, validateOptions } from './utils/validate';
+import { sync as writeSync } from './write';
 export function validateInput(methodName: string, from: string, to: string, options: any): void {
   const methodSignature = methodName + '(from, to, [options])';
-  argument(methodSignature, 'from', from, ['string']);
-  argument(methodSignature, 'to', to, ['string']);
-  options(methodSignature, 'options', options, {
+  validateArgument(methodSignature, 'from', from, ['string']);
+  validateArgument(methodSignature, 'to', to, ['string']);
+  validateOptions(methodSignature, 'options', options, {
     overwrite: ['boolean'],
     matching: ['string', 'array of string']
   });
@@ -96,7 +96,7 @@ function copyItemSync(from: string, inspectData: any, to: string) {
 export function sync(from, to, options) {
   const opts = parseOptions(options, from);
   checksBeforeCopyingSync(from, to, opts);
-  treeWalker.sync(from, {
+  treeWalkerSync(from, {
     inspectOptions: {
       mode: true,
       symlinks: true
@@ -211,7 +211,7 @@ export function async(from: string, to: string, options: any) {
       .then(function () {
         let allFilesDelivered: boolean = false;
         let filesInProgress: number = 0;
-        const stream = treeWalker.stream(from, {
+        const stream = treeWalkerStream(from, {
           inspectOptions: {
             mode: true,
             symlinks: true

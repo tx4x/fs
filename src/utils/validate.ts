@@ -38,7 +38,7 @@ var isValidTypeDefinition = function (typeStr) {
   });
 };
 
-var detectType = function (value):string {
+const detectType = function (value: any | null): string {
   if (value === null) {
     return 'null';
   }
@@ -51,7 +51,7 @@ var detectType = function (value):string {
   return typeof value;
 };
 
-var onlyUniqueValuesInArrayFilter = function (value, index, self) {
+const onlyUniqueValuesInArrayFilter = function (value, index, self) {
   return self.indexOf(value) === index;
 };
 
@@ -71,7 +71,7 @@ var detectTypeDeep = function (value) {
   return type;
 };
 
-var validateArray = function (argumentValue, typeToCheck):boolean {
+var validateArray = function (argumentValue, typeToCheck): boolean {
   var allowedTypeInArray = extractTypeFromArrayOfNotation(typeToCheck);
 
   if (detectType(argumentValue) !== 'array') {
@@ -83,8 +83,8 @@ var validateArray = function (argumentValue, typeToCheck):boolean {
   });
 };
 
-export function argument(methodName:string, argumentName:string, argumentValue:string, argumentMustBe):boolean {
-  
+export function validateArgument(methodName: string, argumentName: string, argumentValue: string, argumentMustBe): boolean {
+
   var isOneOfAllowedTypes = argumentMustBe.some(function (type) {
     if (!isValidTypeDefinition(type)) {
       throw new Error('Unknown type "' + type + '"');
@@ -104,13 +104,13 @@ export function argument(methodName:string, argumentName:string, argumentValue:s
   return false;
 };
 
-export function options(methodName, optionsObjName, obj, allowedOptions) {
+export function validateOptions(methodName, optionsObjName, obj, allowedOptions) {
   if (obj !== undefined) {
-    argument(methodName, optionsObjName, obj, ['object']);
+    validateArgument(methodName, optionsObjName, obj, ['object']);
     Object.keys(obj).forEach(function (key) {
       var argName = optionsObjName + '.' + key;
       if (allowedOptions.hasOwnProperty(key)) {
-        argument(methodName, argName, obj[key], allowedOptions[key]);
+        validateArgument(methodName, argName, obj[key], allowedOptions[key]);
       } else {
         throw new Error('Unknown argument "' + argName + '" passed to ' + methodName);
       }

@@ -1,12 +1,12 @@
 import * as fs from 'fs';
 import * as Q from 'q';
 import { sync as writeSync, async as writeASync } from './write';
-import { argument, options } from './utils/validate';
+import { validateArgument, validateOptions } from './utils/validate';
 export function validateInput(methodName: string, path: string, data: any, options: any) {
   const methodSignature = methodName + '(path, data, [options])';
-  argument(methodSignature, 'path', path, ['string']);
-  argument(methodSignature, 'data', data, ['string', 'buffer']);
-  options(methodSignature, 'options', options, {
+  validateArgument(methodSignature, 'path', path, ['string']);
+  validateArgument(methodSignature, 'data', data, ['string', 'buffer']);
+  validateOptions(methodSignature, 'options', options, {
     mode: ['string', 'number']
   });
 };

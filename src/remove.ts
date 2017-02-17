@@ -1,9 +1,9 @@
 import * as Q from 'q';
-import {sync as rimrafSync} from 'rimraf';
-import { argument, options } from './utils/validate';
+import { sync as rimrafSync } from 'rimraf';
+import { validateArgument } from './utils/validate';
 export function validateInput(methodName: string, path: string) {
   const methodSignature = methodName + '([path])';
-  argument(methodSignature, 'path', path, ['string', 'undefined']);
+  validateArgument(methodSignature, 'path', path, ['string', 'undefined']);
 };
 // ---------------------------------------------------------
 // Sync

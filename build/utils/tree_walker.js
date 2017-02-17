@@ -102,5 +102,4 @@ function stream(path, options) {
     return rs;
 }
 exports.stream = stream;
-;
 //# sourceMappingURL=tree_walker.js.map

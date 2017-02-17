@@ -2,15 +2,13 @@ import * as Q from 'q';
 import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
 import * as  pathUtil from "path";
-import { argument, options } from './utils/validate';
+import { validateArgument } from './utils/validate';
 import * as denodeify from 'denodeify';
-
 export function validateInput(methodName, symlinkValue, path) {
   const methodSignature = methodName + '(symlinkValue, path)';
-  argument(methodSignature, 'symlinkValue', symlinkValue, ['string']);
-  argument(methodSignature, 'path', path, ['string']);
+  validateArgument(methodSignature, 'symlinkValue', symlinkValue, ['string']);
+  validateArgument(methodSignature, 'path', path, ['string']);
 };
-
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
@@ -27,15 +25,13 @@ export function sync(symlinkValue, path): void {
       throw err;
     }
   }
-};
+}
 
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-
-var promisedSymlink = Q.denodeify(fs.symlink);
-var promisedMkdirp = Q.denodeify(mkdirp);
-
+const promisedSymlink = Q.denodeify(fs.symlink);
+const promisedMkdirp = Q.denodeify(mkdirp);
 export function async(symlinkValue, path) {
   return new Promise((resolve, reject) => {
     promisedSymlink(symlinkValue, path)
@@ -53,4 +49,4 @@ export function async(symlinkValue, path) {
         }
       });
   });
-};
+}

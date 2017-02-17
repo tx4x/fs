@@ -48,8 +48,8 @@ export function sync(from, to) {
 // Async
 // ---------------------------------------------------------
 
-var promisedRename = Q.denodeify(fs.rename);
-var promisedMkdirp = Q.denodeify(mkdirp);
+let promisedRename = Q.denodeify(fs.rename);
+let promisedMkdirp = Q.denodeify(mkdirp);
 
 function ensureDestinationPathExistsAsync(to: string) {
   return new Promise((resolve, reject) => {

@@ -136,8 +136,8 @@ function addExtraFieldsAsync(path: string, inspectObj, options) {
 }
 
 export function async(path: string, options?:any) {
-  var deferred = Q.defer();
-  var statOperation = promisedStat;
+  let deferred = Q.defer();
+  let statOperation = promisedStat;
   options = options || {};
 
   if (options.symlinks) {
@@ -146,7 +146,7 @@ export function async(path: string, options?:any) {
 
   statOperation(path)
     .then(function (stat) {
-      var inspectObj = createInspectObj(path, options, stat);
+      let inspectObj = createInspectObj(path, options, stat);
       addExtraFieldsAsync(path, inspectObj, options)
         .then(deferred.resolve, deferred.reject);
     })

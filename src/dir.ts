@@ -78,8 +78,8 @@ function checkExistingDirectoryFulfillsCriteriaSync(path: string, stat: Stats, c
 };
 
 export function sync(path, passedCriteria) {
-  var criteria = getCriteriaDefaults(passedCriteria);
-  var stat = checkWhatAlreadyOccupiesPathSync(path);
+  let criteria = getCriteriaDefaults(passedCriteria);
+  let stat = checkWhatAlreadyOccupiesPathSync(path);
   if (stat) {
     checkExistingDirectoryFulfillsCriteriaSync(path, stat, criteria);
   } else {
@@ -98,7 +98,7 @@ const promisedRimraf = Q.denodeify(rimraf);
 const promisedMkdirp = Q.denodeify(mkdirp);
 
 function checkWhatAlreadyOccupiesPathAsync(path: string) {
-  var deferred = Q.defer();
+  let deferred = Q.defer();
   promisedStat(path)
     .then(function (stat: any) {
       if (stat.isDirectory()) {

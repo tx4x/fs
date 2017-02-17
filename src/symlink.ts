@@ -3,7 +3,6 @@ import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
 import * as  pathUtil from "path";
 import { validateArgument } from './utils/validate';
-import * as denodeify from 'denodeify';
 export function validateInput(methodName, symlinkValue, path) {
   const methodSignature = methodName + '(symlinkValue, path)';
   validateArgument(methodSignature, 'symlinkValue', symlinkValue, ['string']);

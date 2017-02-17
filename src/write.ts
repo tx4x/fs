@@ -4,7 +4,7 @@ import * as Q from 'q';
 import * as mkdirp from 'mkdirp';
 import { validateArgument, validateOptions } from './utils/validate';
 export function validateInput(methodName: string, path: string, data, options): void {
-  var methodSignature = methodName + '(path, data, [options])';
+  let methodSignature = methodName + '(path, data, [options])';
   validateArgument(methodSignature, 'path', path, ['string']);
   validateArgument(methodSignature, 'data', data, ['string', 'buffer', 'object', 'array']);
   validateOptions(methodSignature, 'options', options, {

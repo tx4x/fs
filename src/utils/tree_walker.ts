@@ -28,7 +28,7 @@ export function sync(path, options, callback, currentLevel?: number) {
 // ---------------------------------------------------------
 
 export function stream(path, options) {
-  var rs = new Readable({ objectMode: true });
+  let rs = new Readable({ objectMode: true });
   let nextTreeNode = {
     path: path,
     parent: undefined,
@@ -51,7 +51,7 @@ export function stream(path, options) {
   };
 
   const pushAndContinueMaybe = function (data) {
-    var theyWantMore = rs.push(data);
+    let theyWantMore = rs.push(data);
     running = false;
     if (!nextTreeNode) {
       // Previous was the last node. The job is done.

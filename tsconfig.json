@@ -23,6 +23,6 @@
   },
   "files": [
     "./typings/index.d.ts",
-    "./src/index.ts"
+    "./src/jetpack.ts"
   ]
 }

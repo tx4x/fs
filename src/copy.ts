@@ -1,17 +1,16 @@
 import * as  pathUtil from "path";
 import * as fs from 'fs';
-import * as Q from 'q';
+import { Stats, readlinkSync, symlinkSync, statSync, lstatSync, stat, lstat, readlink, createReadStream, readFileSync } from 'fs';
+const Q = require('q');
 import { Opts, sync as mkdirp } from 'mkdirp';
-var exists = require('./exists');
+import { sync as existsSync, async as existsASync } from './exists';
 import { create as matcher } from './utils/matcher';
 import { normalizeFileMode as fileMode } from './utils/mode';
 var treeWalker = require('./utils/tree_walker');
-
-import {argument,options} from './utils/validate';
-var write = require('./write');
-
-var validateInput = function (methodName, from, to, options): void {
-  var methodSignature = methodName + '(from, to, [options])';
+import { argument, options } from './utils/validate';
+import { sync as writeSync, async as writeASync } from './write';
+export function validateInput(methodName: string, from: string, to: string, options: any): void {
+  const methodSignature = methodName + '(from, to, [options])';
   argument(methodSignature, 'from', from, ['string']);
   argument(methodSignature, 'to', to, ['string']);
   options(methodSignature, 'options', options, {
@@ -20,12 +19,10 @@ var validateInput = function (methodName, from, to, options): void {
   });
 };
 
-var parseOptions = function (options, from) {
-  var opts = options || {};
-  var parsedOptions: any = {};
-
+function parseOptions(options: any | null, from: string) {
+  const opts: any = options || {};
+  const parsedOptions: any = {};
   parsedOptions.overwrite = opts.overwrite;
-
   if (opts.matching) {
     parsedOptions.allowedToCopy = matcher(from, opts.matching);
   } else {
@@ -34,18 +31,17 @@ var parseOptions = function (options, from) {
       return true;
     };
   }
-
   return parsedOptions;
 };
 
-var generateNoSourceError = function (path) {
-  var err: any = new Error("Path to copy doesn't exist " + path);
+function generateNoSourceError(path: string): Error {
+  const err: any = new Error("Path to copy doesn't exist " + path);
   err.code = 'ENOENT';
   return err;
 };
 
-var generateDestinationExistsError = function (path) {
-  var err: any = new Error('Destination path already exists ' + path);
+function generateDestinationExistsError(path): Error {
+  const err: any = new Error('Destination path already exists ' + path);
   err.code = 'EEXIST';
   return err;
 };
@@ -54,25 +50,25 @@ var generateDestinationExistsError = function (path) {
 // Sync
 // ---------------------------------------------------------
 
-var checksBeforeCopyingSync = function (from, to, opts) {
-  if (!exists.sync(from)) {
+function checksBeforeCopyingSync(from: string, to: string, opts: any) {
+  if (!existsSync(from)) {
     throw generateNoSourceError(from);
   }
 
-  if (exists.sync(to) && !opts.overwrite) {
+  if (existsSync(to) && !opts.overwrite) {
     throw generateDestinationExistsError(to);
   }
 };
 
-var copyFileSync = function (from, to, mode) {
-  var data = fs.readFileSync(from);
-  write.sync(to, data, { mode: mode });
+function copyFileSync(from: string, to: string, mode) {
+  const data = readFileSync(from);
+  writeSync(to, data as any, { mode: mode });
 };
 
-var copySymlinkSync = function (from, to) {
-  var symlinkPointsAt = fs.readlinkSync(from);
+function copySymlinkSync(from: string, to: string) {
+  const symlinkPointsAt = fs.readlinkSync(from);
   try {
-    fs.symlinkSync(symlinkPointsAt, to);
+    symlinkSync(symlinkPointsAt, to);
   } catch (err) {
     // There is already file/symlink with this name on destination location.
     // Must erase it manually, otherwise system won't allow us to place symlink there.
@@ -86,7 +82,7 @@ var copySymlinkSync = function (from, to) {
   }
 };
 
-var copyItemSync = function (from, inspectData, to) {
+function copyItemSync(from: string, inspectData: any, to: string) {
   let mode = fileMode(inspectData.mode);
   if (inspectData.type === 'dir') {
     mkdirp(to, { mode: parseInt(mode), fs: null });
@@ -98,18 +94,16 @@ var copyItemSync = function (from, inspectData, to) {
 };
 
 export function sync(from, to, options) {
-  var opts = parseOptions(options, from);
-
+  const opts = parseOptions(options, from);
   checksBeforeCopyingSync(from, to, opts);
-
   treeWalker.sync(from, {
     inspectOptions: {
       mode: true,
       symlinks: true
     }
-  }, function (path, inspectData) {
-    var rel = pathUtil.relative(from, path);
-    var destPath = pathUtil.resolve(to, rel);
+  }, (path, inspectData) => {
+    const rel = pathUtil.relative(from, path);
+    const destPath = pathUtil.resolve(to, rel);
     if (opts.allowedToCopy(path)) {
       copyItemSync(path, inspectData, destPath);
     }
@@ -120,89 +114,84 @@ export function sync(from, to, options) {
 // Async
 // ---------------------------------------------------------
 
-var promisedSymlink = Q.denodeify(fs.symlink);
-var promisedReadlink = Q.denodeify(fs.readlink);
-var promisedUnlink = Q.denodeify(fs.unlink);
-var promisedMkdirp = Q.denodeify(mkdirp);
+const promisedSymlink = Q.denodeify(fs.symlink);
+const promisedReadlink = Q.denodeify(fs.readlink);
+const promisedUnlink = Q.denodeify(fs.unlink);
+const promisedMkdirp = Q.denodeify(mkdirp);
 
-var checksBeforeCopyingAsync = function (from, to, opts) {
-  return exists.async(from)
-    .then(function (srcPathExists) {
+function checksBeforeCopyingAsync(from: string, to: string, opts: any) {
+  return existsASync(from)
+    .then(srcPathExists => {
       if (!srcPathExists) {
         throw generateNoSourceError(from);
       } else {
-        return exists.async(to);
+        return existsASync(to);
       }
     })
-    .then(function (destPathExists) {
+    .then(destPathExists => {
       if (destPathExists && !opts.overwrite) {
         throw generateDestinationExistsError(to);
       }
     });
 };
 
-var copyFileAsync = function (from, to, mode, retriedAttempt) {
-  var deferred = Q.defer();
-  var readStream = fs.createReadStream(from);
-  var writeStream = fs.createWriteStream(to, { mode: mode });
-  readStream.on('error', deferred.reject);
-  writeStream.on('error', function (err) {
-    var toDirPath = pathUtil.dirname(to);
+function copyFileAsync(from: string, to: string, mode: any, retriedAttempt: any) {
+  return new Promise((resolve, reject) => {
+    const readStream = fs.createReadStream(from);
+    const writeStream = fs.createWriteStream(to, { mode: mode });
+    readStream.on('error', reject);
+    writeStream.on('error', function (err) {
+      const toDirPath = pathUtil.dirname(to);
+      // Force read stream to close, since write stream errored
+      // read stream serves us no purpose.
+      readStream.resume();
+      if (err.code === 'ENOENT' && retriedAttempt === undefined) {
+        // Some parent directory doesn't exits. Create it and retry.
+        promisedMkdirp(toDirPath).then(function () {
+          // Make retry attempt only once to prevent vicious infinite loop
+          // (when for some obscure reason I/O will keep returning ENOENT error).
+          // Passing retriedAttempt = true.
+          copyFileAsync(from, to, mode, true)
+            .then(resolve)
+            .catch(reject);
+        });
+      } else {
+        reject(err);
+      }
+    });
 
-    // Force read stream to close, since write stream errored
-    // read stream serves us no purpose.
-    readStream.resume();
+    writeStream.on('finish', resolve);
 
-    if (err.code === 'ENOENT' && retriedAttempt === undefined) {
-      // Some parent directory doesn't exits. Create it and retry.
-      promisedMkdirp(toDirPath).then(function () {
-        // Make retry attempt only once to prevent vicious infinite loop
-        // (when for some obscure reason I/O will keep returning ENOENT error).
-        // Passing retriedAttempt = true.
-        copyFileAsync(from, to, mode, true)
-          .then(deferred.resolve)
-          .catch(deferred.reject);
-      });
-    } else {
-      deferred.reject(err);
-    }
+    readStream.pipe(writeStream);
   });
-
-  writeStream.on('finish', deferred.resolve);
-
-  readStream.pipe(writeStream);
-
-  return deferred.promise;
 };
 
-var copySymlinkAsync = function (from, to) {
+function copySymlinkAsync(from: string, to: string) {
   return promisedReadlink(from)
     .then(function (symlinkPointsAt) {
-      var deferred = Q.defer();
-
-      promisedSymlink(symlinkPointsAt, to)
-        .then(deferred.resolve)
-        .catch(function (err) {
-          if (err.code === 'EEXIST') {
-            // There is already file/symlink with this name on destination location.
-            // Must erase it manually, otherwise system won't allow us to place symlink there.
-            promisedUnlink(to)
-              .then(function () {
-                // Retry...
-                return promisedSymlink(symlinkPointsAt, to);
-              })
-              .then(deferred.resolve, deferred.reject);
-          } else {
-            deferred.reject(err);
-          }
-        });
-
-      return deferred.promise;
+      return new Promise((resolve, reject) => {
+        promisedSymlink(symlinkPointsAt, to)
+          .then(resolve)
+          .catch(err => {
+            if (err.code === 'EEXIST') {
+              // There is already file/symlink with this name on destination location.
+              // Must erase it manually, otherwise system won't allow us to place symlink there.
+              promisedUnlink(to)
+                .then(() => {
+                  // Retry...
+                  return promisedSymlink(symlinkPointsAt, to);
+                })
+                .then(resolve, reject);
+            } else {
+              reject(err);
+            }
+          });
+      });
     });
 };
 
-var copyItemAsync = function (from, inspectData, to) {
-  var mode = fileMode(inspectData.mode);
+function copyItemAsync(from: string, inspectData: any, to: string) {
+  const mode = fileMode(inspectData.mode);
   if (inspectData.type === 'dir') {
     return promisedMkdirp(to, { mode: mode });
   } else if (inspectData.type === 'file') {
@@ -215,25 +204,22 @@ var copyItemAsync = function (from, inspectData, to) {
   return new Q();
 };
 
-var async = function (from, to, options) {
-  var deferred = Q.defer();
-  var opts = parseOptions(options, from);
-
-  checksBeforeCopyingAsync(from, to, opts)
-    .then(function () {
-      var allFilesDelivered = false;
-      var filesInProgress = 0;
-
-      var stream = treeWalker.stream(from, {
-        inspectOptions: {
-          mode: true,
-          symlinks: true
-        }
-      })
-        .on('readable', function () {
-          var item = stream.read();
-          var rel;
-          var destPath;
+export function async(from: string, to: string, options: any) {
+  const opts = parseOptions(options, from);
+  return new Promise((resolve, reject) => {
+    checksBeforeCopyingAsync(from, to, opts)
+      .then(function () {
+        let allFilesDelivered: boolean = false;
+        let filesInProgress: number = 0;
+        const stream = treeWalker.stream(from, {
+          inspectOptions: {
+            mode: true,
+            symlinks: true
+          }
+        }).on('readable', function () {
+          const item = stream.read();
+          let rel: string;
+          let destPath: string;
           if (item) {
             rel = pathUtil.relative(from, item.path);
             destPath = pathUtil.resolve(to, rel);
@@ -243,29 +229,20 @@ var async = function (from, to, options) {
                 .then(function () {
                   filesInProgress -= 1;
                   if (allFilesDelivered && filesInProgress === 0) {
-                    deferred.resolve();
+                    resolve();
                   }
                 })
-                .catch(deferred.reject);
+                .catch(reject);
             }
           }
-        })
-        .on('error', deferred.reject)
-        .on('end', function () {
-          allFilesDelivered = true;
-          if (allFilesDelivered && filesInProgress === 0) {
-            deferred.resolve();
-          }
-        });
-    })
-    .catch(deferred.reject);
-
-  return deferred.promise;
+        }).on('error', reject)
+          .on('end', function () {
+            allFilesDelivered = true;
+            if (allFilesDelivered && filesInProgress === 0) {
+              resolve();
+            }
+          });
+      })
+      .catch(reject);
+  });
 };
-
-// ---------------------------------------------------------
-// API
-// ---------------------------------------------------------
-
-exports.validateInput = validateInput;
-exports.async = async;

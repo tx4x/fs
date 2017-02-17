@@ -331,6 +331,39 @@ describe('find', function () {
     });
   });
 
+  describe('looking for directories works ok with only negation globs in set', function () {
+    var preparations = function () {
+      fse.outputFileSync('a/x', '123');
+      fse.outputFileSync('a/y', '789');
+    };
+
+    var expectations = function (found) {
+      var normalizedPaths = helper.osSep(['a/x']);
+      expect(found).to.eql(normalizedPaths);
+    };
+
+    it('sync', function () {
+      preparations();
+      expectations(jetpack.find('a', {
+        matching: ['!y'],
+        directories: true
+      }));
+    });
+
+    it('async', function (done) {
+      preparations();
+      jetpack.findAsync('a', {
+        matching: ['!y'],
+        directories: true
+      })
+      .then(function (found) {
+        expectations(found);
+        done();
+      })
+      .catch(done);
+    });
+  });
+
   describe('when you turn off files and directoies returns empty list', function () {
     var preparations = function () {
       fse.outputFileSync('a/b/foo1', 'abc');
@@ -441,6 +474,103 @@ describe('find', function () {
       .then(function (found) {
         expectations(found);
         done();
+      });
+    });
+  });
+
+  describe('finds dot-dirs and dot-files', function () {
+    var preparations = function () {
+      fse.outputFileSync('.dir/file', 'a');
+      fse.outputFileSync('.dir/.file', 'b');
+      fse.outputFileSync('.foo/.file', 'c');
+    };
+
+    var expectations = function (found) {
+      var normalizedPaths = helper.osSep([
+        '.dir',
+        '.dir/.file'
+      ]);
+      expect(found).to.eql(normalizedPaths);
+    };
+
+    it('sync', function () {
+      preparations();
+      expectations(jetpack.find({
+        matching: ['.dir', '.file', '!.foo/**'],
+        directories: true
+      }));
+    });
+
+    it('async', function (done) {
+      preparations();
+      jetpack.findAsync({
+        matching: ['.dir', '.file', '!.foo/**'],
+        directories: true
+      })
+      .then(function (found) {
+        expectations(found);
+        done();
+      });
+    });
+  });
+
+  describe('input validation', function () {
+    var tests = [
+      { type: 'sync', method: jetpack.find, methodName: 'find' },
+      { type: 'async', method: jetpack.findAsync, methodName: 'findAsync' }
+    ];
+
+    describe('"path" argument', function () {
+      tests.forEach(function (test) {
+        it(test.type, function () {
+          expect(function () {
+            test.method(undefined, {});
+          }).to.throw('Argument "path" passed to ' + test.methodName
+            + '([path], options) must be a string. Received undefined');
+        });
+      });
+    });
+
+    describe('"options" object', function () {
+      describe('"matching" argument', function () {
+        tests.forEach(function (test) {
+          it(test.type, function () {
+            expect(function () {
+              test.method({ matching: 1 });
+            }).to.throw('Argument "options.matching" passed to ' + test.methodName
+              + '([path], options) must be a string or an array of string. Received number');
+          });
+        });
+      });
+      describe('"files" argument', function () {
+        tests.forEach(function (test) {
+          it(test.type, function () {
+            expect(function () {
+              test.method('abc', { files: 1 });
+            }).to.throw('Argument "options.files" passed to ' + test.methodName
+              + '([path], options) must be a boolean. Received number');
+          });
+        });
+      });
+      describe('"directories" argument', function () {
+        tests.forEach(function (test) {
+          it(test.type, function () {
+            expect(function () {
+              test.method('abc', { directories: 1 });
+            }).to.throw('Argument "options.directories" passed to ' + test.methodName
+              + '([path], options) must be a boolean. Received number');
+          });
+        });
+      });
+      describe('"recursive" argument', function () {
+        tests.forEach(function (test) {
+          it(test.type, function () {
+            expect(function () {
+              test.method('abc', { recursive: 1 });
+            }).to.throw('Argument "options.recursive" passed to ' + test.methodName
+              + '([path], options) must be a boolean. Received number');
+          });
+        });
       });
     });
   });

@@ -265,6 +265,13 @@ describe('inspect', function () {
         expected: 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad'
       },
       {
+        name: 'sha512',
+        type: 'sha512',
+        content: 'abc',
+        expected: 'ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a21'
+          + '92992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f'
+      },
+      {
         name: 'calculates correctly checksum of an empty file',
         type: 'md5',
         content: '',
@@ -293,6 +300,84 @@ describe('inspect', function () {
           .then(function (data) {
             expectations(data);
             done();
+          })
+          .catch(done);
+        });
+      });
+    });
+  });
+
+  describe('input validation', function () {
+    var tests = [
+      { type: 'sync', method: jetpack.inspect, methodName: 'inspect' },
+      { type: 'async', method: jetpack.inspectAsync, methodName: 'inspectAsync' }
+    ];
+
+    describe('"path" argument', function () {
+      tests.forEach(function (test) {
+        it(test.type, function () {
+          expect(function () {
+            test.method(undefined);
+          }).to.throw('Argument "path" passed to ' + test.methodName
+            + '(path, [options]) must be a string. Received undefined');
+        });
+      });
+    });
+
+    describe('"options" object', function () {
+      describe('"checksum" argument', function () {
+        tests.forEach(function (test) {
+          it(test.type, function () {
+            expect(function () {
+              test.method('abc', { checksum: 1 });
+            }).to.throw('Argument "options.checksum" passed to ' + test.methodName
+              + '(path, [options]) must be a string. Received number');
+          });
+          it(test.type, function () {
+            expect(function () {
+              test.method('abc', { checksum: 'foo' });
+            }).to.throw('Argument "options.checksum" passed to ' + test.methodName
+              + '(path, [options]) must have one of values: md5, sha1, sha256');
+          });
+        });
+      });
+      describe('"mode" argument', function () {
+        tests.forEach(function (test) {
+          it(test.type, function () {
+            expect(function () {
+              test.method('abc', { mode: 1 });
+            }).to.throw('Argument "options.mode" passed to ' + test.methodName
+              + '(path, [options]) must be a boolean. Received number');
+          });
+        });
+      });
+      describe('"times" argument', function () {
+        tests.forEach(function (test) {
+          it(test.type, function () {
+            expect(function () {
+              test.method('abc', { times: 1 });
+            }).to.throw('Argument "options.times" passed to ' + test.methodName
+              + '(path, [options]) must be a boolean. Received number');
+          });
+        });
+      });
+      describe('"absolutePath" argument', function () {
+        tests.forEach(function (test) {
+          it(test.type, function () {
+            expect(function () {
+              test.method('abc', { absolutePath: 1 });
+            }).to.throw('Argument "options.absolutePath" passed to ' + test.methodName
+              + '(path, [options]) must be a boolean. Received number');
+          });
+        });
+      });
+      describe('"symlinks" argument', function () {
+        tests.forEach(function (test) {
+          it(test.type, function () {
+            expect(function () {
+              test.method('abc', { symlinks: 1 });
+            }).to.throw('Argument "options.symlinks" passed to ' + test.methodName
+              + '(path, [options]) must be a boolean. Received number');
           });
         });
       });

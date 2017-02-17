@@ -15,27 +15,30 @@ npm install fs-jetpack
 var jetpack = require('fs-jetpack');
 ```
 
-
-# API
+# Sync & Async
 
 API has the same set of synchronous and asynchronous methods. All async methods are promise based (no callbacks).
 
-Commonly used naming convention in Node world is reversed in this library (no 'method' and 'methodSync' naming). Asynchronous methods are those with 'Async' suffix, all methods without 'Async' in the name are synchronous. Reason behind this is that it gives very nice look to blocking API, and promise based non-blocking code is verbose anyway, so one more word is not much of a difference.
+Commonly used naming convention in Node world is reversed in this library (no 'method' and 'methodSync' naming). Asynchronous methods are those with 'Async' suffix, all methods without 'Async' in the name are synchronous. Reason behind this is that it gives very nice look to blocking API. And promise-based, non-blocking code is verbose anyway, so one more word is not much of a difference.
 
 Also it's just convenient...
+
+If you don't see the word "Async" in method name it returns value immediately.
 ```js
-// If you don't see the word "Async", then method returns value immediately.
 var data = jetpack.read('file.txt');
 console.log(data);
+```
 
-// When you see "Async", method returns promise which when resolved returns value.
+When you see "Async" that method returns promise which when resolved returns value.
+```js
 jetpack.readAsync('file.txt')
 .then(function (data) {
   console.log(data);
 });
 ```
 
-**Methods:**
+# API
+
 - [append](#appendpath-data-options)
 - [copy](#copyfrom-to-options)
 - [createReadStream](#createreadstreampath-options)
@@ -60,9 +63,9 @@ jetpack.readAsync('file.txt')
 ## append(path, data, [options])
 asynchronous: **appendAsync(path, data, [options])**
 
-Appends given data to the end of file. If file (or any parent directory) doesn't exist, creates it/them.
+Appends given data to the end of file. If file or any parent directory doesn't exist it will be created.
 
-**parameters:**  
+**arguments:**  
 `path` the path to file.  
 `data` data to append (can be `String` or `Buffer`).  
 `options` (optional) `Object` with possible fields:
@@ -77,29 +80,33 @@ asynchronous: **copyAsync(from, to, [options])**
 
 Copies given file or directory (with everything inside).
 
-**parameters:**  
+**arguments:**  
 `from` path to location you want to copy.  
 `to` path to destination location, where the copy should be placed.  
 `options` (optional) additional options for customization. Is an `Object` with possible fields:  
 * `overwrite` (default: `false`) Whether to overwrite destination path if arready exists. For directories, source directory is merged with destination directory, so files in destination which are not present in the source, will remain intact.
-* `matching` if defined will actually copy **only** items matching any of specified glob patterns and omit everything else (see examples below).
+* `matching` if defined will actually copy **only** items matching any of specified glob patterns and omit everything else ([all possible globs are described further in this readme](#matching-patterns)).
 
 **returns:**  
 Nothing.
 
 **examples:**
 ```javascript
-// Copies a file (and replaces it if one already exists in 'copied' directory)
-jetpack.copy('file.txt', 'copied/file.txt', { overwrite: true });
+// Copies a file (and replaces it if one already exists in 'foo' directory)
+jetpack.copy('file.txt', 'foo/file.txt', { overwrite: true });
 
-// Copies only .md files inside 'dir' to 'copied-dir'
-jetpack.copy('dir', 'copied-dir', { matching: '*.md' });
+// Copies only '.md' files from 'foo' (and subdirectories of 'foo') to 'bar'.
+jetpack.copy('foo', 'bar', { matching: '*.md' });
+// Copies only '.md' and '.txt' files from 'foo' (and subdirectories of 'foo') to 'bar'.
+jetpack.copy('foo', 'bar', { matching: ['*.md', '*.txt'] });
 
-// Can add many globs as an array
-jetpack.copy('dir', 'copied-dir', { matching: ['*.md', '*.txt'] });
-
-// Supports negation patterns as well
-jetpack.copy('dir', 'copied-dir', { matching: ['*.md', '!top-secret.md'] });
+// You can filter previous matches by defining negated pattern further in the order:
+// Copies only '.md' files from 'foo' (and subdirectories of 'foo') to 'bar'
+// but will skip file '!top-secret.md'.
+jetpack.copy('foo', 'bar', { matching: ['*.md', '!top-secret.md'] });
+// Copies only '.md' files from 'foo' (and subdirectories of 'foo') to 'bar'
+// but will skip all files in 'foo/top-secret' directory.
+jetpack.copy('foo', 'bar', { matching: ['*.md', '!top-secret/**/*'] });
 
 // All patterns are anchored to directory you want to copy, not to CWD.
 // So in this example directory 'dir1/dir2/images' will be copied
@@ -126,7 +133,7 @@ Returns Current Working Directory (CWD) for this instance of jetpack, or creates
 
 **Note:** fs-jetpack never changes value of `process.cwd()`, the CWD we are talking about here is internal value inside every jetpack instance.
 
-**parameters:**  
+**arguments:**  
 `path...` (optional) path (or many path parts) to become new CWD. Could be absolute, or relative. If relative path given new CWD will be resolved basing on current CWD of this jetpack instance.
 
 **returns:**  
@@ -159,9 +166,9 @@ console.log(sillyCwd.cwd()); // '/one/two/three/a/b/c'
 ## dir(path, [criteria])
 asynchronous: **dirAsync(path, [criteria])**  
 
-Ensures that directory on given path exists and meets given criteria. If any criterium is not met it will be after this call.
+Ensures that directory on given path exists and meets given criteria. If any criterium is not met it will be after this call. If any parent directory in `path` doesn't exist it will be created (like `mkdir -p`).
 
-**parameters:**  
+**arguments:**  
 `path` path to directory to examine.  
 `criteria` (optional) criteria to be met by the directory. Is an `Object` with possible fields:
 * `empty` (default: `false`) whether directory should be empty (no other files or directories inside). If set to `true` and directory contains any files or subdirectories all of them will be deleted.
@@ -201,9 +208,9 @@ Checks whether something exists on given `path`. This method returns values more
 ## file(path, [criteria])
 asynchronous: **fileAsync(path, [criteria])**  
 
-Ensures that file exists and meets given criteria. If any criterium is not met it will be after this call.
+Ensures that file exists and meets given criteria. If any criterium is not met it will be after this call. If any parent directory in `path` doesn't exist it will be created (like `mkdir -p`).
 
-**parameters:**  
+**arguments:**  
 `path` path to file to examine.  
 `criteria` (optional) criteria to be met by the file. Is an `Object` with possible fields:
 * `content` sets file content. Can be `String`, `Buffer`, `Object` or `Array`. If `Object` or `Array` given to this parameter data will be written as JSON.
@@ -228,10 +235,10 @@ asynchronous: **findAsync([path], searchOptions)**
 
 Finds in directory specified by `path` all files fulfilling `searchOptions`. Returned paths are relative to current CWD of jetpack instance.
 
-**parameters:**  
+**arguments:**  
 `path` (optional, defaults to `'.'`) path to start search in (all subdirectories will be searched).  
 `searchOptions` is an `Object` with possible fields:
-* `matching` glob patterns of files you want to find.
+* `matching` glob patterns of files you want to find ([all possible globs are described further in this readme](#matching-patterns)).
 * `files` (default `true`) whether or not should search for files.
 * `directories` (default `false`) whether or not should search for directories.
 * `recursive` (default `true`) whether the whole directory tree should be searched recursively, or only one-level of given directory (excluding it's subdirectories).
@@ -244,11 +251,22 @@ Finds in directory specified by `path` all files fulfilling `searchOptions`. Ret
 // Finds all files which has 2015 in the name
 jetpack.find('my-work', { matching: '*2015*' });
 
-// Finds all .js files inside 'my-project' but excluding those in 'vendor' subtree.
+// Finds all '.txt' files inside 'foo/bar' directory and its subdirectories
+jetpack.find('foo', { matching: 'bar/**/*.txt' });
+// Finds all '.txt' files inside 'foo/bar' directory WITHOUT subdirectories  
+jetpack.find('foo', { matching: 'bar/*.txt' });
+
+// Finds all '.js' files inside 'my-project' but excluding those in 'vendor' subtree.
 jetpack.find('my-project', { matching: ['*.js', '!vendor/**/*'] });
 
 // Looks for all directories named 'foo' (and will omit all files named 'foo').
 jetpack.find('my-work', { matching: ['foo'], files: false, directories: true });
+
+// Finds all '.txt' files inside 'foo' directory WITHOUT subdirectories  
+jetpack.find('foo', { matching: './*.txt' });
+// This line does the same as the above, but has better performance
+// (skips looking in subdirectories)
+jetpack.find('foo', { matching: '*.txt', recursive: false });
 
 // Path parameter might be omitted and CWD is used as path in that case.
 var myStuffDir = jetpack.cwd('my-stuff');
@@ -260,10 +278,10 @@ asynchronous: **inspectAsync(path, [options])**
 
 Inspects given path (replacement for `fs.stat`). Returned object by default contains only very basic, not platform-dependent properties (so you have something e.g. your unit tests can rely on), you can enable more properties through options object.
 
-**parameters:**  
+**arguments:**  
 `path` path to inspect.  
 `options` (optional). Possible values:
-* `checksum` if specified will return checksum of inspected file. Possible values are strings `'md5'`, `'sha1'` or `'sha256'`. If given path is directory this field is ignored.
+* `checksum` if specified will return checksum of inspected file. Possible values are strings `'md5'`, `'sha1'`, `'sha256'` or `'sha512'`. If given path is directory this field is ignored.
 * `mode` (default `false`) if set to `true` will add file mode (unix file permissions) value.
 * `times` (default `false`) if set to `true` will add atime, mtime and ctime fields (here called `accessTime`, `modifyTime` and `changeTime`).
 * `absolutePath` (default `false`) if set to `true` will add absolute path to this resource.
@@ -294,10 +312,10 @@ asynchronous: **inspectTreeAsync(path, [options])**
 
 Calls [inspect](#inspect) recursively on given path so it creates tree of all directories and sub-directories inside it.
 
-**parameters:**  
+**arguments:**  
 `path` the starting path to inspect.  
 `options` (optional). Possible values:
-* `checksum` if specified will also calculate checksum of every item in the tree. Possible values are strings `'md5'`, `'sha1'` or `'sha256'`. Checksums for directories are calculated as checksum of all children' checksums plus their filenames (see example below).
+* `checksum` if specified will also calculate checksum of every item in the tree. Possible values are strings `'md5'`, `'sha1'`, `'sha256'` or `'sha512'`. Checksums for directories are calculated as checksum of all children' checksums plus their filenames (see example below).
 * `relativePath` if set to `true` every tree node will have relative path anchored to root inspected folder.
 
 **returns:**  
@@ -337,7 +355,7 @@ asynchronous: **listAsync(path)**
 
 Lists the contents of directory. Equivalent of `fs.readdir`.
 
-**parameters:**  
+**arguments:**  
 `path` (optional) path to directory you would like to list. If not specified defaults to CWD.
 
 **returns:**  
@@ -349,7 +367,7 @@ asynchronous: **moveAsync(from, to)**
 
 Moves given path to new location.
 
-**parameters:**  
+**arguments:**  
 `from` path to directory or file you want to move.  
 `to` path where the thing should be moved.
 
@@ -360,7 +378,7 @@ Nothing.
 ## path(parts...)
 Returns path resolved to internal CWD of this jetpack object.
 
-**parameters:**  
+**arguments:**  
 `parts` strings to join and resolve as path (as many as you like).
 
 **returns:**  
@@ -380,12 +398,11 @@ asynchronous: **readAsync(path, [returnAs])**
 
 Reads content of file.
 
-**parameters:**  
+**arguments:**  
 `path` path to file.  
 `returnAs` (optional) how the content of file should be returned. Is a string with possible values:
 * `'utf8'` (default) content will be returned as UTF-8 String.
 * `'buffer'` content will be returned as a Buffer.
-* `'buf'` **deprecated** use `'buffer'` instead.
 * `'json'` content will be returned as parsed JSON object.
 * `'jsonWithDates'` content will be returned as parsed JSON object, and date strings in [ISO format](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString) will be automatically turned into Date objects.
 
@@ -396,9 +413,9 @@ File content in specified format, or `undefined` if file doesn't exist.
 ## remove([path])
 asynchronous: **removeAsync([path])**  
 
-Deletes given path, no matter what it is (file or directory). If path already doesn't exist ends without throwing, so you can use it as 'ensure path doesn't exist'.
+Deletes given path, no matter what it is (file, directory or non-empty directory). If path already doesn't exist terminates gracefully without throwing, so you can use it as 'ensure path doesn't exist'.
 
-**parameters:**  
+**arguments:**  
 `path` (optional) path to file or directory you want to remove. If not specified the remove action will be performed on current working directory (CWD).
 
 **returns:**  
@@ -424,7 +441,7 @@ asynchronous: **renameAsync(path, newName)**
 
 Renames given file or directory.
 
-**parameters:**  
+**arguments:**  
 `path` path to thing you want to change name of.  
 `newName` new name for this thing (not full path, just a name).
 
@@ -442,7 +459,7 @@ asynchronous: **symlinkAsync(symlinkValue, path)**
 
 Creates symbolic link.
 
-**parameters:**  
+**arguments:**  
 `symlinkValue` path where symbolic link should point.  
 `path` path where symbolic link should be put.  
 
@@ -453,9 +470,9 @@ Nothing.
 ## write(path, data, [options])
 asynchronous: **writeAsync(path, data, [options])**  
 
-Writes data to file.
+Writes data to file. If any parent directory in `path` doesn't exist it will be created (like `mkdir -p`).
 
-**parameters:**  
+**arguments:**  
 `path` path to file.  
 `data` data to be written. This could be `String`, `Buffer`, `Object` or `Array` (if last two used, the data will be outputted into file as JSON).  
 `options` (optional) `Object` with possible fields:
@@ -464,3 +481,24 @@ Writes data to file.
 
 **returns:**  
 Nothing.
+
+# Matching patterns
+
+API methods [copy](#copyfrom-to-options) and [find](#findpath-searchoptions) have `matching` option. Those are all the possible tokens to use there:
+
+- `*` - Matches 0 or more characters in a single path portion.
+- `?` - Matches 1 character.
+- `!` - Used as the first character in pattern will invert the matching logic (match everything what **is not** matched by tokens further in this pattern).
+- `[...]` - Matches a range of characters, similar to a RegExp range. If the first character of the range is `!` or `^` then it matches any character not in the range.
+- `@(pattern|pat*|pat?ern)` - Matches exactly one of the patterns provided.
+- `+(pattern|pat*|pat?ern)` - Matches one or more occurrences of the patterns provided.
+- `?(pattern|pat*|pat?ern)` - Matches zero or one occurrence of the patterns provided.
+- `*(pattern|pat*|pat?ern)` - Matches zero or more occurrences of the patterns provided.
+- `!(pattern|pat*|pat?ern)` - Matches anything that does not match any of the patterns provided.
+- `**` - If a "globstar" is alone in a path portion, then it matches zero or more directories and subdirectories.
+
+*(explanation borrowed from [glob](https://github.com/isaacs/node-glob) which is using [the same matching library](https://github.com/isaacs/minimatch) as this project)*
+
+# License
+
+Released under the MIT license.

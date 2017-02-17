@@ -64,33 +64,6 @@ describe('read', function () {
     });
   });
 
-  describe('reads file as a Buffer (deprecated)', function () {
-    var preparations = function () {
-      fse.outputFileSync('file.txt', new Buffer([11, 22]));
-    };
-
-    var expectations = function (content) {
-      expect(Buffer.isBuffer(content)).to.equal(true);
-      expect(content.length).to.equal(2);
-      expect(content[0]).to.equal(11);
-      expect(content[1]).to.equal(22);
-    };
-
-    it('sync', function () {
-      preparations();
-      expectations(jetpack.read('file.txt', 'buf'));
-    });
-
-    it('async', function (done) {
-      preparations();
-      jetpack.readAsync('file.txt', 'buf')
-      .then(function (content) {
-        expectations(content);
-        done();
-      });
-    });
-  });
-
   describe('reads file as JSON', function () {
     var obj = {
       utf8: 'ąćłźż'
@@ -253,6 +226,39 @@ describe('read', function () {
       .then(function (data) {
         expectations(data);
         done();
+      });
+    });
+  });
+
+  describe('input validation', function () {
+    var tests = [
+      { type: 'sync', method: jetpack.read, methodName: 'read' },
+      { type: 'async', method: jetpack.readAsync, methodName: 'readAsync' }
+    ];
+
+    describe('"path" argument', function () {
+      tests.forEach(function (test) {
+        it(test.type, function () {
+          expect(function () {
+            test.method(undefined, 'xyz');
+          }).to.throw('Argument "path" passed to ' + test.methodName
+            + '(path, returnAs) must be a string. Received undefined');
+        });
+      });
+    });
+
+    describe('"returnAs" argument', function () {
+      tests.forEach(function (test) {
+        it(test.type, function () {
+          expect(function () {
+            test.method('abc', true);
+          }).to.throw('Argument "returnAs" passed to ' + test.methodName
+            + '(path, returnAs) must be a string or an undefined. Received boolean');
+          expect(function () {
+            test.method('abc', 'foo');
+          }).to.throw('Argument "returnAs" passed to ' + test.methodName
+            + '(path, returnAs) must have one of values: utf8, buffer, json, jsonWithDates');
+        });
       });
     });
   });

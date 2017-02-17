@@ -1,4 +1,5 @@
 var fse = require('fs-extra');
+var expect = require('chai').expect;
 var path = require('./assert_path');
 var helper = require('./helper');
 var jetpack = require('..');
@@ -118,6 +119,48 @@ describe('append', function () {
       .then(function () {
         expectations();
         done();
+      });
+    });
+  });
+
+  describe('input validation', function () {
+    var tests = [
+      { type: 'sync', method: jetpack.append, methodName: 'append' },
+      { type: 'async', method: jetpack.appendAsync, methodName: 'appendAsync' }
+    ];
+
+    describe('"path" argument', function () {
+      tests.forEach(function (test) {
+        it(test.type, function () {
+          expect(function () {
+            test.method(undefined, 'xyz');
+          }).to.throw('Argument "path" passed to ' + test.methodName
+            + '(path, data, [options]) must be a string. Received undefined');
+        });
+      });
+    });
+
+    describe('"data" argument', function () {
+      tests.forEach(function (test) {
+        it(test.type, function () {
+          expect(function () {
+            test.method('abc');
+          }).to.throw('Argument "data" passed to ' + test.methodName
+            + '(path, data, [options]) must be a string or a buffer. Received undefined');
+        });
+      });
+    });
+
+    describe('"options" object', function () {
+      describe('"mode" argument', function () {
+        tests.forEach(function (test) {
+          it(test.type, function () {
+            expect(function () {
+              test.method('abc', 'xyz', { mode: true });
+            }).to.throw('Argument "options.mode" passed to ' + test.methodName
+              + '(path, data, [options]) must be a string or a number. Received boolean');
+          });
+        });
       });
     });
   });

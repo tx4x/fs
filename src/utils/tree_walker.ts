@@ -103,4 +103,4 @@ export function stream(path, options) {
     }
   };
   return rs;
-};
+}

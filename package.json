@@ -11,6 +11,7 @@
     "rimraf": "^2.5.4"
   },
   "devDependencies": {
+    "@types/node": "^7.0.5",
     "chai": "^3.5.0",
     "codecov": "^1.0.1",
     "eslint": "^2.13.1",
@@ -19,13 +20,17 @@
     "fs-extra": "^0.16.3",
     "istanbul": "^0.4.5",
     "mocha": "^3.1.2",
+    "nodemon": "^1.11.0",
     "pre-commit": "^1.1.2",
-    "release-assist": "^1.0.1"
+    "release-assist": "^1.0.1",
+    "ts-node": "^2.1.0",
+    "tslint": "^4.4.2",
+    "typescript": "^2.1.6"
   },
   "scripts": {
     "test": "mocha \"spec/**/*.spec.js\"",
     "test-with-coverage": "istanbul cover node_modules/.bin/_mocha -- 'spec/**/*.spec.js'",
-    "lint": "eslint .",
+    "lint": "tslint --project=./tsconfig.json",
     "release-start": "release-assist --start",
     "release-finish": "release-assist --finish",
     "dev": "nodemon -w src -x ts-node src/index.ts",

@@ -27,7 +27,8 @@
     "lint": "eslint .",
     "release-start": "release-assist --start",
     "release-finish": "release-assist --finish",
-    "dev": "nodemon -w src -x ts-node src/index.ts"
+    "dev": "nodemon -w src -x ts-node src/index.ts",
+    "build": "tsc"
   },
   "main": "main.js",
   "homepage": "https://github.com/szwacz/fs-jetpack",

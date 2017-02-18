@@ -5,7 +5,7 @@ Typescript port of 'fs-jetpack'
 
 
 ## TODOs
-
+- rtime type/conatract decorater, instead of validate[args|opts]
 - get rid of "any", "Q"
 - enums, contants and the like
 - replace testing with 'intern'

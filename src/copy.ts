@@ -207,42 +207,40 @@ function copyItemAsync(from: string, inspectData: any, to: string) {
 export function async(from: string, to: string, options: any) {
   const opts = parseOptions(options, from);
   return new Promise((resolve, reject) => {
-    checksBeforeCopyingAsync(from, to, opts)
-      .then(function () {
-        let allFilesDelivered: boolean = false;
-        let filesInProgress: number = 0;
-        const stream = treeWalkerStream(from, {
-          inspectOptions: {
-            mode: true,
-            symlinks: true
+    checksBeforeCopyingAsync(from, to, opts).then(function () {
+      let allFilesDelivered: boolean = false;
+      let filesInProgress: number = 0;
+      const stream = treeWalkerStream(from, {
+        inspectOptions: {
+          mode: true,
+          symlinks: true
+        }
+      }).on('readable', function () {
+        const item = stream.read();
+        let rel: string;
+        let destPath: string;
+        if (item) {
+          rel = pathUtil.relative(from, item.path);
+          destPath = pathUtil.resolve(to, rel);
+          if (opts.allowedToCopy(item.path)) {
+            filesInProgress += 1;
+            copyItemAsync(item.path, item.item, destPath)
+              .then(function () {
+                filesInProgress -= 1;
+                if (allFilesDelivered && filesInProgress === 0) {
+                  resolve();
+                }
+              })
+              .catch(reject);
           }
-        }).on('readable', function () {
-          const item = stream.read();
-          let rel: string;
-          let destPath: string;
-          if (item) {
-            rel = pathUtil.relative(from, item.path);
-            destPath = pathUtil.resolve(to, rel);
-            if (opts.allowedToCopy(item.path)) {
-              filesInProgress += 1;
-              copyItemAsync(item.path, item.item, destPath)
-                .then(function () {
-                  filesInProgress -= 1;
-                  if (allFilesDelivered && filesInProgress === 0) {
-                    resolve();
-                  }
-                })
-                .catch(reject);
-            }
+        }
+      }).on('error', reject)
+        .on('end', function () {
+          allFilesDelivered = true;
+          if (allFilesDelivered && filesInProgress === 0) {
+            resolve();
           }
-        }).on('error', reject)
-          .on('end', function () {
-            allFilesDelivered = true;
-            if (allFilesDelivered && filesInProgress === 0) {
-              resolve();
-            }
-          });
-      })
-      .catch(reject);
+        });
+    }).catch(reject);
   });
 };

@@ -1,7 +1,7 @@
 "use strict";
-var prettyPrintTypes = function (types) {
-    var addArticle = function (str) {
-        var vowels = ['a', 'e', 'i', 'o', 'u'];
+let prettyPrintTypes = function (types) {
+    let addArticle = function (str) {
+        let vowels = ['a', 'e', 'i', 'o', 'u'];
         if (vowels.indexOf(str[0]) !== -1) {
             return 'an ' + str;
         }
@@ -9,14 +9,14 @@ var prettyPrintTypes = function (types) {
     };
     return types.map(addArticle).join(' or ');
 };
-var isArrayOfNotation = function (typeDefinition) {
+let isArrayOfNotation = function (typeDefinition) {
     return /array of /.test(typeDefinition);
 };
-var extractTypeFromArrayOfNotation = function (typeDefinition) {
+let extractTypeFromArrayOfNotation = function (typeDefinition) {
     // The notation is e.g. 'array of string'
     return typeDefinition.split(' of ')[1];
 };
-var isValidTypeDefinition = function (typeStr) {
+let isValidTypeDefinition = function (typeStr) {
     if (isArrayOfNotation(typeStr)) {
         return isValidTypeDefinition(extractTypeFromArrayOfNotation(typeStr));
     }
@@ -48,9 +48,9 @@ const detectType = function (value) {
 const onlyUniqueValuesInArrayFilter = function (value, index, self) {
     return self.indexOf(value) === index;
 };
-var detectTypeDeep = function (value) {
-    var type = detectType(value);
-    var typesInArray;
+let detectTypeDeep = function (value) {
+    let type = detectType(value);
+    let typesInArray;
     if (type === 'array') {
         typesInArray = value
             .map(function (element) {
@@ -61,8 +61,8 @@ var detectTypeDeep = function (value) {
     }
     return type;
 };
-var validateArray = function (argumentValue, typeToCheck) {
-    var allowedTypeInArray = extractTypeFromArrayOfNotation(typeToCheck);
+let validateArray = function (argumentValue, typeToCheck) {
+    let allowedTypeInArray = extractTypeFromArrayOfNotation(typeToCheck);
     if (detectType(argumentValue) !== 'array') {
         return false;
     }
@@ -71,7 +71,7 @@ var validateArray = function (argumentValue, typeToCheck) {
     });
 };
 function validateArgument(methodName, argumentName, argumentValue, argumentMustBe) {
-    var isOneOfAllowedTypes = argumentMustBe.some(function (type) {
+    let isOneOfAllowedTypes = argumentMustBe.some(function (type) {
         if (!isValidTypeDefinition(type)) {
             throw new Error('Unknown type "' + type + '"');
         }
@@ -92,7 +92,7 @@ function validateOptions(methodName, optionsObjName, obj, allowedOptions) {
     if (obj !== undefined) {
         validateArgument(methodName, optionsObjName, obj, ['object']);
         Object.keys(obj).forEach(function (key) {
-            var argName = optionsObjName + '.' + key;
+            let argName = optionsObjName + '.' + key;
             if (allowedOptions.hasOwnProperty(key)) {
                 validateArgument(methodName, argName, obj[key], allowedOptions[key]);
             }

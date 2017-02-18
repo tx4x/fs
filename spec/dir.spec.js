@@ -14,16 +14,19 @@ describe('dir', function () {
       path('x').shouldBeDirectory();
     };
 
+
     it('sync', function () {
       jetpack.dir('x');
       expectations();
     });
+    
 
     it('async', function (done) {
-      jetpack.dirAsync('x')
-      .then(function () {
+      jetpack.dirAsync('x').then(function () {
         expectations();
         done();
+      },function(e){
+        console.error('e',e);
       });
     });
   });
@@ -177,6 +180,7 @@ describe('dir', function () {
 
   describe('returns jetack instance pointing on this directory', function () {
     var expectations = function (jetpackContext) {
+      console.log('got ' + jetpackContext.cwd());
       expect(jetpackContext.cwd()).to.equal(pathUtil.resolve('a'));
     };
 
@@ -319,7 +323,7 @@ describe('dir', function () {
   describe('input validation', function () {
     var tests = [
       { type: 'sync', method: jetpack.dir, methodName: 'dir' },
-      { type: 'async', method: jetpack.dirAsync, methodName: 'dirAsync' }
+      { type: 'async', method: jetpack.dirAsync, methodName: 'async' }
     ];
 
     describe('"path" argument', function () {

@@ -32,6 +32,7 @@ module.exports = function (path) {
     },
 
     shouldBeDirectory: function () {
+      
       var message;
       var stat;
       try {

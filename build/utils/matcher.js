@@ -1,12 +1,12 @@
-'use strict';
-var Minimatch = require('minimatch').Minimatch;
-var convertPatternToAbsolutePath = function (basePath, pattern) {
+"use strict";
+let Minimatch = require('minimatch').Minimatch;
+let convertPatternToAbsolutePath = function (basePath, pattern) {
     // All patterns without slash are left as they are, if pattern contain
     // any slash we need to turn it into absolute path.
-    var hasSlash = (pattern.indexOf('/') !== -1);
-    var isAbsolute = /^!?\//.test(pattern);
-    var isNegated = /^!/.test(pattern);
-    var separator;
+    let hasSlash = (pattern.indexOf('/') !== -1);
+    let isAbsolute = /^!?\//.test(pattern);
+    let isNegated = /^!/.test(pattern);
+    let separator;
     if (!isAbsolute && hasSlash) {
         // Throw out meaningful characters from the beginning ("!", "./").
         pattern = pattern.replace(/^!/, '').replace(/^\.\//, '');
@@ -24,7 +24,7 @@ var convertPatternToAbsolutePath = function (basePath, pattern) {
     return pattern;
 };
 function create(basePath, patterns) {
-    var matchers;
+    let matchers;
     if (typeof patterns === 'string') {
         patterns = [patterns];
     }
@@ -39,10 +39,10 @@ function create(basePath, patterns) {
         });
     });
     return function performMatch(absolutePath) {
-        var mode = 'matching';
-        var weHaveMatch = false;
-        var currentMatcher;
-        var i;
+        let mode = 'matching';
+        let weHaveMatch = false;
+        let currentMatcher;
+        let i;
         for (i = 0; i < matchers.length; i += 1) {
             currentMatcher = matchers[i];
             if (currentMatcher.negate) {

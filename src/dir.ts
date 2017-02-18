@@ -1,12 +1,13 @@
 import * as pathUtil from 'path';
 import { Stats, stat, statSync, chmod, chmodSync, readdirSync, readdir } from 'fs';
-const Q = require('q');
-import { sync as mkdirp } from 'mkdirp';
 import * as rimraf from 'rimraf';
 import { normalizeFileMode as modeUtil } from './utils/mode';
 import { validateArgument, validateOptions } from './utils/validate';
-export function validateInput(methodName: string, path: string, criteria: any) {
-  const methodSignature = methodName + '(path, [criteria])';
+const Q = require('q');
+const mkdirp = require('mkdirp');
+
+export let validateInput = function (methodName: string, path: string, criteria?: any) {
+  let methodSignature = methodName + '(path, [criteria])';
   validateArgument(methodSignature, 'path', path, ['string']);
   validateOptions(methodSignature, 'criteria', criteria, {
     empty: ['boolean'],
@@ -34,7 +35,7 @@ function generatePathOccupiedByNotDirectoryError(path: string): Error {
 // Sync
 // ---------------------------------------------------------
 
-function checkWhatAlreadyOccupiesPathSync(path: string):Stats {
+function checkWhatAlreadyOccupiesPathSync(path: string): Stats {
   let stat: Stats;
   try {
     stat = statSync(path);
@@ -53,7 +54,7 @@ function checkWhatAlreadyOccupiesPathSync(path: string):Stats {
 };
 
 function createBrandNewDirectorySync(path: string, criteria: any) {
-  mkdirp(path, { mode: criteria.mode, fs:null });
+  mkdirp.sync(path, { mode: criteria.mode });
 };
 
 function checkExistingDirectoryFulfillsCriteriaSync(path: string, stat: Stats, criteria: any) {
@@ -97,27 +98,27 @@ const promisedReaddir = Q.denodeify(readdir);
 const promisedRimraf = Q.denodeify(rimraf);
 const promisedMkdirp = Q.denodeify(mkdirp);
 
-function checkWhatAlreadyOccupiesPathAsync(path: string) {
-  let deferred = Q.defer();
-  promisedStat(path)
-    .then(function (stat: any) {
-      if (stat.isDirectory()) {
-        deferred.resolve(stat);
-      } else {
-        deferred.reject(generatePathOccupiedByNotDirectoryError(path));
-      }
-    })
-    .catch(function (err) {
-      if (err.code === 'ENOENT') {
-        // Path doesn't exist
-        deferred.resolve(undefined);
-      } else {
-        // This is other error that nonexistent path, so end here.
-        deferred.reject(err);
-      }
-    });
+async function checkWhatAlreadyOccupiesPathAsync(path: string): Promise<Stats> {
+  return new Promise<Stats>((resolve, reject) => {
+    promisedStat(path)
+      .then(function (stat: any) {
+        if (stat.isDirectory()) {
+          resolve(stat);
+        } else {
+          reject(generatePathOccupiedByNotDirectoryError(path));
+        }
+      })
+      .catch(function (err) {
+        if (err.code === 'ENOENT') {
+          // Path doesn't exist
+          resolve(undefined);
+        } else {
+          // This is other error that nonexistent path, so end here.
+          reject(err);
+        }
+      });
 
-  return deferred.promise;
+  });
 };
 
 // Delete all files and directores inside given directory
@@ -142,43 +143,42 @@ function emptyAsync(path: string) {
       .catch(reject);
   });
 };
+const checkMode = function (criteria, stat, path) {
+  const mode = modeUtil(stat.mode);
+  if (criteria.mode !== undefined && criteria.mode !== mode) {
+    return promisedChmod(path, criteria.mode);
+  }
+  return Promise.resolve(null);
+};
 
 function checkExistingDirectoryFulfillsCriteriaAsync(path: string, stat: Stats, criteria: any) {
   return new Promise((resolve, reject) => {
-    const checkMode = function () {
-      const mode = modeUtil(stat.mode);
-      if (criteria.mode !== undefined && criteria.mode !== mode) {
-        return promisedChmod(path, criteria.mode);
-      }
-      return new Q();
-    };
     const checkEmptiness = function () {
       if (criteria.empty) {
         return emptyAsync(path);
       }
-      return new Q();
+      return Promise.resolve();
     };
-    checkMode()
+    checkMode(criteria, stat, path)
       .then(checkEmptiness)
       .then(resolve, reject);
   });
 };
 
-function createBrandNewDirectoryAsync(path: string, criteria: any) {
+function createBrandNewDirectoryAsync(path: string, criteria: any): Promise<null> {
   return promisedMkdirp(path, { mode: criteria.mode });
 };
 
-export function async(path: string, passedCriteria) {
+export function async(path: string, passedCriteria?: any) {
+  const criteria = getCriteriaDefaults(passedCriteria);
   return new Promise((resolve, reject) => {
-    const criteria = getCriteriaDefaults(passedCriteria);
     checkWhatAlreadyOccupiesPathAsync(path)
-      .then(stat => {
+      .then(function (stat: Stats) {
         if (stat !== undefined) {
           return checkExistingDirectoryFulfillsCriteriaAsync(path, stat, criteria);
         }
         return createBrandNewDirectoryAsync(path, criteria);
       })
       .then(resolve, reject);
-
   });
 }

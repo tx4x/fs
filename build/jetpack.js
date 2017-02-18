@@ -21,13 +21,13 @@ const read = require("./read");
 // The Jetpack Context object.
 // It provides the public API, and resolves all paths regarding to
 // passed cwdPath, or default process.cwd() if cwdPath was not specified.
-exports.jetpackContext = function (cwdPath) {
-    var getCwdPath = function () {
+function jetpackContext(cwdPath) {
+    let getCwdPath = function () {
         return cwdPath || process.cwd();
     };
-    var cwd = function (path, ...end) {
-        var args;
-        var pathParts;
+    let cwd = function (w) {
+        let args;
+        let pathParts;
         // return current CWD if no arguments specified...
         if (arguments.length === 0) {
             return getCwdPath();
@@ -35,24 +35,25 @@ exports.jetpackContext = function (cwdPath) {
         // ...create new CWD context otherwise
         args = Array.prototype.slice.call(arguments);
         pathParts = [getCwdPath()].concat(args);
-        return exports.jetpackContext(pathUtil.resolve.apply(null, pathParts));
+        const res = jetpackContext(pathUtil.resolve.apply(null, pathParts));
+        return res;
     };
     // resolves path to inner CWD path of this jetpack instance
-    var resolvePath = function (path) {
+    let resolvePath = function (path) {
         return pathUtil.resolve(getCwdPath(), path);
     };
-    var getPath = function () {
+    let getPath = function () {
         // add CWD base path as first element of arguments array
         Array.prototype.unshift.call(arguments, getCwdPath());
         return pathUtil.resolve.apply(null, arguments);
     };
-    var normalizeOptions = function (options) {
-        var opts = options || {};
+    let normalizeOptions = function (options) {
+        let opts = options || {};
         opts.cwd = getCwdPath();
         return opts;
     };
     // API
-    var api = {
+    let api = {
         cwd: cwd,
         path: getPath,
         append: function (path, data, options) {
@@ -78,7 +79,7 @@ exports.jetpackContext = function (cwdPath) {
             return streams.createReadStream(resolvePath(path), options);
         },
         dir: function (path, criteria) {
-            var normalizedPath;
+            let normalizedPath;
             dir.validateInput('dir', path, criteria);
             normalizedPath = resolvePath(path);
             dir.sync(normalizedPath, criteria);
@@ -87,7 +88,7 @@ exports.jetpackContext = function (cwdPath) {
         dirAsync: function (path, criteria) {
             var deferred = Q.defer();
             var normalizedPath;
-            dir.validateInput('dirAsync', path, criteria);
+            dir.validateInput('async', path, criteria);
             normalizedPath = resolvePath(path);
             dir.async(normalizedPath, criteria)
                 .then(function () {
@@ -109,8 +110,8 @@ exports.jetpackContext = function (cwdPath) {
             return this;
         },
         fileAsync: function (path, criteria) {
-            var deferred = Q.defer();
-            var that = this;
+            let deferred = Q.defer();
+            let that = this;
             file.validateInput('fileAsync', path, criteria);
             file.async(resolvePath(path), criteria)
                 .then(function () {
@@ -218,9 +219,67 @@ exports.jetpackContext = function (cwdPath) {
         // https://github.com/szwacz/fs-jetpack/issues/29
         // https://nodejs.org/api/util.html#util_custom_inspection_functions_on_objects
         api[util.inspect['custom']] = function () {
-            return '[fs-jetpack CWD: ' + getCwdPath() + ']';
+            return getCwdPath();
         };
     }
     return api;
-};
+}
+;
+module.exports = jetpackContext;
+var fse = require('fs-extra');
+fse.outputFileSync('file.txt', 'abc');
+const jetpack = jetpackContext();
+var crypto = require('crypto');
+var os = require('os');
+var random = crypto.randomBytes(16).toString('hex');
+var path = os.tmpdir() + '/fs-jetpack-test-' + random + '/ab/';
+//Argument "path" passed to dirAsync(path, [criteria]) must be a string. Received undefined
+//Argument "path" passed to async(path, [criteria]) must be a string. Received undefined' but got 'Argument "path"
+//assed to dirAsync(path, [criteria]) must be a string. Received undefined'
+//dir.validateInput('async', undefined);
+/*
+console.error('create path : ',path);
+jetpack.dirAsync(path).then(function (d) {
+  console.log('hgo');
+    
+  console.log('a', jetpack.cwd());
+  console.error('a ' + jetpack.cwd() === d);
+  
+}, function (e) {
+  console.log('err', e);
+})
+*/
+/*
+console.log(jetpack.path());-
+
+
+
+jetpack.copyAsync('file.txt', 'dir/dir/file.txt', {}).then(function () {
+  console.log('done!', arguments);
+}, function (e) {
+  console.error('e:', e);
+});
+*/
+/*
+import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
+import { sync as inspectSync, async as inspectASync } from './inspect';
+const _p = jetpack.path();
+inspectASync(_p, {
+  mode: true,
+  symlinks: true
+}).then(function (inspected) {
+  console.log('ins');
+});
+*/
+/*
+const st = treeWalkerStream(jetpack.path(), {
+  inspectOptions: {
+    mode: true,
+    symlinks: true
+  }
+}).on('readable', function () {
+  let a = st.read();
+  console.log(arguments);
+});
+*/
 //# sourceMappingURL=jetpack.js.map

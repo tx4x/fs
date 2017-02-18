@@ -5,7 +5,7 @@ const Q = require("q");
 const mkdirp = require("mkdirp");
 const validate_1 = require("./utils/validate");
 function validateInput(methodName, path, data, options) {
-    var methodSignature = methodName + '(path, data, [options])';
+    let methodSignature = methodName + '(path, data, [options])';
     validate_1.validateArgument(methodSignature, 'path', path, ['string']);
     validate_1.validateArgument(methodSignature, 'data', data, ['string', 'buffer', 'object', 'array']);
     validate_1.validateOptions(methodSignature, 'options', options, {

@@ -1,21 +1,27 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 const pathUtil = require("path");
 const fs_1 = require("fs");
-const Q = require('q');
-const mkdirp_1 = require("mkdirp");
 const rimraf = require("rimraf");
 const mode_1 = require("./utils/mode");
 const validate_1 = require("./utils/validate");
-function validateInput(methodName, path, criteria) {
-    const methodSignature = methodName + '(path, [criteria])';
+const Q = require('q');
+const mkdirp = require('mkdirp');
+exports.validateInput = function (methodName, path, criteria) {
+    let methodSignature = methodName + '(path, [criteria])';
     validate_1.validateArgument(methodSignature, 'path', path, ['string']);
     validate_1.validateOptions(methodSignature, 'criteria', criteria, {
         empty: ['boolean'],
         mode: ['string', 'number']
     });
-}
-exports.validateInput = validateInput;
-;
+};
 function getCriteriaDefaults(passedCriteria) {
     const criteria = passedCriteria || {};
     if (typeof criteria.empty !== 'boolean') {
@@ -53,7 +59,7 @@ function checkWhatAlreadyOccupiesPathSync(path) {
 }
 ;
 function createBrandNewDirectorySync(path, criteria) {
-    mkdirp_1.sync(path, { mode: criteria.mode, fs: null });
+    mkdirp.sync(path, { mode: criteria.mode });
 }
 ;
 function checkExistingDirectoryFulfillsCriteriaSync(path, stat, criteria) {
@@ -78,8 +84,8 @@ function checkExistingDirectoryFulfillsCriteriaSync(path, stat, criteria) {
 }
 ;
 function sync(path, passedCriteria) {
-    var criteria = getCriteriaDefaults(passedCriteria);
-    var stat = checkWhatAlreadyOccupiesPathSync(path);
+    let criteria = getCriteriaDefaults(passedCriteria);
+    let stat = checkWhatAlreadyOccupiesPathSync(path);
     if (stat) {
         checkExistingDirectoryFulfillsCriteriaSync(path, stat, criteria);
     }
@@ -96,29 +102,31 @@ const promisedStat = Q.denodeify(fs_1.stat);
 const promisedChmod = Q.denodeify(fs_1.chmod);
 const promisedReaddir = Q.denodeify(fs_1.readdir);
 const promisedRimraf = Q.denodeify(rimraf);
-const promisedMkdirp = Q.denodeify(mkdirp_1.sync);
+const promisedMkdirp = Q.denodeify(mkdirp);
 function checkWhatAlreadyOccupiesPathAsync(path) {
-    var deferred = Q.defer();
-    promisedStat(path)
-        .then(function (stat) {
-        if (stat.isDirectory()) {
-            deferred.resolve(stat);
-        }
-        else {
-            deferred.reject(generatePathOccupiedByNotDirectoryError(path));
-        }
-    })
-        .catch(function (err) {
-        if (err.code === 'ENOENT') {
-            // Path doesn't exist
-            deferred.resolve(undefined);
-        }
-        else {
-            // This is other error that nonexistent path, so end here.
-            deferred.reject(err);
-        }
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            promisedStat(path)
+                .then(function (stat) {
+                if (stat.isDirectory()) {
+                    resolve(stat);
+                }
+                else {
+                    reject(generatePathOccupiedByNotDirectoryError(path));
+                }
+            })
+                .catch(function (err) {
+                if (err.code === 'ENOENT') {
+                    // Path doesn't exist
+                    resolve(undefined);
+                }
+                else {
+                    // This is other error that nonexistent path, so end here.
+                    reject(err);
+                }
+            });
+        });
     });
-    return deferred.promise;
 }
 ;
 // Delete all files and directores inside given directory
@@ -144,22 +152,23 @@ function emptyAsync(path) {
     });
 }
 ;
+const checkMode = function (criteria, stat, path) {
+    const mode = mode_1.normalizeFileMode(stat.mode);
+    if (criteria.mode !== undefined && criteria.mode !== mode) {
+        return promisedChmod(path, criteria.mode);
+    }
+    return Promise.resolve(null);
+};
 function checkExistingDirectoryFulfillsCriteriaAsync(path, stat, criteria) {
     return new Promise((resolve, reject) => {
-        const checkMode = function () {
-            const mode = mode_1.normalizeFileMode(stat.mode);
-            if (criteria.mode !== undefined && criteria.mode !== mode) {
-                return promisedChmod(path, criteria.mode);
-            }
-            return new Q();
-        };
         const checkEmptiness = function () {
+            console.log('ar', arguments);
             if (criteria.empty) {
                 return emptyAsync(path);
             }
-            return new Q();
+            return Promise.resolve();
         };
-        checkMode()
+        checkMode(criteria, stat, path)
             .then(checkEmptiness)
             .then(resolve, reject);
     });
@@ -170,10 +179,10 @@ function createBrandNewDirectoryAsync(path, criteria) {
 }
 ;
 function async(path, passedCriteria) {
+    const criteria = getCriteriaDefaults(passedCriteria);
     return new Promise((resolve, reject) => {
-        const criteria = getCriteriaDefaults(passedCriteria);
         checkWhatAlreadyOccupiesPathAsync(path)
-            .then(stat => {
+            .then(function (stat) {
             if (stat !== undefined) {
                 return checkExistingDirectoryFulfillsCriteriaAsync(path, stat, criteria);
             }

@@ -214,8 +214,7 @@ function copyItemAsync(from, inspectData, to) {
 function async(from, to, options) {
     const opts = parseOptions(options, from);
     return new Promise((resolve, reject) => {
-        checksBeforeCopyingAsync(from, to, opts)
-            .then(function () {
+        checksBeforeCopyingAsync(from, to, opts).then(function () {
             let allFilesDelivered = false;
             let filesInProgress = 0;
             const stream = tree_walker_1.stream(from, {
@@ -249,8 +248,7 @@ function async(from, to, options) {
                     resolve();
                 }
             });
-        })
-            .catch(reject);
+        }).catch(reject);
     });
 }
 exports.async = async;

@@ -1,8 +1,9 @@
 import { Stats, readlinkSync, statSync, lstatSync, stat, lstat, readlink, createReadStream, readFileSync } from 'fs';
 import * as  pathUtil from "path";
-import * as Q from 'q';
 import { validateArgument, validateOptions } from './utils/validate';
 import { createHash } from 'crypto';
+import { promisify } from './promisify';
+import * as Q from 'q';
 export const supportedChecksumAlgorithms: string[] = ['md5', 'sha1', 'sha256', 'sha512'];
 export function validateInput(methodName: string, path: string, options: any): void {
   const methodSignature: string = methodName + '(path, [options])';
@@ -98,68 +99,66 @@ export function sync(path, options?: any) {
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-
-const promisedStat = Q.denodeify(stat);
-const promisedLstat = Q.denodeify(lstat);
-const promisedReadlink = Q.denodeify(readlink);
+const promisedStat = promisify(stat);
+const promisedLstat = promisify(lstat);
+const promisedReadlink = promisify(readlink);
 
 function fileChecksumAsync(path: string, algo: string) {
-  return new Promise((resolve, reject) => {
-    const hash = createHash(algo);
-    const s = createReadStream(path);
-    s.on('data', data => {
-      hash.update(data);
-    });
-    s.on('end', () => {
-      resolve(hash.digest('hex'));
-    });
-    s.on('error', reject);
+  //return new Promise((resolve, reject) => {
+  const deferred = Q.defer();
+  const hash = createHash(algo);
+  const s = createReadStream(path);
+  s.on('data', data => {
+    hash.update(data);
   });
+  s.on('end', function () {
+    deferred.resolve(hash.digest('hex'));
+  });
+  s.on('error', function (e) {
+    deferred.reject(e);
+  });
+
+  return deferred.promise;
 };
 
 function addExtraFieldsAsync(path: string, inspectObj, options) {
-  return new Promise((resolve, reject) => {
-    if (inspectObj.type === 'file' && options.checksum) {
-      return fileChecksumAsync(path, options.checksum)
-        .then(checksum => {
-          inspectObj[options.checksum] = checksum;
-          return inspectObj;
-        });
-    } else if (inspectObj.type === 'symlink') {
-      return promisedReadlink(path)
-        .then(linkPath => {
-          inspectObj.pointsAt = linkPath;
-          return inspectObj;
-        });
-    }
-  });
+  if (inspectObj.type === 'file' && options.checksum) {
+    return fileChecksumAsync(path, options.checksum)
+      .then(function (checksum) {
+        inspectObj[options.checksum] = checksum;
+        return inspectObj;
+      });
+  } else if (inspectObj.type === 'symlink') {
+    return promisedReadlink(path)
+      .then(function (linkPath) {
+        inspectObj.pointsAt = linkPath;
+        return inspectObj;
+      });
+  }
+  return new Q(inspectObj);
 }
 
-export function async(path: string, options?:any) {
-  let deferred = Q.defer();
-  let statOperation = promisedStat;
-  options = options || {};
-
-  if (options.symlinks) {
-    statOperation = promisedLstat;
-  }
-
-  statOperation(path)
-    .then(function (stat) {
-      let inspectObj = createInspectObj(path, options, stat);
-      addExtraFieldsAsync(path, inspectObj, options)
-        .then(deferred.resolve, deferred.reject);
-    })
-    .catch(function (err) {
-      // Detection if path exists
-      if (err.code === 'ENOENT') {
-        // Doesn't exist. Return undefined instead of throwing.
-        deferred.resolve(undefined);
-      } else {
-        deferred.reject(err);
-      }
-    });
-
-  return deferred.promise;
+export function async(path: string, options?: any) {
+  return new Promise((resolve, reject) => {
+    let statOperation = promisedStat;
+    options = options || {};
+    if (options.symlinks) {
+      statOperation = promisedLstat;
+    }
+    statOperation(path)
+      .then(function (stat: Stats) {
+        let inspectObj = createInspectObj(path, options, stat);
+        addExtraFieldsAsync(path, inspectObj, options).then(resolve, reject);
+      })
+      .catch(function (err) {
+        // Detection if path exists
+        if (err.code === 'ENOENT') {
+          // Doesn't exist. Return undefined instead of throwing.
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+  });
 }
 

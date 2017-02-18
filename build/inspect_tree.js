@@ -49,8 +49,8 @@ function inspectTreeNodeSync(path, options, parent) {
         if (treeBranch.type === 'dir' || (options.symlinks && treeBranch.type === 'symlink')) {
             treeBranch.size = 0;
             treeBranch.children = (list_1.sync(path) || []).map(function (filename) {
-                var subBranchPath = pathUtil.join(path, filename);
-                var treeSubBranch = inspectTreeNodeSync(subBranchPath, options, treeBranch);
+                let subBranchPath = pathUtil.join(path, filename);
+                let treeSubBranch = inspectTreeNodeSync(subBranchPath, options, treeBranch);
                 // Add together all childrens' size to get directory combined size.
                 treeBranch.size += treeSubBranch.size || 0;
                 return treeSubBranch;
@@ -76,9 +76,9 @@ exports.sync = sync;
 function inspectTreeNodeAsync(path, options, parent) {
     return new Promise((resolve, reject) => {
         function inspectAllChildren(treeBranch) {
-            var subDirDeferred = Q.defer();
+            let subDirDeferred = Q.defer();
             list_1.async(path).then(function (children) {
-                var doNext = function (index) {
+                let doNext = function (index) {
                     let subPath;
                     if (index === children.length) {
                         if (options.checksum) {

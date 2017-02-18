@@ -1,4 +1,3 @@
-/* eslint no-underscore-dangle:0 */
 import { Readable } from 'stream';
 import * as  pathUtil from "path";
 import { sync as inspectSync, async as inspectASync } from '../inspect';

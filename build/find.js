@@ -17,7 +17,7 @@ function validateInput(methodName, path, _options) {
 exports.validateInput = validateInput;
 ;
 function normalizeOptions(options) {
-    var opts = options || {};
+    let opts = options || {};
     // defaults:
     if (opts.files === undefined) {
         opts.files = true;

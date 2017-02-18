@@ -28,10 +28,10 @@ describe('inspect', function () {
     it('async', function (done) {
       preparations();
       jetpack.inspectAsync('dir/file.txt')
-      .then(function (data) {
-        expectations(data);
-        done();
-      });
+        .then(function (data) {
+          expectations(data);
+          done();
+        });
     });
   });
 
@@ -55,10 +55,10 @@ describe('inspect', function () {
     it('async', function (done) {
       preparations();
       jetpack.inspectAsync('empty')
-      .then(function (data) {
-        expectations(data);
-        done();
-      });
+        .then(function (data) {
+          expectations(data);
+          done();
+        });
     });
   });
 
@@ -73,10 +73,10 @@ describe('inspect', function () {
 
     it('async', function (done) {
       jetpack.inspectAsync('nonexistent')
-      .then(function (data) {
-        expectations(data);
-        done();
-      });
+        .then(function (data) {
+          expectations(data);
+          done();
+        });
     });
   });
 
@@ -99,10 +99,10 @@ describe('inspect', function () {
     it('async', function (done) {
       preparations();
       jetpack.inspectAsync('dir/file.txt', { times: true })
-      .then(function (data) {
-        expectations(data);
-        done();
-      });
+        .then(function (data) {
+          expectations(data);
+          done();
+        });
     });
   });
 
@@ -123,10 +123,10 @@ describe('inspect', function () {
     it('async', function (done) {
       preparations();
       jetpack.inspectAsync('dir/file.txt', { absolutePath: true })
-      .then(function (data) {
-        expectations(data);
-        done();
-      });
+        .then(function (data) {
+          expectations(data);
+          done();
+        });
     });
   });
 
@@ -149,10 +149,10 @@ describe('inspect', function () {
       var jetContext = jetpack.cwd('a');
       preparations();
       jetContext.inspectAsync('b.txt')
-      .then(function (data) {
-        expectations(data);
-        done();
-      });
+        .then(function (data) {
+          expectations(data);
+          done();
+        });
     });
   });
 
@@ -178,10 +178,10 @@ describe('inspect', function () {
     it('async', function (done) {
       preparations();
       jetpack.inspectAsync('symlinked_file.txt')
-      .then(function (data) {
-        expectations(data);
-        done();
-      });
+        .then(function (data) {
+          expectations(data);
+          done();
+        });
     });
   });
 
@@ -207,10 +207,12 @@ describe('inspect', function () {
     it('async', function (done) {
       preparations();
       jetpack.inspectAsync('symlinked_file.txt', { symlinks: true })
-      .then(function (data) {
-        expectations(data);
-        done();
-      });
+        .then(function (data) {
+          expectations(data);
+          done();
+        },function(e){
+          console.error(e);
+        });
     });
   });
 
@@ -234,10 +236,10 @@ describe('inspect', function () {
       it('async', function (done) {
         preparations();
         jetpack.inspectAsync('dir/file.txt', { mode: true })
-        .then(function (data) {
-          expectations(data);
-          done();
-        });
+          .then(function (data) {
+            expectations(data);
+            done();
+          });
       });
     });
   } else {
@@ -269,7 +271,7 @@ describe('inspect', function () {
         type: 'sha512',
         content: 'abc',
         expected: 'ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a21'
-          + '92992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f'
+        + '92992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f'
       },
       {
         name: 'calculates correctly checksum of an empty file',
@@ -297,11 +299,11 @@ describe('inspect', function () {
         it('async', function (done) {
           preparations();
           jetpack.inspectAsync('file.txt', { checksum: test.type })
-          .then(function (data) {
-            expectations(data);
-            done();
-          })
-          .catch(done);
+            .then(function (data) {
+              expectations(data);
+              done();
+            })
+            .catch(done);
         });
       });
     });
@@ -319,7 +321,7 @@ describe('inspect', function () {
           expect(function () {
             test.method(undefined);
           }).to.throw('Argument "path" passed to ' + test.methodName
-            + '(path, [options]) must be a string. Received undefined');
+          + '(path, [options]) must be a string. Received undefined');
         });
       });
     });
@@ -331,13 +333,13 @@ describe('inspect', function () {
             expect(function () {
               test.method('abc', { checksum: 1 });
             }).to.throw('Argument "options.checksum" passed to ' + test.methodName
-              + '(path, [options]) must be a string. Received number');
+            + '(path, [options]) must be a string. Received number');
           });
           it(test.type, function () {
             expect(function () {
               test.method('abc', { checksum: 'foo' });
             }).to.throw('Argument "options.checksum" passed to ' + test.methodName
-              + '(path, [options]) must have one of values: md5, sha1, sha256');
+            + '(path, [options]) must have one of values: md5, sha1, sha256');
           });
         });
       });
@@ -347,7 +349,7 @@ describe('inspect', function () {
             expect(function () {
               test.method('abc', { mode: 1 });
             }).to.throw('Argument "options.mode" passed to ' + test.methodName
-              + '(path, [options]) must be a boolean. Received number');
+            + '(path, [options]) must be a boolean. Received number');
           });
         });
       });
@@ -357,7 +359,7 @@ describe('inspect', function () {
             expect(function () {
               test.method('abc', { times: 1 });
             }).to.throw('Argument "options.times" passed to ' + test.methodName
-              + '(path, [options]) must be a boolean. Received number');
+            + '(path, [options]) must be a boolean. Received number');
           });
         });
       });
@@ -367,7 +369,7 @@ describe('inspect', function () {
             expect(function () {
               test.method('abc', { absolutePath: 1 });
             }).to.throw('Argument "options.absolutePath" passed to ' + test.methodName
-              + '(path, [options]) must be a boolean. Received number');
+            + '(path, [options]) must be a boolean. Received number');
           });
         });
       });
@@ -377,7 +379,7 @@ describe('inspect', function () {
             expect(function () {
               test.method('abc', { symlinks: 1 });
             }).to.throw('Argument "options.symlinks" passed to ' + test.methodName
-              + '(path, [options]) must be a boolean. Received number');
+            + '(path, [options]) must be a boolean. Received number');
           });
         });
       });

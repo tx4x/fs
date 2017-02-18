@@ -50,8 +50,8 @@ exports.sync = sync;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-var promisedRename = Q.denodeify(fs.rename);
-var promisedMkdirp = Q.denodeify(mkdirp_1.sync);
+let promisedRename = Q.denodeify(fs.rename);
+let promisedMkdirp = Q.denodeify(mkdirp_1.sync);
 function ensureDestinationPathExistsAsync(to) {
     return new Promise((resolve, reject) => {
         let destDir = pathUtil.dirname(to);

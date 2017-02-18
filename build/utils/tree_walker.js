@@ -1,5 +1,4 @@
 "use strict";
-/* eslint no-underscore-dangle:0 */
 const stream_1 = require("stream");
 const pathUtil = require("path");
 const inspect_1 = require("../inspect");
@@ -28,7 +27,7 @@ exports.sync = sync;
 // STREAM
 // ---------------------------------------------------------
 function stream(path, options) {
-    var rs = new stream_1.Readable({ objectMode: true });
+    let rs = new stream_1.Readable({ objectMode: true });
     let nextTreeNode = {
         path: path,
         parent: undefined,
@@ -49,7 +48,7 @@ function stream(path, options) {
         return undefined;
     };
     const pushAndContinueMaybe = function (data) {
-        var theyWantMore = rs.push(data);
+        let theyWantMore = rs.push(data);
         running = false;
         if (!nextTreeNode) {
             // Previous was the last node. The job is done.

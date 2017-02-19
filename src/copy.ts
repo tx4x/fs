@@ -11,10 +11,13 @@ import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync, Options as WriteOptions, ProgressCallback as WriteProgressCallback } from './write';
 import { InspectItem } from './inspect';
 const progress = require('progress-stream');
+export type ItemProgressCallback = (path: string, current: number, total: number, item?: InspectItem) => void;
+export type WriteProgressCallback = (path: string, current: number, total: number) => void;
 export interface Options {
   overwrite?: boolean;
   matching?: string[];
-  progress?(path: string, current: number, total: number, item?: any): void;
+  progress?: ItemProgressCallback;
+  writeProgress?: WriteProgressCallback;
   allowedToCopy?: (from: string) => boolean;
 }
 export interface CopyTask {
@@ -30,15 +33,17 @@ export function validateInput(methodName: string, from: string, to: string, opti
   validateOptions(methodSignature, 'options', options, {
     overwrite: ['boolean'],
     matching: ['string', 'array of string'],
-    progress: ['function']
+    progress: ['function'],
+    writeProgress: ['function']
   });
 };
 
-function parseOptions(options: any | null, from: string) {
+function parseOptions(options: any | null, from: string): Options {
   const opts: any = options || {};
   const parsedOptions: Options = {};
   parsedOptions.overwrite = opts.overwrite;
   parsedOptions.progress = opts.progress;
+  parsedOptions.writeProgress = opts.writeProgress;
   if (opts.matching) {
     parsedOptions.allowedToCopy = matcher(from, opts.matching);
   } else {

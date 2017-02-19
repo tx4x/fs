@@ -1,12 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 const pathUtil = require("path");
 const fs = require("fs");
 const Q = require("q");
@@ -59,26 +51,22 @@ function writeFileSync(path, data, options) {
 }
 ;
 function writeAtomicSync(path, data, options) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // we are assuming there is file on given path, and we don't want
-        // to touch it until we are sure our data has been saved correctly,
-        // so write the data into temporary file...
-        yield writeFileSync(path + newExt, data, options);
-        // ...next rename temp file to replace real path.
-        fs.renameSync(path + newExt, path);
-    });
+    // we are assuming there is file on given path, and we don't want
+    // to touch it until we are sure our data has been saved correctly,
+    // so write the data into temporary file...
+    writeFileSync(path + newExt, data, options);
+    // ...next rename temp file to replace real path.
+    fs.renameSync(path + newExt, path);
 }
 ;
 function sync(path, data, options) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const opts = options || {};
-        const processedData = serializeToJsonMaybe(data, opts.jsonIndent);
-        let writeStrategy = writeFileSync;
-        if (opts.atomic) {
-            writeStrategy = writeAtomicSync;
-        }
-        yield writeStrategy(path, processedData, { mode: opts.mode });
-    });
+    const opts = options || {};
+    const processedData = serializeToJsonMaybe(data, opts.jsonIndent);
+    let writeStrategy = writeFileSync;
+    if (opts.atomic) {
+        writeStrategy = writeAtomicSync;
+    }
+    writeStrategy(path, processedData, { mode: opts.mode });
 }
 exports.sync = sync;
 ;

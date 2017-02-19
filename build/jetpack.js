@@ -236,15 +236,18 @@ TreeWalkerSync(b.path(), {
   console.log('tree walker : ', item);
 });
 */
+/*
 process.on('unhandledRejection', (reason) => {
-    console.error('Unhandled rejection, reason: ', reason);
+  console.error('Unhandled rejection, reason: ', reason);
 });
+
 jetpackContext().copy('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
-    overwrite: true,
-    progress: (path, current, total, item) => {
-        //console.log('copieing : ' + path + ' ' + item.size);
-        console.log('copy ' + current + ' from ' + total);
-    }
+  overwrite: true,
+  progress: (path: string, current: number, total: number, item: InspectItem) => {
+    //console.log('copieing : ' + path + ' ' + item.size);
+    console.log('copy ' + current + ' from ' + total);
+  }
 });
+*/
 //console.log(b.inspectTree(b.path()));
 //# sourceMappingURL=jetpack.js.map

@@ -26,7 +26,8 @@ function validateInput(methodName, from, to, options) {
     validate_1.validateOptions(methodSignature, 'options', options, {
         overwrite: ['boolean'],
         matching: ['string', 'array of string'],
-        progress: ['function']
+        progress: ['function'],
+        writeProgress: ['function']
     });
 }
 exports.validateInput = validateInput;
@@ -36,6 +37,7 @@ function parseOptions(options, from) {
     const parsedOptions = {};
     parsedOptions.overwrite = opts.overwrite;
     parsedOptions.progress = opts.progress;
+    parsedOptions.writeProgress = opts.writeProgress;
     if (opts.matching) {
         parsedOptions.allowedToCopy = matcher_1.create(from, opts.matching);
     }
@@ -82,21 +84,15 @@ function copyFileSyncWithProgress(from, to, options) {
                     resolve();
                 }
             }
-            let rd = fs.createReadStream(from);
-            let str = progress({
+            const rd = fs.createReadStream(from);
+            const str = progress({
                 length: fs.statSync(from).size,
                 time: 100
             });
-            str.on('progress', e => {
-                options.progress(from, e.transferred, e.length);
-            });
-            rd.on("error", err => {
-                done(err);
-            });
-            let wr = fs.createWriteStream(to);
-            wr.on("error", err => {
-                done(err);
-            });
+            str.on('progress', e => options.progress(from, e.transferred, e.length));
+            rd.on("error", err => done(err));
+            const wr = fs.createWriteStream(to);
+            wr.on("error", err => done(err));
             wr.on("close", done);
             rd.pipe(str).pipe(wr);
         });
@@ -181,7 +177,6 @@ function sync(from, to, options) {
             opts.progress(item.path, current, nodes.length, item.item);
         }
     });
-    console.log('items: ', nodes.length);
 }
 exports.sync = sync;
 ;

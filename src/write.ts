@@ -40,7 +40,6 @@ function serializeToJsonMaybe(data: string | Buffer | Object, jsonIndent: number
 // SYNC
 // ---------------------------------------------------------
 function writeFileSync(path: string, data: any | string, options?: Options): void {
-
   try {
     fs.writeFileSync(path, data, options);
   } catch (err) {
@@ -56,23 +55,23 @@ function writeFileSync(path: string, data: any | string, options?: Options): voi
 
 };
 
-async function writeAtomicSync(path: string, data: string, options?: Options): Promise<void> {
+function writeAtomicSync(path: string, data: string, options?: Options):void {
   // we are assuming there is file on given path, and we don't want
   // to touch it until we are sure our data has been saved correctly,
   // so write the data into temporary file...
-  await writeFileSync(path + newExt, data, options);
+  writeFileSync(path + newExt, data, options);
   // ...next rename temp file to replace real path.
   fs.renameSync(path + newExt, path);
 };
 
-export async function sync(path: string, data: string | Buffer | Object, options?: Options) {
+export function sync(path: string, data: string | Buffer | Object, options?: Options) {
   const opts: any = options || {};
   const processedData = serializeToJsonMaybe(data, opts.jsonIndent);
   let writeStrategy = writeFileSync;
   if (opts.atomic) {
     writeStrategy = writeAtomicSync;
   }
-  await writeStrategy(path, processedData, { mode: opts.mode });
+  writeStrategy(path, processedData, { mode: opts.mode });
 };
 
 // ---------------------------------------------------------

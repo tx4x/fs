@@ -140,9 +140,7 @@ function checkExistingFileFulfillsCriteriaAsync(path: string, stat: Stats, crite
           mode: mode,
           jsonIndent: criteria.jsonIndent
         })
-          .then(() => {
-            resolve(true);
-          })
+          .then(() => resolve(true))
           .catch(reject);
       } else {
         resolve(false);

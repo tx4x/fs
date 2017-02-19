@@ -28,8 +28,10 @@ import { Options as WriteOptions } from './write';
 import * as write from './write';
 import * as read from './read';
 
-export interface Jetpack {
-  cwd(w?: any): Jetpack | string;
+
+
+export interface IJetpack {
+  cwd(w?: any): IJetpack | string;
   path(): string;
   append(path: string, data: string | Buffer | Object, options?: AppendOptions): void;
   appendAsync(path: string, data: string | Buffer | Object, options?: AppendOptions): Promise<null>;
@@ -52,8 +54,8 @@ export interface Jetpack {
     start?: number;
     end?: number;
   });
-  dir(path: string, criteria?: DirOptions): Jetpack;
-  dirAsync(path: string, criteria?: DirOptions): Promise<Jetpack>;
+  dir(path: string, criteria?: DirOptions): IJetpack;
+  dirAsync(path: string, criteria?: DirOptions): Promise<IJetpack>;
   exists(path: string): boolean | string;
   existsAsync(path: string): Promise<boolean | string>;
   file(path: string, criteria?: FileOptions);
@@ -79,16 +81,15 @@ export interface Jetpack {
   write(path: string, data: string | Buffer | Object, options?: WriteOptions): void;
   writeAsync(path: string, data: string | Buffer | Object, options?: WriteOptions);
 }
-
 // The Jetpack Context object.
 // It provides the public API, and resolves all paths regarding to
 // passed cwdPath, or default process.cwd() if cwdPath was not specified.
-function jetpackContext(cwdPath?: string): Jetpack {
+export function jetpack(cwdPath?: string): IJetpack {
   let getCwdPath = function () {
     return cwdPath || process.cwd();
   };
 
-  let cwd = function (w?: any): Jetpack | string {
+  let cwd = function (w?: any): IJetpack | string {
     let args;
     let pathParts;
 
@@ -100,7 +101,7 @@ function jetpackContext(cwdPath?: string): Jetpack {
     // ...create new CWD context otherwise
     args = Array.prototype.slice.call(arguments);
     pathParts = [getCwdPath()].concat(args);
-    const res = jetpackContext(pathUtil.resolve.apply(null, pathParts));
+    const res = jetpack(pathUtil.resolve.apply(null, pathParts));
     return res;
   };
 
@@ -121,7 +122,7 @@ function jetpackContext(cwdPath?: string): Jetpack {
   };
 
   // API
-  let api: Jetpack = {
+  let api: IJetpack = {
     cwd: cwd,
     path: getPath,
     append: function (path: string, data: string | Buffer | Object, options?: AppendOptions): void {
@@ -163,14 +164,14 @@ function jetpackContext(cwdPath?: string): Jetpack {
       return streams.createReadStream(resolvePath(path), options);
     },
 
-    dir: function (path: string, criteria?: DirOptions): Jetpack {
+    dir: function (path: string, criteria?: DirOptions): IJetpack {
       let normalizedPath;
       dir.validateInput('dir', path, criteria);
       normalizedPath = resolvePath(path);
       dir.sync(normalizedPath, criteria);
-      return cwd(normalizedPath) as Jetpack;
+      return cwd(normalizedPath) as IJetpack;
     },
-    dirAsync: function (path: string, criteria?: DirOptions): Promise<Jetpack> {
+    dirAsync: function (path: string, criteria?: DirOptions): Promise<IJetpack> {
       const deferred = Q.defer();
       let normalizedPath: string;
       dir.validateInput('dirAsync', path, criteria);
@@ -321,34 +322,21 @@ function jetpackContext(cwdPath?: string): Jetpack {
 
   return api;
 };
-module.exports = jetpackContext;
 
-let b = jetpackContext();
-/*
-TreeWalkerSync(b.path(), {
-  inspectOptions: {
-    mode: true,
-    symlinks: true
-  }
-}, (path: string, item: InspectItem) => {
-  console.log('tree walker : ', item);
-});
-*/
-/*
 process.on('unhandledRejection', (reason) => {
   console.error('Unhandled rejection, reason: ', reason);
 });
 
-jetpackContext().copy('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
+jetpack().copy('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
   overwrite: true,
   progress: (path: string, current: number, total: number, item: InspectItem) => {
     //console.log('copieing : ' + path + ' ' + item.size);
-    console.log('copy ' + current + ' from ' + total);
+    console.log('copy item ' + current + ' from ' + total);
+  },
+  writeProgress: (path: string, current: number, total: number) => {
+    //console.log('copieing : ' + path + ' ' + item.size);
+    console.log('write ' + current + ' from ' + total);
   }
 });
-*/
-
-//console.log(b.inspectTree(b.path()));
-
 
 

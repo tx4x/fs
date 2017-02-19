@@ -21,7 +21,7 @@ const read = require("./read");
 // The Jetpack Context object.
 // It provides the public API, and resolves all paths regarding to
 // passed cwdPath, or default process.cwd() if cwdPath was not specified.
-function jetpackContext(cwdPath) {
+function jetpack(cwdPath) {
     let getCwdPath = function () {
         return cwdPath || process.cwd();
     };
@@ -35,7 +35,7 @@ function jetpackContext(cwdPath) {
         // ...create new CWD context otherwise
         args = Array.prototype.slice.call(arguments);
         pathParts = [getCwdPath()].concat(args);
-        const res = jetpackContext(pathUtil.resolve.apply(null, pathParts));
+        const res = jetpack(pathUtil.resolve.apply(null, pathParts));
         return res;
     };
     // resolves path to inner CWD path of this jetpack instance
@@ -223,31 +223,20 @@ function jetpackContext(cwdPath) {
     }
     return api;
 }
+exports.jetpack = jetpack;
 ;
-module.exports = jetpackContext;
-let b = jetpackContext();
-/*
-TreeWalkerSync(b.path(), {
-  inspectOptions: {
-    mode: true,
-    symlinks: true
-  }
-}, (path: string, item: InspectItem) => {
-  console.log('tree walker : ', item);
-});
-*/
-/*
 process.on('unhandledRejection', (reason) => {
-  console.error('Unhandled rejection, reason: ', reason);
+    console.error('Unhandled rejection, reason: ', reason);
 });
-
-jetpackContext().copy('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
-  overwrite: true,
-  progress: (path: string, current: number, total: number, item: InspectItem) => {
-    //console.log('copieing : ' + path + ' ' + item.size);
-    console.log('copy ' + current + ' from ' + total);
-  }
+jetpack().copy('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
+    overwrite: true,
+    progress: (path, current, total, item) => {
+        //console.log('copieing : ' + path + ' ' + item.size);
+        console.log('copy item ' + current + ' from ' + total);
+    },
+    writeProgress: (path, current, total) => {
+        //console.log('copieing : ' + path + ' ' + item.size);
+        console.log('write ' + current + ' from ' + total);
+    }
 });
-*/
-//console.log(b.inspectTree(b.path()));
 //# sourceMappingURL=jetpack.js.map

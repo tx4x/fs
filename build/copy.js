@@ -78,6 +78,9 @@ function copyFileSyncWithProgress(from, to, options) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
             let cbCalled = false;
+            const started = Date.now();
+            let elapsed = Date.now();
+            let speed = 0;
             function done(err) {
                 if (!cbCalled) {
                     cbCalled = true;
@@ -87,9 +90,13 @@ function copyFileSyncWithProgress(from, to, options) {
             const rd = fs.createReadStream(from);
             const str = progress({
                 length: fs.statSync(from).size,
-                time: 100
+                time: 0
             });
-            str.on('progress', e => options.progress(from, e.transferred, e.length));
+            str.on('progress', e => {
+                elapsed = (Date.now() - started) / 1000;
+                speed = e.transferred / elapsed;
+                options.writeProgress(from, e.transferred, e.length);
+            });
             rd.on("error", err => done(err));
             const wr = fs.createWriteStream(to);
             wr.on("error", err => done(err));
@@ -105,7 +112,7 @@ function copyFileSync(from, to, mode, options) {
         const writeOptions = {
             mode: mode
         };
-        if (options.progress) {
+        if (options.writeProgress) {
             yield copyFileSyncWithProgress(from, to, options);
         }
         else {

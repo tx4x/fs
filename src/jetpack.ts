@@ -334,7 +334,7 @@ TreeWalkerSync(b.path(), {
   console.log('tree walker : ', item);
 });
 */
-
+/*
 process.on('unhandledRejection', (reason) => {
   console.error('Unhandled rejection, reason: ', reason);
 });
@@ -346,6 +346,7 @@ jetpackContext().copy('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
     console.log('copy ' + current + ' from ' + total);
   }
 });
+*/
 
 //console.log(b.inspectTree(b.path()));
 

@@ -84,22 +84,15 @@ async function copyFileSyncWithProgress(from: string, to: string, options?: Opti
         resolve();
       }
     }
-    let rd = fs.createReadStream(from);
-    let str = progress({
+    const rd = fs.createReadStream(from);
+    const str = progress({
       length: fs.statSync(from).size,
       time: 100
     });
-    str.on('progress', e => {
-      options.progress(from, e.transferred, e.length);
-    });
-    rd.on("error", err => {
-      done(err);
-    });
-
-    let wr = fs.createWriteStream(to);
-    wr.on("error", err => {
-      done(err);
-    });
+    str.on('progress', e => options.progress(from, e.transferred, e.length));
+    rd.on("error", err => done(err));
+    const wr = fs.createWriteStream(to);
+    wr.on("error", err => done(err));
     wr.on("close", done);
     rd.pipe(str).pipe(wr);
   });
@@ -176,7 +169,6 @@ export function sync(from: string, to: string, options?: Options) {
       opts.progress(item.path, current, nodes.length, item.item);
     }
   });
-  console.log('items: ', nodes.length);
 };
 
 // ---------------------------------------------------------

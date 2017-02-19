@@ -1,4 +1,4 @@
-import * as rimraf from 'rimraf';
+import * as rm from 'rimraf';
 import * as denodeify from 'denodeify';
 import { validateArgument } from './utils/validate';
 export function validateInput(methodName: string, path: string) {
@@ -9,12 +9,12 @@ export function validateInput(methodName: string, path: string) {
 // Sync
 // ---------------------------------------------------------
 export function sync(path: string):void {
-  rimraf.sync(path);
+  rm.sync(path);
 };
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-const qRimraf = denodeify(rimraf);
+const qrm = denodeify(rm);
 export function async(path: string): Promise<null> {
-  return qRimraf(path);
+  return qrm(path);
 };

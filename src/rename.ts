@@ -12,14 +12,12 @@ export function validateInput(methodName: string, path: string, newName: string)
 // Sync
 // ---------------------------------------------------------
 export function sync(path: string, newName: string) {
-  const newPath = pathUtil.join(pathUtil.dirname(path), newName);
-  moveSync(path, newPath);
+  moveSync(path, pathUtil.join(pathUtil.dirname(path), newName));
 }
 
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
 export function async(path, newName): Promise<null> {
-  const newPath = pathUtil.join(pathUtil.dirname(path), newName);
-  return moveASync(path, newPath);
+  return moveASync(path, pathUtil.join(pathUtil.dirname(path), newName));
 }

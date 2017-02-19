@@ -1,3 +1,4 @@
 "use strict";
-var jetpack = require('./build/jetpack');
+var jetpack = require('./build/jetpack').jetpack;
 module.exports = jetpack();
+

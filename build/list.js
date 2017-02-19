@@ -1,6 +1,6 @@
 "use strict";
 const fs_1 = require("fs");
-const Q = require("q");
+const denodeify = require("denodeify");
 const validate_1 = require("./utils/validate");
 function validateInput(methodName, path) {
     const methodSignature = methodName + '(path)';
@@ -28,22 +28,12 @@ exports.sync = sync;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-const promisedReaddir = Q.denodeify(fs_1.readdir);
+const promisedReaddir = denodeify(fs_1.readdir);
 function async(path) {
     return new Promise((resolve, reject) => {
         promisedReaddir(path)
-            .then(function (list) {
-            resolve(list);
-        })
-            .catch(function (err) {
-            if (err.code === 'ENOENT') {
-                // Doesn't exist. Return undefined instead of throwing.
-                resolve(undefined);
-            }
-            else {
-                reject(err);
-            }
-        });
+            .then((list) => resolve(list))
+            .catch(err => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
     });
 }
 exports.async = async;

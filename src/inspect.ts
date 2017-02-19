@@ -126,15 +126,15 @@ function fileChecksumAsync(path: string, algo: string) {
 };
 
 function addExtraFieldsAsync(path: string, inspectObj: IInspectItem, options: IInspectOptions) {
-  if (inspectObj.type === 'file' && options.checksum) {
+  if (inspectObj.type === EInspectItemType.FILE && options.checksum) {
     return fileChecksumAsync(path, options.checksum)
-      .then(function (checksum) {
+      .then(checksum => {
         inspectObj[options.checksum] = checksum;
         return inspectObj;
       });
   } else if (inspectObj.type === 'symlink') {
     return promisedReadlink(path)
-      .then(function (linkPath: string) {
+      .then(linkPath => {
         inspectObj.pointsAt = linkPath;
         return inspectObj;
       });
@@ -144,25 +144,14 @@ function addExtraFieldsAsync(path: string, inspectObj: IInspectItem, options: II
 
 export function async(path: string, options?: IInspectOptions) {
   return new Promise((resolve, reject) => {
-    let statOperation = promisedStat;
     options = options || {} as IInspectOptions;
-    if (options.symlinks) {
-      statOperation = promisedLstat;
-    }
+    const statOperation = options.symlinks ? promisedLstat : promisedStat;
     statOperation(path)
-      .then(function (stat: Stats) {
-        let inspectObj: IInspectItem = createInspectObj(path, options, stat);
+      .then((stat: Stats) => {
+        const inspectObj: IInspectItem = createInspectObj(path, options, stat);
         addExtraFieldsAsync(path, inspectObj, options).then(resolve, reject);
       })
-      .catch(function (err) {
-        // Detection if path exists
-        if (err.code === 'ENOENT') {
-          // Doesn't exist. Return undefined instead of throwing.
-          resolve(undefined);
-        } else {
-          reject(err);
-        }
-      });
+      .catch(err => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
   });
 }
 

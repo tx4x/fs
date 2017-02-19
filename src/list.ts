@@ -1,5 +1,5 @@
 import { readdirSync, readdir } from 'fs';
-import * as Q from 'q';
+import * as denodeify from 'denodeify';
 import { validateArgument } from './utils/validate';
 
 export function validateInput(methodName: string, path: string) {
@@ -25,20 +25,11 @@ export function sync(path: string): string[] {
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-const promisedReaddir = Q.denodeify(readdir);
+const promisedReaddir = denodeify(readdir);
 export function async(path: string): Promise<string[]> {
   return new Promise<string[]>((resolve, reject) => {
     promisedReaddir(path)
-      .then(function (list) {
-        resolve(list);
-      })
-      .catch(function (err) {
-        if (err.code === 'ENOENT') {
-          // Doesn't exist. Return undefined instead of throwing.
-          resolve(undefined);
-        } else {
-          reject(err);
-        }
-      });
+      .then((list) => resolve(list))
+      .catch(err => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
   });
 };

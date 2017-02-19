@@ -1,11 +1,14 @@
 "use strict";
 const pathUtil = require("path");
 const fs = require("fs");
+const fs_1 = require("fs");
 const Q = require("q");
 const mkdirp = require("mkdirp");
+const imports_1 = require("./imports");
 const validate_1 = require("./utils/validate");
+const newExt = '.__new__';
 function validateInput(methodName, path, data, options) {
-    let methodSignature = methodName + '(path, data, [options])';
+    const methodSignature = methodName + '(path, data, [options])';
     validate_1.validateArgument(methodSignature, 'path', path, ['string']);
     validate_1.validateArgument(methodSignature, 'data', data, ['string', 'buffer', 'object', 'array']);
     validate_1.validateOptions(methodSignature, 'options', options, {
@@ -17,7 +20,6 @@ function validateInput(methodName, path, data, options) {
 exports.validateInput = validateInput;
 ;
 // Temporary file extensions used for atomic file overwriting.
-const newExt = '.__new__';
 function serializeToJsonMaybe(data, jsonIndent) {
     let indent = jsonIndent;
     if (typeof indent !== 'number') {
@@ -26,7 +28,7 @@ function serializeToJsonMaybe(data, jsonIndent) {
     if (typeof data === 'object'
         && !Buffer.isBuffer(data)
         && data !== null) {
-        return JSON.stringify(data, null, indent);
+        return imports_1.json.serialize(data, null, indent);
     }
     return data;
 }
@@ -34,9 +36,9 @@ function serializeToJsonMaybe(data, jsonIndent) {
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-function writeFileSync(path, data, options) {
+function _writeFileSync(path, data, options) {
     try {
-        fs.writeFileSync(path, data, options);
+        fs_1.writeFileSync(path, data, options);
     }
     catch (err) {
         if (err.code === 'ENOENT') {
@@ -51,21 +53,13 @@ function writeFileSync(path, data, options) {
 }
 ;
 function writeAtomicSync(path, data, options) {
-    // we are assuming there is file on given path, and we don't want
-    // to touch it until we are sure our data has been saved correctly,
-    // so write the data into temporary file...
-    writeFileSync(path + newExt, data, options);
-    // ...next rename temp file to replace real path.
-    fs.renameSync(path + newExt, path);
+    return imports_1.file.write_atomic(path + newExt, data, options);
 }
 ;
 function sync(path, data, options) {
     const opts = options || {};
     const processedData = serializeToJsonMaybe(data, opts.jsonIndent);
-    let writeStrategy = writeFileSync;
-    if (opts.atomic) {
-        writeStrategy = writeAtomicSync;
-    }
+    const writeStrategy = opts.atomic ? writeAtomicSync : _writeFileSync;
     writeStrategy(path, processedData, { mode: opts.mode });
 }
 exports.sync = sync;
@@ -80,15 +74,13 @@ function writeFileAsync(path, data, options) {
     return new Promise((resolve, reject) => {
         promisedWriteFile(path, data, options)
             .then(resolve)
-            .catch(function (err) {
+            .catch(err => {
             // First attempt to write a file ended with error.
             // Check if this is not due to nonexistent parent directory.
             if (err.code === 'ENOENT') {
                 // Parent directory doesn't exist, so create it and try again.
                 promisedMkdirp(pathUtil.dirname(path))
-                    .then(function () {
-                    return promisedWriteFile(path, data, options);
-                })
+                    .then(() => promisedWriteFile(path, data, options))
                     .then(resolve, reject);
             }
             else {
@@ -105,20 +97,14 @@ function writeAtomicAsync(path, data, options) {
         // to touch it until we are sure our data has been saved correctly,
         // so write the data into temporary file...
         writeFileAsync(path + newExt, data, options)
-            .then(function () {
-            // ...next rename temp file to real path.
-            return promisedRename(path + newExt, path);
-        })
+            .then(() => promisedRename(path + newExt, path))
             .then(resolve, reject);
     });
 }
 function async(path, data, options) {
-    let opts = options || {};
-    let processedData = serializeToJsonMaybe(data, opts.jsonIndent);
-    let writeStrategy = writeFileAsync;
-    if (opts.atomic) {
-        writeStrategy = writeAtomicAsync;
-    }
+    const opts = options || {};
+    const processedData = serializeToJsonMaybe(data, opts.jsonIndent);
+    const writeStrategy = opts.atomic ? writeAtomicAsync : writeFileAsync;
     return writeStrategy(path, processedData, { mode: opts.mode });
 }
 exports.async = async;

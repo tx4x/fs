@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 import * as  pathUtil from "path";
 import * as Q from 'q';
-import { sync as inspectSync, async as inspectASync, supportedChecksumAlgorithms} from './inspect';
+import { sync as inspectSync, async as inspectASync, supportedChecksumAlgorithms } from './inspect';
 import { EInspectItemType, IInspectItem, IInspectOptions } from './interfaces';
 import { sync as listSync, async as listASync } from './list';
 import { validateArgument, validateOptions } from './utils/validate';
@@ -125,14 +125,11 @@ function inspectTreeNodeAsync(path: string, options: Options, parent?: any) {
           if (options.relativePath) {
             (treeBranch as any).relativePath = generateTreeNodeRelativePath(parent, path);
           }
-
           if ((treeBranch as any).type !== 'dir') {
             resolve(treeBranch);
           } else {
             inspectAllChildren(treeBranch)
-              .then(() => {
-                resolve(treeBranch);
-              })
+              .then(() => resolve(treeBranch))
               .catch(reject);
           }
         }

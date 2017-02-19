@@ -1,5 +1,5 @@
 import * as  pathUtil from "path";
-import * as fs from 'fs';
+import { rename, renameSync } from 'fs';
 import * as denodeify from 'denodeify';
 import * as mkdirp from 'mkdirp';
 import { async as existsAsync, sync as existsSync } from './exists';
@@ -23,7 +23,7 @@ function generateSourceDoesntExistError(path): Error {
 
 export function sync(from, to): void {
   try {
-    fs.renameSync(from, to);
+    renameSync(from, to);
   } catch (err) {
     if (err.code !== 'ENOENT') {
       // We can't make sense of this error. Rethrow it.
@@ -38,7 +38,7 @@ export function sync(from, to): void {
         // Some parent directory doesn't exist. Create it.
         mkdirp.sync(pathUtil.dirname(to));
         // Retry the attempt
-        fs.renameSync(from, to);
+        renameSync(from, to);
       }
     }
   }
@@ -48,12 +48,12 @@ export function sync(from, to): void {
 // Async
 // ---------------------------------------------------------
 
-let promisedRename = denodeify(fs.rename);
-let promisedMkdirp = denodeify(mkdirp);
+const promisedRename = denodeify(rename);
+const promisedMkdirp = denodeify(mkdirp);
 
 function ensureDestinationPathExistsAsync(to: string): Promise<null> {
   return new Promise<null>((resolve, reject) => {
-    let destDir: string = pathUtil.dirname(to);
+    const destDir: string = pathUtil.dirname(to);
     existsAsync(destDir)
       .then(dstExists => {
         if (!dstExists) {

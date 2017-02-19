@@ -321,6 +321,7 @@ export function jetpack(cwdPath?: string): IJetpack {
   return api;
 };
 
+/*
 
 process.on('unhandledRejection', (reason) => {
   console.error('Unhandled rejection, reason: ', reason);
@@ -335,5 +336,5 @@ jetpack().copy('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
     console.log('write ' + path + ' / ' + current + ' from ' + total);
   }
 });
-
+*/
 

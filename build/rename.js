@@ -13,16 +13,14 @@ exports.validateInput = validateInput;
 // Sync
 // ---------------------------------------------------------
 function sync(path, newName) {
-    const newPath = pathUtil.join(pathUtil.dirname(path), newName);
-    move_1.sync(path, newPath);
+    move_1.sync(path, pathUtil.join(pathUtil.dirname(path), newName));
 }
 exports.sync = sync;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
 function async(path, newName) {
-    const newPath = pathUtil.join(pathUtil.dirname(path), newName);
-    return move_1.async(path, newPath);
+    return move_1.async(path, pathUtil.join(pathUtil.dirname(path), newName));
 }
 exports.async = async;
 //# sourceMappingURL=rename.js.map

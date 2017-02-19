@@ -8,6 +8,7 @@ import * as find from './find';
 import * as inspect from './inspect';
 import * as inspectTree from './inspect_tree';
 import * as copy from './copy';
+import { Options as CopyOptions } from './copy';
 import * as exists from './exists';
 import * as list from './list';
 import * as move from './move';
@@ -75,11 +76,11 @@ function jetpackContext(cwdPath?: string) {
       return append.async(resolvePath(path), data, options);
     },
 
-    copy: function (from: string, to: string, options?: any) {
+    copy: function (from: string, to: string, options?: CopyOptions) {
       copy.validateInput('copy', from, to, options);
       copy.sync(resolvePath(from), resolvePath(to), options);
     },
-    copyAsync: function (from: string, to: string, options?: any) {
+    copyAsync: function (from: string, to: string, options?: CopyOptions) {
       copy.validateInput('async', from, to, options);
       return copy.async(resolvePath(from), resolvePath(to), options);
     },

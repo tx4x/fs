@@ -1,15 +1,21 @@
 import * as  pathUtil from "path";
 import * as fs from 'fs';
 import { symlinkSync, readFileSync } from 'fs';
-const Q = require('q');
-const mkdirp = require('mkdirp');
+import * as Q from 'q';
+import * as mkdirp from 'mkdirp';
 import { sync as existsSync, async as existsASync } from './exists';
 import { create as matcher } from './utils/matcher';
 import { normalizeFileMode as fileMode } from './utils/mode';
 import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
 import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync } from './write';
-export function validateInput(methodName: string, from: string, to: string, options: any): void {
+
+export interface Options {
+  overwrite?: boolean;
+  matching?: string[];
+}
+
+export function validateInput(methodName: string, from: string, to: string, options?: Options): void {
   const methodSignature = methodName + '(from, to, [options])';
   validateArgument(methodSignature, 'from', from, ['string']);
   validateArgument(methodSignature, 'to', to, ['string']);
@@ -18,6 +24,8 @@ export function validateInput(methodName: string, from: string, to: string, opti
     matching: ['string', 'array of string']
   });
 };
+
+
 
 function parseOptions(options: any | null, from: string) {
   const opts: any = options || {};
@@ -50,7 +58,7 @@ function generateDestinationExistsError(path): Error {
 // Sync
 // ---------------------------------------------------------
 
-function checksBeforeCopyingSync(from: string, to: string, opts: any) {
+function checksBeforeCopyingSync(from: string, to: string, opts?: any) {
   if (!existsSync(from)) {
     throw generateNoSourceError(from);
   }
@@ -93,7 +101,7 @@ function copyItemSync(from: string, inspectData: any, to: string) {
   }
 };
 
-export function sync(from, to, options) {
+export function sync(from: string, to: string, options?: any) {
   const opts = parseOptions(options, from);
   checksBeforeCopyingSync(from, to, opts);
   treeWalkerSync(from, {
@@ -119,7 +127,7 @@ const promisedReadlink = Q.denodeify(fs.readlink);
 const promisedUnlink = Q.denodeify(fs.unlink);
 const promisedMkdirp = Q.denodeify(mkdirp);
 
-function checksBeforeCopyingAsync(from: string, to: string, opts: any) {
+function checksBeforeCopyingAsync(from: string, to: string, opts?: Options) {
   return existsASync(from)
     .then(srcPathExists => {
       if (!srcPathExists) {
@@ -204,9 +212,8 @@ function copyItemAsync(from: string, inspectData: any, to: string) {
   return new Q();
 };
 
-export function async(from: string, to: string, options: any) {
+export function async(from: string, to: string, options?: Options) {
   const opts = parseOptions(options, from);
-  
   return new Promise((resolve, reject) => {
     checksBeforeCopyingAsync(from, to, opts).then(function () {
       let allFilesDelivered: boolean = false;

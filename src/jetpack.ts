@@ -3,6 +3,7 @@ import * as  pathUtil from "path";
 import * as Q from 'q';
 import * as append from './append';
 import * as dir from './dir';
+import { Options as DirOptions } from './dir';
 import * as file from './file';
 import * as find from './find';
 import * as inspect from './inspect';
@@ -92,14 +93,14 @@ function jetpackContext(cwdPath?: string) {
       return streams.createReadStream(resolvePath(path), options);
     },
 
-    dir: function (path, criteria) {
+    dir: function (path, criteria?:DirOptions) {
       let normalizedPath;
-      dir.validateInput('dir', path, criteria);
+      dir.validateInput('sync', path, criteria);
       normalizedPath = resolvePath(path);
       dir.sync(normalizedPath, criteria);
       return cwd(normalizedPath);
     },
-    dirAsync: function (path: string, criteria?: any) {
+    dirAsync: function (path: string, criteria?: DirOptions) {
       const deferred = Q.defer();
       let normalizedPath: string;
       dir.validateInput('async', path, criteria);

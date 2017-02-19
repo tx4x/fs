@@ -3,10 +3,13 @@ import { Stats, stat, statSync, chmod, chmodSync, readdirSync, readdir } from 'f
 import * as rimraf from 'rimraf';
 import { normalizeFileMode as modeUtil } from './utils/mode';
 import { validateArgument, validateOptions } from './utils/validate';
-const Q = require('q');
+import * as  Q from 'q';
 const mkdirp = require('mkdirp');
-
-export let validateInput = function (methodName: string, path: string, criteria?: any) {
+export interface Options {
+  empty?: boolean;
+  mode?: number | string;
+}
+export let validateInput = function (methodName: string, path: string, criteria?: Options) {
   let methodSignature = methodName + '(path, [criteria])';
   validateArgument(methodSignature, 'path', path, ['string']);
   validateOptions(methodSignature, 'criteria', criteria, {
@@ -15,7 +18,7 @@ export let validateInput = function (methodName: string, path: string, criteria?
   });
 };
 
-function getCriteriaDefaults(passedCriteria?: any) {
+function getCriteriaDefaults(passedCriteria?: Options):Options {
   const criteria = passedCriteria || {};
   if (typeof criteria.empty !== 'boolean') {
     criteria.empty = false;
@@ -53,15 +56,15 @@ function checkWhatAlreadyOccupiesPathSync(path: string): Stats {
   return stat;
 };
 
-function createBrandNewDirectorySync(path: string, criteria: any) {
+function createBrandNewDirectorySync(path: string, criteria: Options) {
   mkdirp.sync(path, { mode: criteria.mode });
 };
 
-function checkExistingDirectoryFulfillsCriteriaSync(path: string, stat: Stats, criteria: any) {
+function checkExistingDirectoryFulfillsCriteriaSync(path: string, stat: Stats, criteria: Options) {
   const checkMode = function () {
     const mode = modeUtil(stat.mode);
     if (criteria.mode !== undefined && criteria.mode !== mode) {
-      chmodSync(path, criteria.mode);
+      chmodSync(path, criteria.mode as string);
     }
   };
   const checkEmptiness = function () {
@@ -78,7 +81,7 @@ function checkExistingDirectoryFulfillsCriteriaSync(path: string, stat: Stats, c
   checkEmptiness();
 };
 
-export function sync(path, passedCriteria) {
+export function sync(path, passedCriteria:Options) {
   let criteria = getCriteriaDefaults(passedCriteria);
   let stat = checkWhatAlreadyOccupiesPathSync(path);
   if (stat) {
@@ -137,7 +140,6 @@ function emptyAsync(path: string) {
             });
           }
         };
-
         doOne(0);
       })
       .catch(reject);
@@ -151,7 +153,7 @@ const checkMode = function (criteria, stat, path) {
   return Promise.resolve(null);
 };
 
-function checkExistingDirectoryFulfillsCriteriaAsync(path: string, stat: Stats, criteria: any) {
+function checkExistingDirectoryFulfillsCriteriaAsync(path: string, stat: Stats, criteria: Options) {
   return new Promise((resolve, reject) => {
     const checkEmptiness = function () {
       if (criteria.empty) {
@@ -165,11 +167,11 @@ function checkExistingDirectoryFulfillsCriteriaAsync(path: string, stat: Stats, 
   });
 };
 
-function createBrandNewDirectoryAsync(path: string, criteria: any): Promise<null> {
+function createBrandNewDirectoryAsync(path: string, criteria: Options): Promise<null> {
   return promisedMkdirp(path, { mode: criteria.mode });
 };
 
-export function async(path: string, passedCriteria?: any) {
+export function async(path: string, passedCriteria?: Options) {
   const criteria = getCriteriaDefaults(passedCriteria);
   return new Promise((resolve, reject) => {
     checkWhatAlreadyOccupiesPathAsync(path)

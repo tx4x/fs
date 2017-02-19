@@ -10,13 +10,11 @@ import { Options as FileOptions } from './file';
 import * as find from './find';
 import { Options as FindOptions } from './find';
 import * as inspect from './inspect';
-import { Options as InspectOptions, InspectItem } from './inspect';
 import * as inspectTree from './inspect_tree';
 import { sync as InspectSync } from './inspect_tree';
 import { Options as InspectTreeOptions } from './inspect_tree';
 import { sync as TreeWalkerSync, Options as TreeWalkerOptions } from './utils/tree_walker';
 import * as copy from './copy';
-import { Options as CopyOptions } from './copy';
 import * as exists from './exists';
 import * as list from './list';
 import * as move from './move';
@@ -27,6 +25,8 @@ import * as streams from './streams';
 import { Options as WriteOptions } from './write';
 import * as write from './write';
 import * as read from './read';
+
+import { ECopyOverwriteMode, CopyOptions, IInspectItem, IInspectOptions } from './interfaces';
 
 export interface IJetpack {
   cwd(w?: any): IJetpack | string;
@@ -60,8 +60,8 @@ export interface IJetpack {
   fileAsync(path: string, criteria?: FileOptions);
   find(startPath: string, options: FindOptions): string[];
   findAsync(startPath: string, options: FindOptions): Promise<string[]>;
-  inspect(path: string, fieldsToInclude: InspectOptions);
-  inspectAsync(path: string, fieldsToInclude: InspectOptions);
+  inspect(path: string, fieldsToInclude: IInspectOptions);
+  inspectAsync(path: string, fieldsToInclude: IInspectOptions);
   inspectTree(path: string, options?: InspectTreeOptions);
   inspectTreeAsync(path: string, options?: InspectTreeOptions);
   list(path: string): string[];
@@ -227,11 +227,11 @@ export function jetpack(cwdPath?: string): IJetpack {
       return find.async(resolvePath(startPath), normalizeOptions(options));
     },
 
-    inspect: function (path: string, fieldsToInclude: InspectOptions) {
+    inspect: function (path: string, fieldsToInclude: IInspectOptions) {
       inspect.validateInput('inspect', path, fieldsToInclude);
       return inspect.sync(resolvePath(path), fieldsToInclude);
     },
-    inspectAsync: function (path: string, fieldsToInclude: InspectOptions) {
+    inspectAsync: function (path: string, fieldsToInclude: IInspectOptions) {
       inspect.validateInput('inspectAsync', path, fieldsToInclude);
       return inspect.async(resolvePath(path), fieldsToInclude);
     },
@@ -328,11 +328,11 @@ process.on('unhandledRejection', (reason) => {
 
 jetpack().copy('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
   overwrite: true,
-  progress: (path: string, current: number, total: number, item: InspectItem) => {
+  progress: (path: string, current: number, total: number, item: IInspectItem) => {
     console.log('copied item ' + path + ' ' + current + ' from ' + total);
   },
   writeProgress: (path: string, current: number, total: number) => {
-    console.log('write ' + path +' / ' + current + ' from ' + total);
+    console.log('write ' + path + ' / ' + current + ' from ' + total);
   }
 });
 

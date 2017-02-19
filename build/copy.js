@@ -18,7 +18,7 @@ const mode_1 = require("./utils/mode");
 const tree_walker_1 = require("./utils/tree_walker");
 const validate_1 = require("./utils/validate");
 const write_1 = require("./write");
-const progress = require('progress-stream');
+const progress = require("progress-stream");
 function validateInput(methodName, from, to, options) {
     const methodSignature = methodName + '(from, to, [options])';
     validate_1.validateArgument(methodSignature, 'from', from, ['string']);
@@ -65,11 +65,11 @@ function generateDestinationExistsError(path) {
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-function checksBeforeCopyingSync(from, to, opts) {
+function checksBeforeCopyingSync(from, to, options) {
     if (!exists_1.sync(from)) {
         throw generateNoSourceError(from);
     }
-    if (exists_1.sync(to) && !opts.overwrite) {
+    if (exists_1.sync(to) && !options.overwrite) {
         throw generateDestinationExistsError(to);
     }
 }
@@ -90,7 +90,7 @@ function copyFileSyncWithProgress(from, to, options) {
             const rd = fs.createReadStream(from);
             const str = progress({
                 length: fs.statSync(from).size,
-                time: 0
+                time: 100
             });
             str.on('progress', e => {
                 elapsed = (Date.now() - started) / 1000;
@@ -141,16 +141,18 @@ function copySymlinkSync(from, to) {
 }
 ;
 function copyItemSync(from, inspectData, to, options) {
-    const mode = mode_1.normalizeFileMode(inspectData.mode);
-    if (inspectData.type === 'dir') {
-        mkdirp.sync(to, { mode: parseInt(mode, 8), fs: null });
-    }
-    else if (inspectData.type === 'file') {
-        copyFileSync(from, to, mode, options);
-    }
-    else if (inspectData.type === 'symlink') {
-        copySymlinkSync(from, to);
-    }
+    return __awaiter(this, void 0, void 0, function* () {
+        const mode = mode_1.normalizeFileMode(inspectData.mode);
+        if (inspectData.type === 'dir') {
+            mkdirp.sync(to, { mode: parseInt(mode, 8), fs: null });
+        }
+        else if (inspectData.type === 'file') {
+            yield copyFileSync(from, to, mode, options);
+        }
+        else if (inspectData.type === 'symlink') {
+            copySymlinkSync(from, to);
+        }
+    });
 }
 ;
 function sync(from, to, options) {
@@ -177,13 +179,22 @@ function sync(from, to, options) {
             sizeTotal += inspectData.size;
         }
     });
-    nodes.forEach(item => {
-        copyItemSync(item.path, item.item, item.dst, options);
+    Promise.all(nodes.map((item) => __awaiter(this, void 0, void 0, function* () {
+        yield copyItemSync(item.path, item.item, item.dst, options);
         current++;
         if (opts.progress) {
             opts.progress(item.path, current, nodes.length, item.item);
         }
+    })));
+    /*
+    nodes.forEach(item => {
+      copyItemSync(item.path, item.item, item.dst, options);
+      current++;
+      if (opts.progress) {
+        opts.progress(item.path, current, nodes.length, item.item);
+      }
     });
+    */
 }
 exports.sync = sync;
 ;

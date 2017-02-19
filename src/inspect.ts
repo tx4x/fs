@@ -3,36 +3,11 @@ import * as  pathUtil from "path";
 import { validateArgument, validateOptions } from './utils/validate';
 import { createHash } from 'crypto';
 import { promisify } from './promisify';
+import { EInspectItemType, IInspectItem, IInspectOptions } from './interfaces';
 import * as Q from 'q';
 export const supportedChecksumAlgorithms: string[] = ['md5', 'sha1', 'sha256', 'sha512'];
-export interface Options {
-  checksum?: string;
-  mode?: boolean;
-  times?: boolean;
-  absolutePath?: boolean;
-  symlinks?: boolean;
-}
-export enum EItemType {
-  FILE = <any>'file',
-  DIR = <any>'dir',
-  SYMLINK = <any>'symlink',
-  OTHER = <any>'other'
-}
-export interface InspectItem {
-  name: string;
-  type: EItemType | string;
-  size?: number;
-  accessTime?: Date;
-  modifyTime?: Date;
-  changeTime?: Date;
-  absolutePath?: string;
-  mode?: number;
-  pointsAt?: string;
-  relativePath?: string;
-  children?: InspectItem[];
-  total?: number;
-}
-export function validateInput(methodName: string, path: string, options?: Options): void {
+
+export function validateInput(methodName: string, path: string, options?: IInspectOptions): void {
   const methodSignature: string = methodName + '(path, [options])';
   validateArgument(methodSignature, 'path', path, ['string']);
   validateOptions(methodSignature, 'options', options, {
@@ -50,18 +25,18 @@ export function validateInput(methodName: string, path: string, options?: Option
   }
 };
 
-function createInspectObj(path: string, options: Options, stat: Stats): InspectItem {
-  let obj: InspectItem = {} as InspectItem;
+function createInspectObj(path: string, options: IInspectOptions, stat: Stats): IInspectItem {
+  let obj: IInspectItem = {} as IInspectItem;
   obj.name = pathUtil.basename(path);
   if (stat.isFile()) {
-    obj.type = EItemType.FILE;
+    obj.type = EInspectItemType.FILE;
     obj.size = stat.size;
   } else if (stat.isDirectory()) {
-    obj.type = EItemType.DIR;
+    obj.type = EInspectItemType.DIR;
   } else if (stat.isSymbolicLink()) {
-    obj.type = EItemType.SYMLINK;
+    obj.type = EInspectItemType.SYMLINK;
   } else {
-    obj.type = EItemType.OTHER;
+    obj.type = EInspectItemType.OTHER;
   }
 
   if (options.mode) {
@@ -93,7 +68,7 @@ function fileChecksum(path: string, algo: string) {
   return hash.digest('hex');
 };
 
-function addExtraFieldsSync(path: string, inspectObj: any, options: Options):void {
+function addExtraFieldsSync(path: string, inspectObj: any, options: IInspectOptions): void {
   if (inspectObj.type === 'file' && options.checksum) {
     inspectObj[options.checksum] = fileChecksum(path, options.checksum);
   } else if (inspectObj.type === 'symlink') {
@@ -101,11 +76,11 @@ function addExtraFieldsSync(path: string, inspectObj: any, options: Options):voi
   }
 };
 
-export function sync(path: string, options?: Options): InspectItem {
+export function sync(path: string, options?: IInspectOptions): IInspectItem {
   let statOperation = statSync;
   let stat: Stats;
-  let inspectObj: InspectItem;
-  options = options || {} as Options;
+  let inspectObj: IInspectItem;
+  options = options || {} as IInspectOptions;
   if (options.symlinks) {
     statOperation = lstatSync;
   }
@@ -150,7 +125,7 @@ function fileChecksumAsync(path: string, algo: string) {
   return deferred.promise;
 };
 
-function addExtraFieldsAsync(path: string, inspectObj: InspectItem, options: Options) {
+function addExtraFieldsAsync(path: string, inspectObj: IInspectItem, options: IInspectOptions) {
   if (inspectObj.type === 'file' && options.checksum) {
     return fileChecksumAsync(path, options.checksum)
       .then(function (checksum) {
@@ -167,16 +142,16 @@ function addExtraFieldsAsync(path: string, inspectObj: InspectItem, options: Opt
   return new Q(inspectObj);
 }
 
-export function async(path: string, options?: Options) {
+export function async(path: string, options?: IInspectOptions) {
   return new Promise((resolve, reject) => {
     let statOperation = promisedStat;
-    options = options || {} as Options;
+    options = options || {} as IInspectOptions;
     if (options.symlinks) {
       statOperation = promisedLstat;
     }
     statOperation(path)
       .then(function (stat: Stats) {
-        let inspectObj: InspectItem = createInspectObj(path, options, stat);
+        let inspectObj: IInspectItem = createInspectObj(path, options, stat);
         addExtraFieldsAsync(path, inspectObj, options).then(resolve, reject);
       })
       .catch(function (err) {

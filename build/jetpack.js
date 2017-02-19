@@ -225,22 +225,16 @@ function jetpack(cwdPath) {
 }
 exports.jetpack = jetpack;
 ;
-/*
-
 process.on('unhandledRejection', (reason) => {
-  console.error('Unhandled rejection, reason: ', reason);
+    console.error('Unhandled rejection, reason: ', reason);
 });
-
 jetpack().copy('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
-  overwrite: true,
-  progress: (path: string, current: number, total: number, item: InspectItem) => {
-    //console.log('copieing : ' + path + ' ' + item.size);
-    console.log('copy item ' + current + ' from ' + total);
-  },
-  writeProgress: (path: string, current: number, total: number) => {
-    //console.log('copieing : ' + path + ' ' + item.size);
-    console.log('write ' + current + ' from ' + total);
-  }
+    overwrite: true,
+    progress: (path, current, total, item) => {
+        console.log('copied item ' + path + ' ' + current + ' from ' + total);
+    },
+    writeProgress: (path, current, total) => {
+        console.log('write ' + path + ' / ' + current + ' from ' + total);
+    }
 });
-*/
 //# sourceMappingURL=jetpack.js.map

@@ -4,15 +4,9 @@ const pathUtil = require("path");
 const validate_1 = require("./utils/validate");
 const crypto_1 = require("crypto");
 const promisify_1 = require("./promisify");
+const interfaces_1 = require("./interfaces");
 const Q = require("q");
 exports.supportedChecksumAlgorithms = ['md5', 'sha1', 'sha256', 'sha512'];
-var EItemType;
-(function (EItemType) {
-    EItemType[EItemType["FILE"] = 'file'] = "FILE";
-    EItemType[EItemType["DIR"] = 'dir'] = "DIR";
-    EItemType[EItemType["SYMLINK"] = 'symlink'] = "SYMLINK";
-    EItemType[EItemType["OTHER"] = 'other'] = "OTHER";
-})(EItemType = exports.EItemType || (exports.EItemType = {}));
 function validateInput(methodName, path, options) {
     const methodSignature = methodName + '(path, [options])';
     validate_1.validateArgument(methodSignature, 'path', path, ['string']);
@@ -35,17 +29,17 @@ function createInspectObj(path, options, stat) {
     let obj = {};
     obj.name = pathUtil.basename(path);
     if (stat.isFile()) {
-        obj.type = EItemType.FILE;
+        obj.type = interfaces_1.EInspectItemType.FILE;
         obj.size = stat.size;
     }
     else if (stat.isDirectory()) {
-        obj.type = EItemType.DIR;
+        obj.type = interfaces_1.EInspectItemType.DIR;
     }
     else if (stat.isSymbolicLink()) {
-        obj.type = EItemType.SYMLINK;
+        obj.type = interfaces_1.EInspectItemType.SYMLINK;
     }
     else {
-        obj.type = EItemType.OTHER;
+        obj.type = interfaces_1.EInspectItemType.OTHER;
     }
     if (options.mode) {
         obj.mode = stat.mode;

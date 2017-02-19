@@ -1,9 +1,11 @@
 import { createHash } from 'crypto';
 import * as  pathUtil from "path";
 import * as Q from 'q';
-import { sync as inspectSync, async as inspectASync, supportedChecksumAlgorithms, Options as inspectSyncOptions, InspectItem } from './inspect';
+import { sync as inspectSync, async as inspectASync, supportedChecksumAlgorithms} from './inspect';
+import { EInspectItemType, IInspectItem, IInspectOptions } from './interfaces';
 import { sync as listSync, async as listASync } from './list';
 import { validateArgument, validateOptions } from './utils/validate';
+
 export interface Options {
   checksum: string;
   relativePath: boolean;
@@ -44,7 +46,7 @@ function checksumOfDir(inspectList: any[], algo: string): string {
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-function inspectTreeNodeSync(path: string, options: Options, parent: any): InspectItem {
+function inspectTreeNodeSync(path: string, options: Options, parent: any): IInspectItem {
   const treeBranch = inspectSync(path, { checksum: options.checksum, symlinks: options.symlinks });
   if (treeBranch) {
     if (options.relativePath) {

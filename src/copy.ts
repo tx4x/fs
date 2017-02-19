@@ -8,35 +8,23 @@ import { create as matcher } from './utils/matcher';
 import { normalizeFileMode as fileMode } from './utils/mode';
 import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
 import { validateArgument, validateOptions } from './utils/validate';
-import { sync as writeSync, Options as WriteOptions, ProgressCallback as WriteProgressCallback } from './write';
-import { InspectItem } from './inspect';
-const progress = require('progress-stream');
-export type ItemProgressCallback = (path: string, current: number, total: number, item?: InspectItem) => void;
-export type WriteProgressCallback = (path: string, current: number, total: number) => void;
-export enum EOverwriteMode {
-  SKIP = 0,
-  OVERWRITE,
-  IF_NEWER,
-  IF_SIZE_DIFFERS
-}
+import { sync as writeSync, Options as WriteOptions } from './write';
+import { CopyOptions, ECopyOverwriteMode, ItemProgressCallback, WriteProgressCallback } from './interfaces';
+import * as  progress from 'progress-stream';
+import { IInspectItem, IInspectOptions } from './interfaces';
 
 export interface IConflictResolver {
-  overwrite: EOverwriteMode;
+  overwrite: ECopyOverwriteMode;
 }
-export interface Options {
-  overwrite?: boolean;
-  matching?: string[];
-  progress?: ItemProgressCallback;
-  writeProgress?: WriteProgressCallback;
-  allowedToCopy?: (from: string) => boolean;
-}
-export interface CopyTask {
+
+export interface ICopyTask {
   path: string;
-  item: InspectItem;
+  item: IInspectItem;
   dst: string;
   done: boolean;
 }
-export function validateInput(methodName: string, from: string, to: string, options?: Options): void {
+
+export function validateInput(methodName: string, from: string, to: string, options?: CopyOptions): void {
   const methodSignature = methodName + '(from, to, [options])';
   validateArgument(methodSignature, 'from', from, ['string']);
   validateArgument(methodSignature, 'to', to, ['string']);
@@ -48,9 +36,9 @@ export function validateInput(methodName: string, from: string, to: string, opti
   });
 };
 
-function parseOptions(options: any | null, from: string): Options {
+function parseOptions(options: any | null, from: string): CopyOptions {
   const opts: any = options || {};
-  const parsedOptions: Options = {};
+  const parsedOptions: CopyOptions = {};
   parsedOptions.overwrite = opts.overwrite;
   parsedOptions.progress = opts.progress;
   parsedOptions.writeProgress = opts.writeProgress;
@@ -81,7 +69,7 @@ function generateDestinationExistsError(path): Error {
 // Sync
 // ---------------------------------------------------------
 
-function checksBeforeCopyingSync(from: string, to: string, options?: Options) {
+function checksBeforeCopyingSync(from: string, to: string, options?: CopyOptions) {
   if (!existsSync(from)) {
     throw generateNoSourceError(from);
   }
@@ -90,7 +78,7 @@ function checksBeforeCopyingSync(from: string, to: string, options?: Options) {
     throw generateDestinationExistsError(to);
   }
 };
-async function copyFileSyncWithProgress(from: string, to: string, options?: Options) {
+async function copyFileSyncWithProgress(from: string, to: string, options?: CopyOptions) {
   return new Promise((resolve, reject) => {
     let cbCalled = false;
     const started = Date.now();
@@ -119,7 +107,7 @@ async function copyFileSyncWithProgress(from: string, to: string, options?: Opti
     rd.pipe(str).pipe(wr);
   });
 };
-async function copyFileSync(from: string, to: string, mode, options?: Options) {
+async function copyFileSync(from: string, to: string, mode, options?: CopyOptions) {
   const data = readFileSync(from);
   const writeOptions: WriteOptions = {
     mode: mode
@@ -148,7 +136,7 @@ function copySymlinkSync(from: string, to: string) {
   }
 };
 
-async function copyItemSync(from: string, inspectData: InspectItem, to: string, options: Options) {
+async function copyItemSync(from: string, inspectData: IInspectItem, to: string, options: CopyOptions) {
   const mode: string = fileMode(inspectData.mode);
   if (inspectData.type === 'dir') {
     mkdirp.sync(to, { mode: parseInt(mode, 8), fs: null });
@@ -159,10 +147,10 @@ async function copyItemSync(from: string, inspectData: InspectItem, to: string, 
   }
 };
 
-export function sync(from: string, to: string, options?: Options) {
+export function sync(from: string, to: string, options?: CopyOptions) {
   const opts = parseOptions(options, from);
   checksBeforeCopyingSync(from, to, opts);
-  let nodes: CopyTask[] = [];
+  let nodes: ICopyTask[] = [];
   let current: number = 0;
   let sizeTotal: number = 0;
   treeWalkerSync(from, {
@@ -170,7 +158,7 @@ export function sync(from: string, to: string, options?: Options) {
       mode: true,
       symlinks: true
     }
-  }, (path: string, inspectData: InspectItem) => {
+  }, (path: string, inspectData: IInspectItem) => {
     const rel = pathUtil.relative(from, path);
     const destPath = pathUtil.resolve(to, rel);
     if (opts.allowedToCopy(path)) {
@@ -210,7 +198,7 @@ const promisedReadlink = Q.denodeify(fs.readlink);
 const promisedUnlink = Q.denodeify(fs.unlink);
 const promisedMkdirp = Q.denodeify(mkdirp);
 
-function checksBeforeCopyingAsync(from: string, to: string, opts?: Options) {
+function checksBeforeCopyingAsync(from: string, to: string, opts?: CopyOptions) {
   return existsASync(from)
     .then(srcPathExists => {
       if (!srcPathExists) {
@@ -295,7 +283,7 @@ function copyItemAsync(from: string, inspectData: any, to: string) {
   return new Q();
 };
 
-export function async(from: string, to: string, options?: Options) {
+export function async(from: string, to: string, options?: CopyOptions) {
   const opts = parseOptions(options, from);
   return new Promise((resolve, reject) => {
     checksBeforeCopyingAsync(from, to, opts).then(function () {

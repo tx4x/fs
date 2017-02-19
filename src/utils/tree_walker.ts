@@ -1,16 +1,18 @@
 import { Readable } from 'stream';
 import * as  pathUtil from "path";
-import { sync as inspectSync, async as inspectASync, Options as InspectOptions, InspectItem } from '../inspect';
+import { sync as inspectSync, async as inspectASync } from '../inspect';
+import { EInspectItemType, IInspectOptions, IInspectItem } from '../interfaces';
 import { sync as listSync, async as listASync } from '../list';
 
+
 export interface Options {
-  inspectOptions: InspectOptions;
+  inspectOptions: IInspectOptions;
   maxLevelsDeep?: number;
 }
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-export function sync(path: string, options: Options, callback: (path: string, item: InspectItem) => void, currentLevel?: number) {
+export function sync(path: string, options: Options, callback: (path: string, item: IInspectItem) => void, currentLevel?: number) {
   const item = inspectSync(path, options.inspectOptions);
   if (options.maxLevelsDeep === undefined) {
     options.maxLevelsDeep = Infinity;

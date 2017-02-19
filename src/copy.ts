@@ -2,7 +2,7 @@ import * as  pathUtil from "path";
 import * as fs from 'fs';
 import { symlinkSync, readFileSync } from 'fs';
 const Q = require('q');
-import { sync as mkdirp } from 'mkdirp';
+const mkdirp = require('mkdirp');
 import { sync as existsSync, async as existsASync } from './exists';
 import { create as matcher } from './utils/matcher';
 import { normalizeFileMode as fileMode } from './utils/mode';
@@ -85,7 +85,7 @@ function copySymlinkSync(from: string, to: string) {
 function copyItemSync(from: string, inspectData: any, to: string) {
   const mode = fileMode(inspectData.mode);
   if (inspectData.type === 'dir') {
-    mkdirp(to, { mode: parseInt(mode), fs: null });
+    mkdirp.sync(to, { mode: parseInt(mode), fs: null });
   } else if (inspectData.type === 'file') {
     copyFileSync(from, to, mode);
   } else if (inspectData.type === 'symlink') {
@@ -135,7 +135,7 @@ function checksBeforeCopyingAsync(from: string, to: string, opts: any) {
     });
 };
 
-function copyFileAsync(from: string, to: string, mode: any, retriedAttempt: any) {
+function copyFileAsync(from: string, to: string, mode: any, retriedAttempt?: any) {
   return new Promise((resolve, reject) => {
     const readStream = fs.createReadStream(from);
     const writeStream = fs.createWriteStream(to, { mode: mode });
@@ -147,7 +147,7 @@ function copyFileAsync(from: string, to: string, mode: any, retriedAttempt: any)
       readStream.resume();
       if (err.code === 'ENOENT' && retriedAttempt === undefined) {
         // Some parent directory doesn't exits. Create it and retry.
-        promisedMkdirp(toDirPath).then(function () {
+        promisedMkdirp(toDirPath).then(() => {
           // Make retry attempt only once to prevent vicious infinite loop
           // (when for some obscure reason I/O will keep returning ENOENT error).
           // Passing retriedAttempt = true.
@@ -177,7 +177,7 @@ function copySymlinkAsync(from: string, to: string) {
               // There is already file/symlink with this name on destination location.
               // Must erase it manually, otherwise system won't allow us to place symlink there.
               promisedUnlink(to)
-                .then(() => {
+                .then(function () {
                   // Retry...
                   return promisedSymlink(symlinkPointsAt, to);
                 })
@@ -195,7 +195,7 @@ function copyItemAsync(from: string, inspectData: any, to: string) {
   if (inspectData.type === 'dir') {
     return promisedMkdirp(to, { mode: mode });
   } else if (inspectData.type === 'file') {
-    return copyFileAsync(from, to, mode, null);
+    return copyFileAsync(from, to, mode);
   } else if (inspectData.type === 'symlink') {
     return copySymlinkAsync(from, to);
   }
@@ -206,6 +206,7 @@ function copyItemAsync(from: string, inspectData: any, to: string) {
 
 export function async(from: string, to: string, options: any) {
   const opts = parseOptions(options, from);
+  
   return new Promise((resolve, reject) => {
     checksBeforeCopyingAsync(from, to, opts).then(function () {
       let allFilesDelivered: boolean = false;

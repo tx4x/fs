@@ -69,7 +69,7 @@ function jetpackContext(cwdPath) {
             copy.sync(resolvePath(from), resolvePath(to), options);
         },
         copyAsync: function (from, to, options) {
-            copy.validateInput('copyAsync', from, to, options);
+            copy.validateInput('async', from, to, options);
             return copy.async(resolvePath(from), resolvePath(to), options);
         },
         createWriteStream: function (path, options) {
@@ -86,8 +86,8 @@ function jetpackContext(cwdPath) {
             return cwd(normalizedPath);
         },
         dirAsync: function (path, criteria) {
-            var deferred = Q.defer();
-            var normalizedPath;
+            const deferred = Q.defer();
+            let normalizedPath;
             dir.validateInput('async', path, criteria);
             normalizedPath = resolvePath(path);
             dir.async(normalizedPath, criteria)
@@ -226,6 +226,7 @@ function jetpackContext(cwdPath) {
 }
 ;
 module.exports = jetpackContext;
+/*
 var fse = require('fs-extra');
 fse.outputFileSync('file.txt', 'abc');
 const jetpack = jetpackContext();
@@ -233,6 +234,25 @@ var crypto = require('crypto');
 var os = require('os');
 var random = crypto.randomBytes(16).toString('hex');
 var path = os.tmpdir() + '/fs-jetpack-test-' + random + '/ab/';
+*/
+//fse.mkdirsSync('dir');
+/*
+import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
+var stream = treeWalkerStream('file.txt', {
+  inspectOptions: {
+    mode: true,
+    symlinks: true
+  }
+})
+  .on('readable', function () {
+    console.log('r',arguments);
+  });
+*/
+/*
+process.on('unhandledRejection', (reason) => {
+  
+});
+*/
 //Argument "path" passed to dirAsync(path, [criteria]) must be a string. Received undefined
 //Argument "path" passed to async(path, [criteria]) must be a string. Received undefined' but got 'Argument "path"
 //assed to dirAsync(path, [criteria]) must be a string. Received undefined'
@@ -249,12 +269,9 @@ jetpack.dirAsync(path).then(function (d) {
   console.log('err', e);
 })
 */
+//console.log(jetpack.path());
 /*
-console.log(jetpack.path());-
-
-
-
-jetpack.copyAsync('file.txt', 'dir/dir/file.txt', {}).then(function () {
+jetpack.copyAsync('dir', 'copied/dir', {}).then(function () {
   console.log('done!', arguments);
 }, function (e) {
   console.error('e:', e);

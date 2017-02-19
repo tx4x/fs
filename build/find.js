@@ -7,7 +7,7 @@ const validate_1 = require("./utils/validate");
 function validateInput(methodName, path, _options) {
     const methodSignature = methodName + '([path], options)';
     validate_1.validateArgument(methodSignature, 'path', path, ['string']);
-    validate_1.validateOptions(methodSignature, 'options', validate_1.validateOptions, {
+    validate_1.validateOptions(methodSignature, 'options', _options, {
         matching: ['string', 'array of string'],
         files: ['boolean'],
         directories: ['boolean'],

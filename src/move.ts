@@ -1,7 +1,7 @@
 import * as  pathUtil from "path";
 import * as fs from 'fs';
-import * as Q from 'q';
-import { sync as mkdirp } from 'mkdirp';
+import * as denodeify from 'denodeify';
+import * as mkdirp from  'mkdirp';
 import { async as existsAsync, sync as existsSync } from './exists';
 import { validateArgument } from './utils/validate';
 
@@ -36,7 +36,7 @@ export function sync(from, to) {
       }
       if (!existsSync(to)) {
         // Some parent directory doesn't exist. Create it.
-        mkdirp(pathUtil.dirname(to));
+        mkdirp.sync(pathUtil.dirname(to));
         // Retry the attempt
         fs.renameSync(from, to);
       }
@@ -48,8 +48,8 @@ export function sync(from, to) {
 // Async
 // ---------------------------------------------------------
 
-let promisedRename = Q.denodeify(fs.rename);
-let promisedMkdirp = Q.denodeify(mkdirp);
+let promisedRename = denodeify(fs.rename);
+let promisedMkdirp = denodeify(mkdirp);
 
 function ensureDestinationPathExistsAsync(to: string) {
   return new Promise((resolve, reject) => {

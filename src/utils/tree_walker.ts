@@ -27,7 +27,7 @@ export function sync(path, options, callback, currentLevel?: number) {
 // ---------------------------------------------------------
 
 export function stream(path, options) {
-  let rs = new Readable({ objectMode: true });
+  const rs = new Readable({ objectMode: true });
   let nextTreeNode = {
     path: path,
     parent: undefined,
@@ -36,11 +36,11 @@ export function stream(path, options) {
   let running: boolean = false;
   let readSome;
 
-  const error = function (err) {
+  let error = function (err) {
     rs.emit('error', err);
   };
 
-  const findNextUnprocessedNode = function (node) {
+  let findNextUnprocessedNode = function (node) {
     if (node.nextSibling) {
       return node.nextSibling;
     } else if (node.parent) {
@@ -49,7 +49,7 @@ export function stream(path, options) {
     return undefined;
   };
 
-  const pushAndContinueMaybe = function (data) {
+  let pushAndContinueMaybe = function (data) {
     let theyWantMore = rs.push(data);
     running = false;
     if (!nextTreeNode) {

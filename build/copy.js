@@ -3,7 +3,7 @@ const pathUtil = require("path");
 const fs = require("fs");
 const fs_1 = require("fs");
 const Q = require('q');
-const mkdirp_1 = require("mkdirp");
+const mkdirp = require('mkdirp');
 const exists_1 = require("./exists");
 const matcher_1 = require("./utils/matcher");
 const mode_1 = require("./utils/mode");
@@ -88,7 +88,7 @@ function copySymlinkSync(from, to) {
 function copyItemSync(from, inspectData, to) {
     const mode = mode_1.normalizeFileMode(inspectData.mode);
     if (inspectData.type === 'dir') {
-        mkdirp_1.sync(to, { mode: parseInt(mode), fs: null });
+        mkdirp.sync(to, { mode: parseInt(mode), fs: null });
     }
     else if (inspectData.type === 'file') {
         copyFileSync(from, to, mode);
@@ -122,7 +122,7 @@ exports.sync = sync;
 const promisedSymlink = Q.denodeify(fs.symlink);
 const promisedReadlink = Q.denodeify(fs.readlink);
 const promisedUnlink = Q.denodeify(fs.unlink);
-const promisedMkdirp = Q.denodeify(mkdirp_1.sync);
+const promisedMkdirp = Q.denodeify(mkdirp);
 function checksBeforeCopyingAsync(from, to, opts) {
     return exists_1.async(from)
         .then(srcPathExists => {
@@ -152,7 +152,7 @@ function copyFileAsync(from, to, mode, retriedAttempt) {
             readStream.resume();
             if (err.code === 'ENOENT' && retriedAttempt === undefined) {
                 // Some parent directory doesn't exits. Create it and retry.
-                promisedMkdirp(toDirPath).then(function () {
+                promisedMkdirp(toDirPath).then(() => {
                     // Make retry attempt only once to prevent vicious infinite loop
                     // (when for some obscure reason I/O will keep returning ENOENT error).
                     // Passing retriedAttempt = true.
@@ -181,7 +181,7 @@ function copySymlinkAsync(from, to) {
                     // There is already file/symlink with this name on destination location.
                     // Must erase it manually, otherwise system won't allow us to place symlink there.
                     promisedUnlink(to)
-                        .then(() => {
+                        .then(function () {
                         // Retry...
                         return promisedSymlink(symlinkPointsAt, to);
                     })
@@ -201,7 +201,7 @@ function copyItemAsync(from, inspectData, to) {
         return promisedMkdirp(to, { mode: mode });
     }
     else if (inspectData.type === 'file') {
-        return copyFileAsync(from, to, mode, null);
+        return copyFileAsync(from, to, mode);
     }
     else if (inspectData.type === 'symlink') {
         return copySymlinkAsync(from, to);

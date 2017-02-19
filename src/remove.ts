@@ -1,5 +1,5 @@
-import * as Q from 'q';
-import { sync as rimrafSync } from 'rimraf';
+import * as rimraf from 'rimraf';
+import * as denodeify from 'denodeify';
 import { validateArgument } from './utils/validate';
 export function validateInput(methodName: string, path: string) {
   const methodSignature = methodName + '([path])';
@@ -9,12 +9,12 @@ export function validateInput(methodName: string, path: string) {
 // Sync
 // ---------------------------------------------------------
 export function sync(path: string) {
-  rimrafSync(path);
+  rimraf.sync(path);
 };
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-const qRimraf = Q.denodeify(rimrafSync);
+const qRimraf = denodeify(rimraf);
 export function async(path: string) {
   return qRimraf(path);
 };

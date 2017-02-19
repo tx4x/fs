@@ -27,7 +27,7 @@ exports.sync = sync;
 // STREAM
 // ---------------------------------------------------------
 function stream(path, options) {
-    let rs = new stream_1.Readable({ objectMode: true });
+    const rs = new stream_1.Readable({ objectMode: true });
     let nextTreeNode = {
         path: path,
         parent: undefined,
@@ -35,10 +35,10 @@ function stream(path, options) {
     };
     let running = false;
     let readSome;
-    const error = function (err) {
+    let error = function (err) {
         rs.emit('error', err);
     };
-    const findNextUnprocessedNode = function (node) {
+    let findNextUnprocessedNode = function (node) {
         if (node.nextSibling) {
             return node.nextSibling;
         }
@@ -47,7 +47,7 @@ function stream(path, options) {
         }
         return undefined;
     };
-    const pushAndContinueMaybe = function (data) {
+    let pushAndContinueMaybe = function (data) {
         let theyWantMore = rs.push(data);
         running = false;
         if (!nextTreeNode) {

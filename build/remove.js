@@ -1,6 +1,6 @@
 "use strict";
-const Q = require("q");
-const rimraf_1 = require("rimraf");
+const rimraf = require("rimraf");
+const denodeify = require("denodeify");
 const validate_1 = require("./utils/validate");
 function validateInput(methodName, path) {
     const methodSignature = methodName + '([path])';
@@ -12,14 +12,14 @@ exports.validateInput = validateInput;
 // Sync
 // ---------------------------------------------------------
 function sync(path) {
-    rimraf_1.sync(path);
+    rimraf.sync(path);
 }
 exports.sync = sync;
 ;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-const qRimraf = Q.denodeify(rimraf_1.sync);
+const qRimraf = denodeify(rimraf);
 function async(path) {
     return qRimraf(path);
 }

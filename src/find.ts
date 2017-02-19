@@ -6,7 +6,7 @@ import { validateArgument, validateOptions } from './utils/validate';
 export function validateInput(methodName: string, path: string, _options: any): void {
   const methodSignature = methodName + '([path], options)';
   validateArgument(methodSignature, 'path', path, ['string']);
-  validateOptions(methodSignature, 'options', validateOptions, {
+  validateOptions(methodSignature, 'options', _options, {
     matching: ['string', 'array of string'],
     files: ['boolean'],
     directories: ['boolean'],

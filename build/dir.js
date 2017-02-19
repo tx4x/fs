@@ -162,7 +162,6 @@ const checkMode = function (criteria, stat, path) {
 function checkExistingDirectoryFulfillsCriteriaAsync(path, stat, criteria) {
     return new Promise((resolve, reject) => {
         const checkEmptiness = function () {
-            console.log('ar', arguments);
             if (criteria.empty) {
                 return emptyAsync(path);
             }

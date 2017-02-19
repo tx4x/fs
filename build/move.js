@@ -1,8 +1,8 @@
 "use strict";
 const pathUtil = require("path");
 const fs = require("fs");
-const Q = require("q");
-const mkdirp_1 = require("mkdirp");
+const denodeify = require("denodeify");
+const mkdirp = require("mkdirp");
 const exists_1 = require("./exists");
 const validate_1 = require("./utils/validate");
 function validateInput(methodName, from, to) {
@@ -38,7 +38,7 @@ function sync(from, to) {
             }
             if (!exists_1.sync(to)) {
                 // Some parent directory doesn't exist. Create it.
-                mkdirp_1.sync(pathUtil.dirname(to));
+                mkdirp.sync(pathUtil.dirname(to));
                 // Retry the attempt
                 fs.renameSync(from, to);
             }
@@ -50,8 +50,8 @@ exports.sync = sync;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-let promisedRename = Q.denodeify(fs.rename);
-let promisedMkdirp = Q.denodeify(mkdirp_1.sync);
+let promisedRename = denodeify(fs.rename);
+let promisedMkdirp = denodeify(mkdirp);
 function ensureDestinationPathExistsAsync(to) {
     return new Promise((resolve, reject) => {
         let destDir = pathUtil.dirname(to);

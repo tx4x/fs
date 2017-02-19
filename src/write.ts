@@ -3,13 +3,11 @@ import * as fs from 'fs';
 import * as Q from 'q';
 import * as mkdirp from 'mkdirp';
 import { validateArgument, validateOptions } from './utils/validate';
-export type ProgressCallback = (path: string, current: number, total: number, item?: any) => void;
 export interface Options {
   atomic?: boolean;
   jsonIndent?: number;
   mode?: string;
 }
-
 export function validateInput(methodName: string, path: string, data, options: Options): void {
   let methodSignature = methodName + '(path, data, [options])';
   validateArgument(methodSignature, 'path', path, ['string']);
@@ -52,7 +50,6 @@ function writeFileSync(path: string, data: any | string, options?: Options): voi
       throw err;
     }
   }
-
 };
 
 function writeAtomicSync(path: string, data: string, options?: Options):void {

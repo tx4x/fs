@@ -9,22 +9,18 @@ import { normalizeFileMode as fileMode } from './utils/mode';
 import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
 import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync, Options as WriteOptions } from './write';
-import { CopyOptions, ECopyOverwriteMode, ItemProgressCallback, WriteProgressCallback } from './interfaces';
+import { ICopyOptions, ECopyOverwriteMode, ItemProgressCallback, WriteProgressCallback } from './interfaces';
 import * as  progress from 'progress-stream';
-import { IInspectItem, IInspectOptions } from './interfaces';
+import { IInspectItem, IInspectOptions, EInspectItemType } from './interfaces';
 
-export interface IConflictResolver {
-  overwrite: ECopyOverwriteMode;
-}
-
-export interface ICopyTask {
+interface ICopyTask {
   path: string;
   item: IInspectItem;
   dst: string;
   done: boolean;
 }
 
-export function validateInput(methodName: string, from: string, to: string, options?: CopyOptions): void {
+export function validateInput(methodName: string, from: string, to: string, options?: ICopyOptions): void {
   const methodSignature = methodName + '(from, to, [options])';
   validateArgument(methodSignature, 'from', from, ['string']);
   validateArgument(methodSignature, 'to', to, ['string']);
@@ -36,9 +32,9 @@ export function validateInput(methodName: string, from: string, to: string, opti
   });
 };
 
-function parseOptions(options: any | null, from: string): CopyOptions {
+function parseOptions(options: any | null, from: string): ICopyOptions {
   const opts: any = options || {};
-  const parsedOptions: CopyOptions = {};
+  const parsedOptions: ICopyOptions = {};
   parsedOptions.overwrite = opts.overwrite;
   parsedOptions.progress = opts.progress;
   parsedOptions.writeProgress = opts.writeProgress;
@@ -69,7 +65,7 @@ function generateDestinationExistsError(path): Error {
 // Sync
 // ---------------------------------------------------------
 
-function checksBeforeCopyingSync(from: string, to: string, options?: CopyOptions) {
+function checksBeforeCopyingSync(from: string, to: string, options?: ICopyOptions) {
   if (!existsSync(from)) {
     throw generateNoSourceError(from);
   }
@@ -78,7 +74,7 @@ function checksBeforeCopyingSync(from: string, to: string, options?: CopyOptions
     throw generateDestinationExistsError(to);
   }
 };
-async function copyFileSyncWithProgress(from: string, to: string, options?: CopyOptions) {
+async function copyFileSyncWithProgress(from: string, to: string, options?: ICopyOptions) {
   return new Promise((resolve, reject) => {
     let cbCalled = false;
     const started = Date.now();
@@ -107,7 +103,7 @@ async function copyFileSyncWithProgress(from: string, to: string, options?: Copy
     rd.pipe(str).pipe(wr);
   });
 };
-async function copyFileSync(from: string, to: string, mode, options?: CopyOptions) {
+async function copyFileSync(from: string, to: string, mode, options?: ICopyOptions) {
   const data = readFileSync(from);
   const writeOptions: WriteOptions = {
     mode: mode
@@ -118,7 +114,6 @@ async function copyFileSync(from: string, to: string, mode, options?: CopyOption
     writeSync(to, data as any, writeOptions);
   }
 };
-
 function copySymlinkSync(from: string, to: string) {
   const symlinkPointsAt = fs.readlinkSync(from);
   try {
@@ -135,19 +130,17 @@ function copySymlinkSync(from: string, to: string) {
     }
   }
 };
-
-async function copyItemSync(from: string, inspectData: IInspectItem, to: string, options: CopyOptions) {
+async function copyItemSync(from: string, inspectData: IInspectItem, to: string, options: ICopyOptions) {
   const mode: string = fileMode(inspectData.mode);
-  if (inspectData.type === 'dir') {
+  if (inspectData.type === EInspectItemType.DIR) {
     mkdirp.sync(to, { mode: parseInt(mode, 8), fs: null });
-  } else if (inspectData.type === 'file') {
+  } else if (inspectData.type === EInspectItemType.FILE) {
     await copyFileSync(from, to, mode, options);
-  } else if (inspectData.type === 'symlink') {
+  } else if (inspectData.type === EInspectItemType.SYMLINK) {
     copySymlinkSync(from, to);
   }
 };
-
-export function sync(from: string, to: string, options?: CopyOptions) {
+export function sync(from: string, to: string, options?: ICopyOptions) {
   const opts = parseOptions(options, from);
   checksBeforeCopyingSync(from, to, opts);
   let nodes: ICopyTask[] = [];
@@ -192,13 +185,12 @@ export function sync(from: string, to: string, options?: CopyOptions) {
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-
 const promisedSymlink = Q.denodeify(fs.symlink);
 const promisedReadlink = Q.denodeify(fs.readlink);
 const promisedUnlink = Q.denodeify(fs.unlink);
 const promisedMkdirp = Q.denodeify(mkdirp);
 
-function checksBeforeCopyingAsync(from: string, to: string, opts?: CopyOptions) {
+function checksBeforeCopyingAsync(from: string, to: string, opts?: ICopyOptions) {
   return existsASync(from)
     .then(srcPathExists => {
       if (!srcPathExists) {
@@ -283,7 +275,7 @@ function copyItemAsync(from: string, inspectData: any, to: string) {
   return new Q();
 };
 
-export function async(from: string, to: string, options?: CopyOptions) {
+export function async(from: string, to: string, options?: ICopyOptions) {
   const opts = parseOptions(options, from);
   return new Promise((resolve, reject) => {
     checksBeforeCopyingAsync(from, to, opts).then(function () {

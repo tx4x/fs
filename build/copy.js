@@ -19,6 +19,7 @@ const tree_walker_1 = require("./utils/tree_walker");
 const validate_1 = require("./utils/validate");
 const write_1 = require("./write");
 const progress = require("progress-stream");
+const interfaces_1 = require("./interfaces");
 function validateInput(methodName, from, to, options) {
     const methodSignature = methodName + '(from, to, [options])';
     validate_1.validateArgument(methodSignature, 'from', from, ['string']);
@@ -143,13 +144,13 @@ function copySymlinkSync(from, to) {
 function copyItemSync(from, inspectData, to, options) {
     return __awaiter(this, void 0, void 0, function* () {
         const mode = mode_1.normalizeFileMode(inspectData.mode);
-        if (inspectData.type === 'dir') {
+        if (inspectData.type === interfaces_1.EInspectItemType.DIR) {
             mkdirp.sync(to, { mode: parseInt(mode, 8), fs: null });
         }
-        else if (inspectData.type === 'file') {
+        else if (inspectData.type === interfaces_1.EInspectItemType.FILE) {
             yield copyFileSync(from, to, mode, options);
         }
-        else if (inspectData.type === 'symlink') {
+        else if (inspectData.type === interfaces_1.EInspectItemType.SYMLINK) {
             copySymlinkSync(from, to);
         }
     });

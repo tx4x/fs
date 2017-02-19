@@ -26,15 +26,15 @@ import { Options as WriteOptions } from './write';
 import * as write from './write';
 import * as read from './read';
 
-import { ECopyOverwriteMode, CopyOptions, IInspectItem, IInspectOptions } from './interfaces';
+import { ECopyOverwriteMode, ICopyOptions, IInspectItem, IInspectOptions } from './interfaces';
 
 export interface IJetpack {
   cwd(w?: any): IJetpack | string;
   path(): string;
   append(path: string, data: string | Buffer | Object, options?: AppendOptions): void;
   appendAsync(path: string, data: string | Buffer | Object, options?: AppendOptions): Promise<null>;
-  copy(from: string, to: string, options?: CopyOptions);
-  copyAsync(from: string, to: string, options?: CopyOptions);
+  copy(from: string, to: string, options?: ICopyOptions);
+  copyAsync(from: string, to: string, options?: ICopyOptions);
   createWriteStream(path: string, options?: {
     flags?: string;
     encoding?: string;
@@ -132,11 +132,11 @@ export function jetpack(cwdPath?: string): IJetpack {
       return append.async(resolvePath(path), data, options);
     },
 
-    copy: function (from: string, to: string, options?: CopyOptions) {
+    copy: function (from: string, to: string, options?: ICopyOptions) {
       copy.validateInput('copy', from, to, options);
       copy.sync(resolvePath(from), resolvePath(to), options);
     },
-    copyAsync: function (from: string, to: string, options?: CopyOptions) {
+    copyAsync: function (from: string, to: string, options?: ICopyOptions) {
       copy.validateInput('copyAsync', from, to, options);
       return copy.async(resolvePath(from), resolvePath(to), options);
     },

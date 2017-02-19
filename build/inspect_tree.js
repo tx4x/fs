@@ -134,7 +134,7 @@ function inspectTreeNodeAsync(path, options, parent) {
 function async(path, options) {
     options = options || {};
     options.symlinks = true;
-    return inspectTreeNodeAsync(path, options, null);
+    return inspectTreeNodeAsync(path, options);
 }
 exports.async = async;
 ;

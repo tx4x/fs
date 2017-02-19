@@ -6,6 +6,13 @@ const crypto_1 = require("crypto");
 const promisify_1 = require("./promisify");
 const Q = require("q");
 exports.supportedChecksumAlgorithms = ['md5', 'sha1', 'sha256', 'sha512'];
+var EItemType;
+(function (EItemType) {
+    EItemType[EItemType["FILE"] = 'file'] = "FILE";
+    EItemType[EItemType["DIR"] = 'dir'] = "DIR";
+    EItemType[EItemType["SYMLINK"] = 'symlink'] = "SYMLINK";
+    EItemType[EItemType["OTHER"] = 'other'] = "OTHER";
+})(EItemType = exports.EItemType || (exports.EItemType = {}));
 function validateInput(methodName, path, options) {
     const methodSignature = methodName + '(path, [options])';
     validate_1.validateArgument(methodSignature, 'path', path, ['string']);
@@ -28,17 +35,17 @@ function createInspectObj(path, options, stat) {
     let obj = {};
     obj.name = pathUtil.basename(path);
     if (stat.isFile()) {
-        obj.type = 'file';
+        obj.type = EItemType.FILE;
         obj.size = stat.size;
     }
     else if (stat.isDirectory()) {
-        obj.type = 'dir';
+        obj.type = EItemType.DIR;
     }
     else if (stat.isSymbolicLink()) {
-        obj.type = 'symlink';
+        obj.type = EItemType.SYMLINK;
     }
     else {
-        obj.type = 'other';
+        obj.type = EItemType.OTHER;
     }
     if (options.mode) {
         obj.mode = stat.mode;

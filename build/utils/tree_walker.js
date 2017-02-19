@@ -15,8 +15,9 @@ function sync(path, options, callback, currentLevel) {
         currentLevel = 0;
     }
     callback(path, item);
+    console.log('cb ' + path);
     if (item && item.type === 'dir' && currentLevel < options.maxLevelsDeep) {
-        list_1.sync(path).forEach(function (child) {
+        list_1.sync(path).forEach(child => {
             sync(path + pathUtil.sep + child, options, callback, currentLevel + 1);
         });
     }

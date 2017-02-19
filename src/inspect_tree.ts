@@ -24,7 +24,7 @@ export function validateInput(methodName: string, path: string, options: Options
   }
 };
 
-function generateTreeNodeRelativePath(parent: any, path: string) {
+function generateTreeNodeRelativePath(parent: any, path: string): string {
   if (!parent) {
     return '.';
   }
@@ -80,7 +80,7 @@ export function sync(path: string, options?: any): any | undefined {
 // Async
 // ---------------------------------------------------------
 
-function inspectTreeNodeAsync(path: string, options: Options, parent: any) {
+function inspectTreeNodeAsync(path: string, options: Options, parent?: any) {
   return new Promise((resolve, reject) => {
     function inspectAllChildren(treeBranch) {
       let subDirDeferred = Q.defer();
@@ -104,10 +104,8 @@ function inspectTreeNodeAsync(path: string, options: Options, parent: any) {
               .catch(subDirDeferred.reject);
           }
         };
-
         treeBranch.children = children;
         treeBranch.size = 0;
-
         doNext(0);
       });
 
@@ -142,5 +140,5 @@ function inspectTreeNodeAsync(path: string, options: Options, parent: any) {
 export function async(path: string, options?: Options) {
   options = options || {} as Options;
   options.symlinks = true;
-  return inspectTreeNodeAsync(path, options, null);
+  return inspectTreeNodeAsync(path, options);
 };

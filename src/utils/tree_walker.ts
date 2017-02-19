@@ -1,11 +1,16 @@
 import { Readable } from 'stream';
 import * as  pathUtil from "path";
-import { sync as inspectSync, async as inspectASync } from '../inspect';
+import { sync as inspectSync, async as inspectASync, Options as InspectOptions, InspectItem } from '../inspect';
 import { sync as listSync, async as listASync } from '../list';
+
+export interface Options {
+  inspectOptions: InspectOptions;
+  maxLevelsDeep?: number;
+}
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-export function sync(path, options, callback, currentLevel?: number) {
+export function sync(path: string, options: Options, callback: (path: string, item: InspectItem) => void, currentLevel?: number) {
   const item = inspectSync(path, options.inspectOptions);
   if (options.maxLevelsDeep === undefined) {
     options.maxLevelsDeep = Infinity;
@@ -16,7 +21,7 @@ export function sync(path, options, callback, currentLevel?: number) {
 
   callback(path, item);
   if (item && item.type === 'dir' && currentLevel < options.maxLevelsDeep) {
-    listSync(path).forEach(function (child) {
+    listSync(path).forEach(child => {
       sync(path + pathUtil.sep + child, options, callback, currentLevel + 1);
     });
   }
@@ -26,7 +31,7 @@ export function sync(path, options, callback, currentLevel?: number) {
 // STREAM
 // ---------------------------------------------------------
 
-export function stream(path, options) {
+export function stream(path: string, options) {
   const rs = new Readable({ objectMode: true });
   let nextTreeNode = {
     path: path,

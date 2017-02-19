@@ -9,10 +9,11 @@ import { normalizeFileMode as fileMode } from './utils/mode';
 import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
 import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync } from './write';
-
+import { InspectItem } from './inspect';
 export interface Options {
   overwrite?: boolean;
   matching?: string[];
+  progress?(current: number, total: number);
 }
 
 export function validateInput(methodName: string, from: string, to: string, options?: Options): void {
@@ -109,7 +110,7 @@ export function sync(from: string, to: string, options?: any) {
       mode: true,
       symlinks: true
     }
-  }, (path, inspectData) => {
+  }, (path: string, inspectData: InspectItem) => {
     const rel = pathUtil.relative(from, path);
     const destPath = pathUtil.resolve(to, rel);
     if (opts.allowedToCopy(path)) {

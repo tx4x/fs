@@ -84,17 +84,17 @@ describe('tree walker', function () {
       var st;
       preparations();
       st = walker.stream(absoluteStartingPath, {})
-      .on('readable', function () {
-        var a = st.read();
-        if (a) {
-          data.push(a);
-        }
-      })
-      .on('error', console.error)
-      .on('end', function () {
-        expectations(data);
-        done();
-      });
+        .on('readable', function () {
+          var a = st.read();
+          if (a) {
+            data.push(a);
+          }
+        })
+        .on('error', console.error)
+        .on('end', function () {
+          expectations(data);
+          done();
+        });
     });
   });
 
@@ -176,17 +176,17 @@ describe('tree walker', function () {
       var st;
       preparations();
       st = walker.stream(absoluteStartingPath, {})
-      .on('readable', function () {
-        var a = st.read();
-        if (a) {
-          data.push(a);
-        }
-      })
-      .on('error', console.error)
-      .on('end', function () {
-        expectations(data);
-        done();
-      });
+        .on('readable', function () {
+          var a = st.read();
+          if (a) {
+            data.push(a);
+          }
+        })
+        .on('error', console.error)
+        .on('end', function () {
+          expectations(data);
+          done();
+        });
     });
   });
 
@@ -244,17 +244,17 @@ describe('tree walker', function () {
       var st;
       preparations();
       st = walker.stream(absoluteStartingPath, options)
-      .on('readable', function () {
-        var a = st.read();
-        if (a) {
-          data.push(a);
-        }
-      })
-      .on('error', console.error)
-      .on('end', function () {
-        expectations(data);
-        done();
-      });
+        .on('readable', function () {
+          var a = st.read();
+          if (a) {
+            data.push(a);
+          }
+        })
+        .on('error', console.error)
+        .on('end', function () {
+          expectations(data);
+          done();
+        });
     });
   });
 
@@ -291,17 +291,17 @@ describe('tree walker', function () {
       var st;
       preparations();
       st = walker.stream(absoluteStartingPath, {})
-      .on('readable', function () {
-        var a = st.read();
-        if (a) {
-          data.push(a);
-        }
-      })
-      .on('error', console.error)
-      .on('end', function () {
-        expectations(data);
-        done();
-      });
+        .on('readable', function () {
+          var a = st.read();
+          if (a) {
+            data.push(a);
+          }
+        })
+        .on('error', console.error)
+        .on('end', function () {
+          expectations(data);
+          done();
+        });
     });
   });
 
@@ -339,17 +339,17 @@ describe('tree walker', function () {
       var st;
       preparations();
       st = walker.stream(absoluteStartingPath, {})
-      .on('readable', function () {
-        var a = st.read();
-        if (a) {
-          data.push(a);
-        }
-      })
-      .on('error', console.error)
-      .on('end', function () {
-        expectations(data);
-        done();
-      });
+        .on('readable', function () {
+          var a = st.read();
+          if (a) {
+            data.push(a);
+          }
+        })
+        .on('error', console.error)
+        .on('end', function () {
+          expectations(data);
+          done();
+        });
     });
   });
 
@@ -377,17 +377,17 @@ describe('tree walker', function () {
       var data = [];
       var st;
       st = walker.stream(absoluteStartingPath, {})
-      .on('readable', function () {
-        var a = st.read();
-        if (a) {
-          data.push(a);
-        }
-      })
-      .on('error', console.error)
-      .on('end', function () {
-        expectations(data);
-        done();
-      });
+        .on('readable', function () {
+          var a = st.read();
+          if (a) {
+            data.push(a);
+          }
+        })
+        .on('error', console.error)
+        .on('end', function () {
+          expectations(data);
+          done();
+        });
     });
   });
 
@@ -439,17 +439,17 @@ describe('tree walker', function () {
       var st;
       preparations();
       st = walker.stream(absoluteStartingPath, options)
-      .on('readable', function () {
-        var a = st.read();
-        if (a) {
-          data.push(a);
-        }
-      })
-      .on('error', console.error)
-      .on('end', function () {
-        expectations(data);
-        done();
-      });
+        .on('readable', function () {
+          var a = st.read();
+          if (a) {
+            data.push(a);
+          }
+        })
+        .on('error', console.error)
+        .on('end', function () {
+          expectations(data);
+          done();
+        });
     });
   });
 });

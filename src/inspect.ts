@@ -12,6 +12,25 @@ export interface Options {
   absolutePath?: boolean;
   symlinks?: boolean;
 }
+export enum EItemType {
+  FILE = <any>'file',
+  DIR = <any>'dir',
+  SYMLINK = <any>'symlink',
+  OTHER = <any>'other'
+}
+export interface InspectItem {
+  name: string;
+  type: EItemType | string;
+  size?: number;
+  accessTime?: Date;
+  modifyTime?: Date;
+  changeTime?: Date;
+  absolutePath?: string;
+  mode?: number;
+  pointsAt?: string;
+  relativePath?: string;
+  children?: InspectItem[];
+}
 export function validateInput(methodName: string, path: string, options?: Options): void {
   const methodSignature: string = methodName + '(path, [options])';
   validateArgument(methodSignature, 'path', path, ['string']);
@@ -30,18 +49,18 @@ export function validateInput(methodName: string, path: string, options?: Option
   }
 };
 
-function createInspectObj(path: string, options: Options, stat: Stats) {
-  let obj: any = {};
+function createInspectObj(path: string, options: Options, stat: Stats): InspectItem {
+  let obj: InspectItem = {} as InspectItem;
   obj.name = pathUtil.basename(path);
   if (stat.isFile()) {
-    obj.type = 'file';
+    obj.type = EItemType.FILE;
     obj.size = stat.size;
   } else if (stat.isDirectory()) {
-    obj.type = 'dir';
+    obj.type = EItemType.DIR;
   } else if (stat.isSymbolicLink()) {
-    obj.type = 'symlink';
+    obj.type = EItemType.SYMLINK;
   } else {
-    obj.type = 'other';
+    obj.type = EItemType.OTHER;
   }
 
   if (options.mode) {
@@ -82,7 +101,7 @@ function addExtraFieldsSync(path: string, inspectObj: any, options: Options) {
 export function sync(path: string, options?: Options) {
   let statOperation = statSync;
   let stat: Stats;
-  let inspectObj: any;
+  let inspectObj: InspectItem;
   options = options || {} as Options;
   if (options.symlinks) {
     statOperation = lstatSync;
@@ -128,7 +147,7 @@ function fileChecksumAsync(path: string, algo: string) {
   return deferred.promise;
 };
 
-function addExtraFieldsAsync(path: string, inspectObj: any, options: Options) {
+function addExtraFieldsAsync(path: string, inspectObj: InspectItem, options: Options) {
   if (inspectObj.type === 'file' && options.checksum) {
     return fileChecksumAsync(path, options.checksum)
       .then(function (checksum) {
@@ -137,7 +156,7 @@ function addExtraFieldsAsync(path: string, inspectObj: any, options: Options) {
       });
   } else if (inspectObj.type === 'symlink') {
     return promisedReadlink(path)
-      .then(function (linkPath) {
+      .then(function (linkPath: string) {
         inspectObj.pointsAt = linkPath;
         return inspectObj;
       });
@@ -154,7 +173,7 @@ export function async(path: string, options?: Options) {
     }
     statOperation(path)
       .then(function (stat: Stats) {
-        let inspectObj = createInspectObj(path, options, stat);
+        let inspectObj: InspectItem = createInspectObj(path, options, stat);
         addExtraFieldsAsync(path, inspectObj, options).then(resolve, reject);
       })
       .catch(function (err) {

@@ -271,17 +271,16 @@ function copySymlinkAsync(from, to) {
 ;
 function copyItemAsync(from, inspectData, to) {
     const mode = mode_1.normalizeFileMode(inspectData.mode);
-    if (inspectData.type === 'dir') {
+    if (inspectData.type === interfaces_1.EInspectItemType.DIR) {
         return promisedMkdirp(to, { mode: mode });
     }
-    else if (inspectData.type === 'file') {
+    else if (inspectData.type === interfaces_1.EInspectItemType.FILE) {
         return copyFileAsync(from, to, mode);
     }
-    else if (inspectData.type === 'symlink') {
+    else if (inspectData.type === interfaces_1.EInspectItemType.SYMLINK) {
         return copySymlinkAsync(from, to);
     }
-    // Ha! This is none of supported file system entities. What now?
-    // Just continuing without actually copying sounds sane.
+    //EInspectItemType.OTHER
     return new Q();
 }
 ;
@@ -296,7 +295,7 @@ function async(from, to, options) {
                     mode: true,
                     symlinks: true
                 }
-            }).on('readable', function () {
+            }).on('readable', () => {
                 const item = stream.read();
                 let rel;
                 let destPath;
@@ -316,7 +315,7 @@ function async(from, to, options) {
                     }
                 }
             }).on('error', reject)
-                .on('end', function () {
+                .on('end', () => {
                 allFilesDelivered = true;
                 if (allFilesDelivered && filesInProgress === 0) {
                     resolve();

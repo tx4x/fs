@@ -14,10 +14,15 @@ function sync(path, options, callback, currentLevel) {
     if (currentLevel === undefined) {
         currentLevel = 0;
     }
+    let children = [];
+    let hasChildren = item && item.type === 'dir' && currentLevel < options.maxLevelsDeep;
+    if (hasChildren) {
+        children = list_1.sync(path);
+    }
+    ;
     callback(path, item);
-    console.log('cb ' + path);
-    if (item && item.type === 'dir' && currentLevel < options.maxLevelsDeep) {
-        list_1.sync(path).forEach(child => {
+    if (hasChildren) {
+        children.forEach(child => {
             sync(path + pathUtil.sep + child, options, callback, currentLevel + 1);
         });
     }

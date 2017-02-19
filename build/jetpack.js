@@ -225,4 +225,23 @@ function jetpackContext(cwdPath) {
 }
 ;
 module.exports = jetpackContext;
+//let b = jetpackContext('./lib');
+/*
+TreeWalkerSync(b.path(), {
+  inspectOptions: {
+    mode: true,
+    symlinks: true
+  }
+}, (path: string, item: InspectItem) => {
+  console.log('tree walker : ', item);
+});
+*/
+/*
+b.copy('', '../libc', {
+  overwrite: true, matching: ['**'], progress: (path: string, current: number, total: number) => {
+    console.log('copieing : ' + path + '\t (' + current + '/' + total + ')');
+  }
+});
+*/
+//console.log(b.inspectTree(b.path()));
 //# sourceMappingURL=jetpack.js.map

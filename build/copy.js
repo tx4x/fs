@@ -16,7 +16,8 @@ function validateInput(methodName, from, to, options) {
     validate_1.validateArgument(methodSignature, 'to', to, ['string']);
     validate_1.validateOptions(methodSignature, 'options', options, {
         overwrite: ['boolean'],
-        matching: ['string', 'array of string']
+        matching: ['string', 'array of string'],
+        progress: ['function']
     });
 }
 exports.validateInput = validateInput;
@@ -25,6 +26,7 @@ function parseOptions(options, from) {
     const opts = options || {};
     const parsedOptions = {};
     parsedOptions.overwrite = opts.overwrite;
+    parsedOptions.progress = opts.progress;
     if (opts.matching) {
         parsedOptions.allowedToCopy = matcher_1.create(from, opts.matching);
     }
@@ -88,7 +90,7 @@ function copySymlinkSync(from, to) {
 function copyItemSync(from, inspectData, to) {
     const mode = mode_1.normalizeFileMode(inspectData.mode);
     if (inspectData.type === 'dir') {
-        mkdirp.sync(to, { mode: parseInt(mode), fs: null });
+        mkdirp.sync(to, { mode: parseInt(mode, 8), fs: null });
     }
     else if (inspectData.type === 'file') {
         copyFileSync(from, to, mode);
@@ -100,6 +102,7 @@ function copyItemSync(from, inspectData, to) {
 ;
 function sync(from, to, options) {
     const opts = parseOptions(options, from);
+    let current = 0;
     checksBeforeCopyingSync(from, to, opts);
     tree_walker_1.sync(from, {
         inspectOptions: {
@@ -109,7 +112,12 @@ function sync(from, to, options) {
     }, (path, inspectData) => {
         const rel = pathUtil.relative(from, path);
         const destPath = pathUtil.resolve(to, rel);
+        console.log('tottt', inspectData.total);
         if (opts.allowedToCopy(path)) {
+            if (opts.progress) {
+                opts.progress(path, current, inspectData.total);
+                current++;
+            }
             copyItemSync(path, inspectData, destPath);
         }
     });

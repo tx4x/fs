@@ -30,6 +30,7 @@ export interface InspectItem {
   pointsAt?: string;
   relativePath?: string;
   children?: InspectItem[];
+  total?: number;
 }
 export function validateInput(methodName: string, path: string, options?: Options): void {
   const methodSignature: string = methodName + '(path, [options])';
@@ -77,6 +78,8 @@ function createInspectObj(path: string, options: Options, stat: Stats): InspectI
     obj.absolutePath = path;
   }
 
+  obj.total = 1;
+
   return obj;
 };
 
@@ -90,7 +93,7 @@ function fileChecksum(path: string, algo: string) {
   return hash.digest('hex');
 };
 
-function addExtraFieldsSync(path: string, inspectObj: any, options: Options) {
+function addExtraFieldsSync(path: string, inspectObj: any, options: Options):void {
   if (inspectObj.type === 'file' && options.checksum) {
     inspectObj[options.checksum] = fileChecksum(path, options.checksum);
   } else if (inspectObj.type === 'symlink') {
@@ -98,7 +101,7 @@ function addExtraFieldsSync(path: string, inspectObj: any, options: Options) {
   }
 };
 
-export function sync(path: string, options?: Options) {
+export function sync(path: string, options?: Options): InspectItem {
   let statOperation = statSync;
   let stat: Stats;
   let inspectObj: InspectItem;

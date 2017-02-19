@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 import * as  pathUtil from "path";
 import * as Q from 'q';
-import { sync as inspectSync, async as inspectASync, supportedChecksumAlgorithms, Options as inspectSyncOptions } from './inspect';
+import { sync as inspectSync, async as inspectASync, supportedChecksumAlgorithms, Options as inspectSyncOptions, InspectItem } from './inspect';
 import { sync as listSync, async as listASync } from './list';
 import { validateArgument, validateOptions } from './utils/validate';
 export interface Options {
@@ -44,22 +44,24 @@ function checksumOfDir(inspectList: any[], algo: string): string {
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-function inspectTreeNodeSync(path: string, options: Options, parent: any): any {
+function inspectTreeNodeSync(path: string, options: Options, parent: any): InspectItem {
   const treeBranch = inspectSync(path, { checksum: options.checksum, symlinks: options.symlinks });
   if (treeBranch) {
     if (options.relativePath) {
       treeBranch.relativePath = generateTreeNodeRelativePath(parent, path);
     }
 
-    if (treeBranch.type === 'dir' || (options.symlinks && treeBranch.type === 'symlink')) {
+    if (treeBranch.type === 'dir' /*|| (options.symlinks && treeBranch.type === 'symlink')*/) {
       treeBranch.size = 0;
       treeBranch.children = (listSync(path) || []).map(function (filename) {
         let subBranchPath = pathUtil.join(path, filename);
         let treeSubBranch = inspectTreeNodeSync(subBranchPath, options, treeBranch);
         // Add together all childrens' size to get directory combined size.
         treeBranch.size += treeSubBranch.size || 0;
+        treeBranch.total += treeSubBranch.total;
         return treeSubBranch;
       });
+
 
       if (options.checksum) {
         treeBranch[options.checksum] = checksumOfDir(treeBranch.children, options.checksum);
@@ -85,8 +87,8 @@ function inspectTreeNodeAsync(path: string, options: Options, parent?: any) {
     function inspectAllChildren(treeBranch) {
       let subDirDeferred = Q.defer();
       listASync(path).then(function (children: any) {
-        let doNext = function (index) {
-          let subPath;
+        let doNext = function (index: number) {
+          let subPath: string;
           if (index === children.length) {
             if (options.checksum) {
               // We are done, but still have to calculate checksum of whole directory.

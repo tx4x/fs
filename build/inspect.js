@@ -58,6 +58,7 @@ function createInspectObj(path, options, stat) {
     if (options.absolutePath) {
         obj.absolutePath = path;
     }
+    obj.total = 1;
     return obj;
 }
 ;

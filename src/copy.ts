@@ -13,7 +13,8 @@ import { InspectItem } from './inspect';
 export interface Options {
   overwrite?: boolean;
   matching?: string[];
-  progress?(current: number, total: number);
+  progress?(path: string, current: number, total: number);
+  allowedToCopy?: (from: string) => boolean;
 }
 
 export function validateInput(methodName: string, from: string, to: string, options?: Options): void {
@@ -22,7 +23,8 @@ export function validateInput(methodName: string, from: string, to: string, opti
   validateArgument(methodSignature, 'to', to, ['string']);
   validateOptions(methodSignature, 'options', options, {
     overwrite: ['boolean'],
-    matching: ['string', 'array of string']
+    matching: ['string', 'array of string'],
+    progress: ['function']
   });
 };
 
@@ -30,8 +32,9 @@ export function validateInput(methodName: string, from: string, to: string, opti
 
 function parseOptions(options: any | null, from: string) {
   const opts: any = options || {};
-  const parsedOptions: any = {};
+  const parsedOptions: Options = {};
   parsedOptions.overwrite = opts.overwrite;
+  parsedOptions.progress = opts.progress;
   if (opts.matching) {
     parsedOptions.allowedToCopy = matcher(from, opts.matching);
   } else {
@@ -91,10 +94,10 @@ function copySymlinkSync(from: string, to: string) {
   }
 };
 
-function copyItemSync(from: string, inspectData: any, to: string) {
-  const mode = fileMode(inspectData.mode);
+function copyItemSync(from: string, inspectData: InspectItem, to: string) {
+  const mode: string = fileMode(inspectData.mode);
   if (inspectData.type === 'dir') {
-    mkdirp.sync(to, { mode: parseInt(mode), fs: null });
+    mkdirp.sync(to, { mode: parseInt(mode, 8), fs: null });
   } else if (inspectData.type === 'file') {
     copyFileSync(from, to, mode);
   } else if (inspectData.type === 'symlink') {
@@ -102,8 +105,9 @@ function copyItemSync(from: string, inspectData: any, to: string) {
   }
 };
 
-export function sync(from: string, to: string, options?: any) {
+export function sync(from: string, to: string, options?: Options) {
   const opts = parseOptions(options, from);
+  let current: number = 0;
   checksBeforeCopyingSync(from, to, opts);
   treeWalkerSync(from, {
     inspectOptions: {
@@ -113,7 +117,12 @@ export function sync(from: string, to: string, options?: any) {
   }, (path: string, inspectData: InspectItem) => {
     const rel = pathUtil.relative(from, path);
     const destPath = pathUtil.resolve(to, rel);
+    console.log('tottt', inspectData.total);
     if (opts.allowedToCopy(path)) {
+      if (opts.progress) {
+        opts.progress(path, current, inspectData.total);
+        current++;
+      }
       copyItemSync(path, inspectData, destPath);
     }
   });

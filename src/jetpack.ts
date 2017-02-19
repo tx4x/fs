@@ -10,9 +10,11 @@ import { Options as FileOptions } from './file';
 import * as find from './find';
 import { Options as FindOptions } from './find';
 import * as inspect from './inspect';
-import { Options as InspectOptions } from './inspect';
+import { Options as InspectOptions, InspectItem } from './inspect';
 import * as inspectTree from './inspect_tree';
+import { sync as InspectSync } from './inspect_tree';
 import { Options as InspectTreeOptions } from './inspect_tree';
+import { sync as TreeWalkerSync, Options as TreeWalkerOptions } from './utils/tree_walker';
 import * as copy from './copy';
 import { Options as CopyOptions } from './copy';
 import * as exists from './exists';
@@ -320,3 +322,28 @@ function jetpackContext(cwdPath?: string): Jetpack {
   return api;
 };
 module.exports = jetpackContext;
+
+//let b = jetpackContext('./lib');
+/*
+TreeWalkerSync(b.path(), {
+  inspectOptions: {
+    mode: true,
+    symlinks: true
+  }
+}, (path: string, item: InspectItem) => {
+  console.log('tree walker : ', item);
+});
+*/
+
+
+/*
+b.copy('', '../libc', {
+  overwrite: true, matching: ['**'], progress: (path: string, current: number, total: number) => {
+    console.log('copieing : ' + path + '\t (' + current + '/' + total + ')');
+  }
+});
+*/
+//console.log(b.inspectTree(b.path()));
+
+
+

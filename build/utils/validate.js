@@ -28,7 +28,8 @@ let isValidTypeDefinition = function (typeStr) {
         'object',
         'buffer',
         'null',
-        'undefined'
+        'undefined',
+        'function'
     ].some(function (validType) {
         return validType === typeStr;
     });

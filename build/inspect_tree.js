@@ -46,13 +46,14 @@ function inspectTreeNodeSync(path, options, parent) {
         if (options.relativePath) {
             treeBranch.relativePath = generateTreeNodeRelativePath(parent, path);
         }
-        if (treeBranch.type === 'dir' || (options.symlinks && treeBranch.type === 'symlink')) {
+        if (treeBranch.type === 'dir' /*|| (options.symlinks && treeBranch.type === 'symlink')*/) {
             treeBranch.size = 0;
             treeBranch.children = (list_1.sync(path) || []).map(function (filename) {
                 let subBranchPath = pathUtil.join(path, filename);
                 let treeSubBranch = inspectTreeNodeSync(subBranchPath, options, treeBranch);
                 // Add together all childrens' size to get directory combined size.
                 treeBranch.size += treeSubBranch.size || 0;
+                treeBranch.total += treeSubBranch.total;
                 return treeSubBranch;
             });
             if (options.checksum) {

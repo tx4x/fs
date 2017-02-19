@@ -19,9 +19,14 @@ export function sync(path: string, options: Options, callback: (path: string, it
     currentLevel = 0;
   }
 
+  let children: string[] = [];
+  let hasChildren: boolean = item && item.type === 'dir' && currentLevel < options.maxLevelsDeep;
+  if (hasChildren) {
+    children = listSync(path);
+  };
   callback(path, item);
-  if (item && item.type === 'dir' && currentLevel < options.maxLevelsDeep) {
-    listSync(path).forEach(child => {
+  if (hasChildren) {
+    children.forEach(child => {
       sync(path + pathUtil.sep + child, options, callback, currentLevel + 1);
     });
   }

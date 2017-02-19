@@ -111,7 +111,7 @@ function writeAtomicAsync(path: string, data: string, options?: any): Promise<nu
   });
 }
 
-export function async(path: string, data: string|Buffer|Object, options?: Options): Promise<null> {
+export function async(path: string, data: string | Buffer | Object, options?: Options): Promise<null> {
   let opts: any = options || {};
   let processedData: string = serializeToJsonMaybe(data, opts.jsonIndent);
   let writeStrategy = writeFileAsync;

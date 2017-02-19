@@ -3,12 +3,13 @@ import * as fs from 'fs';
 import * as Q from 'q';
 import * as mkdirp from 'mkdirp';
 import { validateArgument, validateOptions } from './utils/validate';
+export type ProgressCallback = (path: string, current: number, total: number, item?: any) => void;
 export interface Options {
   atomic?: boolean;
   jsonIndent?: number;
   mode?: string;
-  progress?(current: number, total: number);
 }
+
 export function validateInput(methodName: string, path: string, data, options: Options): void {
   let methodSignature = methodName + '(path, data, [options])';
   validateArgument(methodSignature, 'path', path, ['string']);
@@ -38,21 +39,21 @@ function serializeToJsonMaybe(data: string | Buffer | Object, jsonIndent: number
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-async function writeFileSync(path: string, data: any | string, options?: Options): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    try {
+function writeFileSync(path: string, data: any | string, options?: Options): void {
+
+  try {
+    fs.writeFileSync(path, data, options);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      // Means parent directory doesn't exist, so create it and try again.
+      mkdirp.sync(pathUtil.dirname(path));
       fs.writeFileSync(path, data, options);
-    } catch (err) {
-      if (err.code === 'ENOENT') {
-        // Means parent directory doesn't exist, so create it and try again.
-        mkdirp.sync(pathUtil.dirname(path));
-        fs.writeFileSync(path, data, options);
-        resolve();
-      } else {
-        throw err;
-      }
+
+    } else {
+      throw err;
     }
-  });
+  }
+
 };
 
 async function writeAtomicSync(path: string, data: string, options?: Options): Promise<void> {
@@ -64,7 +65,7 @@ async function writeAtomicSync(path: string, data: string, options?: Options): P
   fs.renameSync(path + newExt, path);
 };
 
-export async function sync(path: string, data: string | Buffer | Object, options?: any) {
+export async function sync(path: string, data: string | Buffer | Object, options?: Options) {
   const opts: any = options || {};
   const processedData = serializeToJsonMaybe(data, opts.jsonIndent);
   let writeStrategy = writeFileSync;

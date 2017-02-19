@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 const pathUtil = require("path");
 const fs = require("fs");
 const fs_1 = require("fs");
@@ -10,6 +18,7 @@ const mode_1 = require("./utils/mode");
 const tree_walker_1 = require("./utils/tree_walker");
 const validate_1 = require("./utils/validate");
 const write_1 = require("./write");
+const progress = require('progress-stream');
 function validateInput(methodName, from, to, options) {
     const methodSignature = methodName + '(from, to, [options])';
     validate_1.validateArgument(methodSignature, 'from', from, ['string']);
@@ -63,9 +72,50 @@ function checksBeforeCopyingSync(from, to, opts) {
     }
 }
 ;
-function copyFileSync(from, to, mode) {
-    const data = fs_1.readFileSync(from);
-    write_1.sync(to, data, { mode: mode });
+function copyFileSyncWithProgress(from, to, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            let cbCalled = false;
+            function done(err) {
+                if (!cbCalled) {
+                    cbCalled = true;
+                    resolve();
+                }
+            }
+            let rd = fs.createReadStream(from);
+            let str = progress({
+                length: fs.statSync(from).size,
+                time: 100
+            });
+            str.on('progress', e => {
+                options.progress(from, e.transferred, e.length);
+            });
+            rd.on("error", err => {
+                done(err);
+            });
+            let wr = fs.createWriteStream(to);
+            wr.on("error", err => {
+                done(err);
+            });
+            wr.on("close", done);
+            rd.pipe(str).pipe(wr);
+        });
+    });
+}
+;
+function copyFileSync(from, to, mode, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const data = fs_1.readFileSync(from);
+        const writeOptions = {
+            mode: mode
+        };
+        if (options.progress) {
+            yield copyFileSyncWithProgress(from, to, options);
+        }
+        else {
+            write_1.sync(to, data, writeOptions);
+        }
+    });
 }
 ;
 function copySymlinkSync(from, to) {
@@ -87,13 +137,13 @@ function copySymlinkSync(from, to) {
     }
 }
 ;
-function copyItemSync(from, inspectData, to) {
+function copyItemSync(from, inspectData, to, options) {
     const mode = mode_1.normalizeFileMode(inspectData.mode);
     if (inspectData.type === 'dir') {
         mkdirp.sync(to, { mode: parseInt(mode, 8), fs: null });
     }
     else if (inspectData.type === 'file') {
-        copyFileSync(from, to, mode);
+        copyFileSync(from, to, mode, options);
     }
     else if (inspectData.type === 'symlink') {
         copySymlinkSync(from, to);
@@ -102,8 +152,10 @@ function copyItemSync(from, inspectData, to) {
 ;
 function sync(from, to, options) {
     const opts = parseOptions(options, from);
-    let current = 0;
     checksBeforeCopyingSync(from, to, opts);
+    let nodes = [];
+    let current = 0;
+    let sizeTotal = 0;
     tree_walker_1.sync(from, {
         inspectOptions: {
             mode: true,
@@ -112,15 +164,24 @@ function sync(from, to, options) {
     }, (path, inspectData) => {
         const rel = pathUtil.relative(from, path);
         const destPath = pathUtil.resolve(to, rel);
-        console.log('tottt', inspectData.total);
         if (opts.allowedToCopy(path)) {
-            if (opts.progress) {
-                opts.progress(path, current, inspectData.total);
-                current++;
-            }
-            copyItemSync(path, inspectData, destPath);
+            nodes.push({
+                path: path,
+                item: inspectData,
+                dst: destPath,
+                done: false
+            });
+            sizeTotal += inspectData.size;
         }
     });
+    nodes.forEach(item => {
+        copyItemSync(item.path, item.item, item.dst, options);
+        current++;
+        if (opts.progress) {
+            opts.progress(item.path, current, nodes.length, item.item);
+        }
+    });
+    console.log('items: ', nodes.length);
 }
 exports.sync = sync;
 ;

@@ -323,7 +323,7 @@ function jetpackContext(cwdPath?: string): Jetpack {
 };
 module.exports = jetpackContext;
 
-let b = jetpackContext('./lib');
+let b = jetpackContext();
 /*
 TreeWalkerSync(b.path(), {
   inspectOptions: {
@@ -335,10 +335,13 @@ TreeWalkerSync(b.path(), {
 });
 */
 
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled rejection, reason: ', reason);
+});
 
-
-b.copy('', '../libc', {
-  overwrite: true, matching: ['**'], progress: (path: string, current: number, total: number, item: InspectItem) => {
+jetpackContext().copy('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
+  overwrite: true,
+  progress: (path: string, current: number, total: number, item: InspectItem) => {
     //console.log('copieing : ' + path + ' ' + item.size);
     console.log('copy ' + current + ' from ' + total);
   }

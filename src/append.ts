@@ -3,7 +3,7 @@ import * as Q from 'q';
 import { sync as writeSync, async as writeASync } from './write';
 import { validateArgument, validateOptions } from './utils/validate';
 export interface Options {
-  mode: number | string;
+  mode: string;
   encoding?: string;
   flag?: string;
 }

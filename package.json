@@ -4,16 +4,17 @@
   "version": "0.11.3",
   "contributors": [
     {
-      "name" : "Jakub Szwacz"
+      "name": "Jakub Szwacz"
     },
     {
-      "name" : "xblox"
+      "name": "xblox"
     }
   ],
   "dependencies": {
     "denodeify": "^1.2.1",
     "minimatch": "^3.0.3",
     "mkdirp": "^0.5.1",
+    "progress-stream": "^1.2.0",
     "q": "^1.4.1",
     "rimraf": "^2.5.4"
   },

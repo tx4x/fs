@@ -8,7 +8,7 @@ import { sync as writeSync, async as writeASync } from './write';
 export interface Options {
   content: string | Buffer | Object | Array<any>;
   jsonIndent: number;
-  mode: string | number;
+  mode: string;
 }
 
 export function validateInput(methodName: string, path, criteria?: Options) {

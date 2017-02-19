@@ -8,12 +8,13 @@ import { create as matcher } from './utils/matcher';
 import { normalizeFileMode as fileMode } from './utils/mode';
 import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
 import { validateArgument, validateOptions } from './utils/validate';
-import { sync as writeSync } from './write';
+import { sync as writeSync, Options as WriteOptions, ProgressCallback as WriteProgressCallback } from './write';
 import { InspectItem } from './inspect';
+const progress = require('progress-stream');
 export interface Options {
   overwrite?: boolean;
   matching?: string[];
-  progress?(path: string, current: number, total: number, item: InspectItem);
+  progress?(path: string, current: number, total: number, item?: any): void;
   allowedToCopy?: (from: string) => boolean;
 }
 export interface CopyTask {
@@ -74,10 +75,45 @@ function checksBeforeCopyingSync(from: string, to: string, opts?: any) {
     throw generateDestinationExistsError(to);
   }
 };
+async function copyFileSyncWithProgress(from: string, to: string, options?: Options) {
+  return new Promise((resolve, reject) => {
+    let cbCalled = false;
+    function done(err?: any) {
+      if (!cbCalled) {
+        cbCalled = true;
+        resolve();
+      }
+    }
+    let rd = fs.createReadStream(from);
+    let str = progress({
+      length: fs.statSync(from).size,
+      time: 100
+    });
+    str.on('progress', e => {
+      options.progress(from, e.transferred, e.length);
+    });
+    rd.on("error", err => {
+      done(err);
+    });
 
-function copyFileSync(from: string, to: string, mode) {
+    let wr = fs.createWriteStream(to);
+    wr.on("error", err => {
+      done(err);
+    });
+    wr.on("close", done);
+    rd.pipe(str).pipe(wr);
+  });
+};
+async function copyFileSync(from: string, to: string, mode, options?: Options) {
   const data = readFileSync(from);
-  writeSync(to, data as any, { mode: mode });
+  const writeOptions: WriteOptions = {
+    mode: mode
+  };
+  if (options.progress) {
+    await copyFileSyncWithProgress(from, to, options);
+  } else {
+    writeSync(to, data as any, writeOptions);
+  }
 };
 
 function copySymlinkSync(from: string, to: string) {
@@ -97,12 +133,12 @@ function copySymlinkSync(from: string, to: string) {
   }
 };
 
-function copyItemSync(from: string, inspectData: InspectItem, to: string) {
+function copyItemSync(from: string, inspectData: InspectItem, to: string, options: Options) {
   const mode: string = fileMode(inspectData.mode);
   if (inspectData.type === 'dir') {
     mkdirp.sync(to, { mode: parseInt(mode, 8), fs: null });
   } else if (inspectData.type === 'file') {
-    copyFileSync(from, to, mode);
+    copyFileSync(from, to, mode, options);
   } else if (inspectData.type === 'symlink') {
     copySymlinkSync(from, to);
   }
@@ -110,7 +146,6 @@ function copyItemSync(from: string, inspectData: InspectItem, to: string) {
 
 export function sync(from: string, to: string, options?: Options) {
   const opts = parseOptions(options, from);
-
   checksBeforeCopyingSync(from, to, opts);
   let nodes: CopyTask[] = [];
   let current: number = 0;
@@ -135,7 +170,7 @@ export function sync(from: string, to: string, options?: Options) {
     }
   });
   nodes.forEach(item => {
-    copyItemSync(item.path, item.item, item.dst);
+    copyItemSync(item.path, item.item, item.dst, options);
     current++;
     if (opts.progress) {
       opts.progress(item.path, current, nodes.length, item.item);

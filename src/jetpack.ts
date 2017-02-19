@@ -323,7 +323,7 @@ function jetpackContext(cwdPath?: string): Jetpack {
 };
 module.exports = jetpackContext;
 
-//let b = jetpackContext('./lib');
+let b = jetpackContext('./lib');
 /*
 TreeWalkerSync(b.path(), {
   inspectOptions: {
@@ -336,13 +336,14 @@ TreeWalkerSync(b.path(), {
 */
 
 
-/*
+
 b.copy('', '../libc', {
-  overwrite: true, matching: ['**'], progress: (path: string, current: number, total: number) => {
-    console.log('copieing : ' + path + '\t (' + current + '/' + total + ')');
+  overwrite: true, matching: ['**'], progress: (path: string, current: number, total: number, item: InspectItem) => {
+    //console.log('copieing : ' + path + ' ' + item.size);
+    console.log('copy ' + current + ' from ' + total);
   }
 });
-*/
+
 //console.log(b.inspectTree(b.path()));
 
 

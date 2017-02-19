@@ -13,10 +13,15 @@ import { InspectItem } from './inspect';
 export interface Options {
   overwrite?: boolean;
   matching?: string[];
-  progress?(path: string, current: number, total: number);
+  progress?(path: string, current: number, total: number, item: InspectItem);
   allowedToCopy?: (from: string) => boolean;
 }
-
+export interface CopyTask {
+  path: string;
+  item: InspectItem;
+  dst: string;
+  done: boolean;
+}
 export function validateInput(methodName: string, from: string, to: string, options?: Options): void {
   const methodSignature = methodName + '(from, to, [options])';
   validateArgument(methodSignature, 'from', from, ['string']);
@@ -27,8 +32,6 @@ export function validateInput(methodName: string, from: string, to: string, opti
     progress: ['function']
   });
 };
-
-
 
 function parseOptions(options: any | null, from: string) {
   const opts: any = options || {};
@@ -107,25 +110,38 @@ function copyItemSync(from: string, inspectData: InspectItem, to: string) {
 
 export function sync(from: string, to: string, options?: Options) {
   const opts = parseOptions(options, from);
-  let current: number = 0;
+
   checksBeforeCopyingSync(from, to, opts);
+  let nodes: CopyTask[] = [];
+  let current: number = 0;
+  let sizeTotal: number = 0;
   treeWalkerSync(from, {
     inspectOptions: {
       mode: true,
       symlinks: true
     }
   }, (path: string, inspectData: InspectItem) => {
+
     const rel = pathUtil.relative(from, path);
     const destPath = pathUtil.resolve(to, rel);
-    console.log('tottt', inspectData.total);
     if (opts.allowedToCopy(path)) {
-      if (opts.progress) {
-        opts.progress(path, current, inspectData.total);
-        current++;
-      }
-      copyItemSync(path, inspectData, destPath);
+      nodes.push({
+        path: path,
+        item: inspectData,
+        dst: destPath,
+        done: false
+      });
+      sizeTotal += inspectData.size;
     }
   });
+  nodes.forEach(item => {
+    copyItemSync(item.path, item.item, item.dst);
+    current++;
+    if (opts.progress) {
+      opts.progress(item.path, current, nodes.length, item.item);
+    }
+  });
+  console.log('items: ', nodes.length);
 };
 
 // ---------------------------------------------------------

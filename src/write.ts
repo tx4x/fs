@@ -7,6 +7,7 @@ export interface Options {
   atomic?: boolean;
   jsonIndent?: number;
   mode?: string;
+  progress?(current: number, total: number);
 }
 export function validateInput(methodName: string, path: string, data, options: Options): void {
   let methodSignature = methodName + '(path, data, [options])';
@@ -14,7 +15,8 @@ export function validateInput(methodName: string, path: string, data, options: O
   validateArgument(methodSignature, 'data', data, ['string', 'buffer', 'object', 'array']);
   validateOptions(methodSignature, 'options', options, {
     atomic: ['boolean'],
-    jsonIndent: ['number']
+    jsonIndent: ['number'],
+    progress: ['function']
   });
 };
 
@@ -36,37 +38,40 @@ function serializeToJsonMaybe(data: string | Buffer | Object, jsonIndent: number
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-function writeFileSync(path: string, data: any | string, options?: Options): void {
-  try {
-    fs.writeFileSync(path, data, options);
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      // Means parent directory doesn't exist, so create it and try again.
-      mkdirp.sync(pathUtil.dirname(path));
+async function writeFileSync(path: string, data: any | string, options?: Options): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    try {
       fs.writeFileSync(path, data, options);
-    } else {
-      throw err;
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        // Means parent directory doesn't exist, so create it and try again.
+        mkdirp.sync(pathUtil.dirname(path));
+        fs.writeFileSync(path, data, options);
+        resolve();
+      } else {
+        throw err;
+      }
     }
-  }
+  });
 };
 
-function writeAtomicSync(path: string, data: string, options?: Options): void {
+async function writeAtomicSync(path: string, data: string, options?: Options): Promise<void> {
   // we are assuming there is file on given path, and we don't want
   // to touch it until we are sure our data has been saved correctly,
   // so write the data into temporary file...
-  writeFileSync(path + newExt, data, options);
+  await writeFileSync(path + newExt, data, options);
   // ...next rename temp file to replace real path.
   fs.renameSync(path + newExt, path);
 };
 
-export function sync(path: string, data: string | Buffer | Object, options?: any): void {
+export async function sync(path: string, data: string | Buffer | Object, options?: any) {
   const opts: any = options || {};
   const processedData = serializeToJsonMaybe(data, opts.jsonIndent);
   let writeStrategy = writeFileSync;
   if (opts.atomic) {
     writeStrategy = writeAtomicSync;
   }
-  writeStrategy(path, processedData, { mode: opts.mode });
+  await writeStrategy(path, processedData, { mode: opts.mode });
 };
 
 // ---------------------------------------------------------

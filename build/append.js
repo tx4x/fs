@@ -18,7 +18,7 @@ exports.validateInput = validateInput;
 // ---------------------------------------------------------
 function sync(path, data, options) {
     try {
-        fs.appendFileSync(path, data, options);
+        fs.appendFileSync(path, data, { encoding: options.encoding, mode: options.mode });
     }
     catch (err) {
         if (err.code === 'ENOENT') {
@@ -45,7 +45,7 @@ function async(path, data, options) {
             if (err.code === 'ENOENT') {
                 // Parent directory doesn't exist, so just pass the task to `write`,
                 // which will create the folder and file.
-                write_1.async(path, data, options).then(resolve, reject);
+                write_1.async(path, data, { mode: options.mode }).then(resolve, reject);
             }
             else {
                 reject(err);

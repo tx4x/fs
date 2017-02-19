@@ -41,7 +41,7 @@ function checksumOfDir(inspectList, algo) {
 // Sync
 // ---------------------------------------------------------
 function inspectTreeNodeSync(path, options, parent) {
-    const treeBranch = inspect_1.sync(path, options);
+    const treeBranch = inspect_1.sync(path, { checksum: options.checksum, symlinks: options.symlinks });
     if (treeBranch) {
         if (options.relativePath) {
             treeBranch.relativePath = generateTreeNodeRelativePath(parent, path);

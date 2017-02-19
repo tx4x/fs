@@ -1,10 +1,15 @@
 import { createHash } from 'crypto';
 import * as  pathUtil from "path";
 import * as Q from 'q';
-import { sync as inspectSync, async as inspectASync, supportedChecksumAlgorithms } from './inspect';
+import { sync as inspectSync, async as inspectASync, supportedChecksumAlgorithms, Options as inspectSyncOptions } from './inspect';
 import { sync as listSync, async as listASync } from './list';
 import { validateArgument, validateOptions } from './utils/validate';
-export function validateInput(methodName: string, path: string, options: any): void {
+export interface Options {
+  checksum: string;
+  relativePath: boolean;
+  symlinks: string|boolean;
+}
+export function validateInput(methodName: string, path: string, options: Options): void {
   const methodSignature = methodName + '(path, options)';
   validateArgument(methodSignature, 'path', path, ['string']);
   validateOptions(methodSignature, 'options', options, {
@@ -39,8 +44,8 @@ function checksumOfDir(inspectList: any[], algo: string): string {
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-function inspectTreeNodeSync(path: string, options: any, parent: any): any {
-  const treeBranch = inspectSync(path, options);
+function inspectTreeNodeSync(path: string, options: Options, parent: any): any {
+  const treeBranch = inspectSync(path, { checksum: options.checksum, symlinks: options.symlinks as string });
   if (treeBranch) {
     if (options.relativePath) {
       treeBranch.relativePath = generateTreeNodeRelativePath(parent, path);
@@ -65,7 +70,7 @@ function inspectTreeNodeSync(path: string, options: any, parent: any): any {
   return treeBranch;
 };
 
-export function sync(path: string, options?: any) {
+export function sync(path: string, options?: any): any | undefined {
   options = options || {};
   options.symlinks = true;
   return inspectTreeNodeSync(path, options, undefined);
@@ -75,7 +80,7 @@ export function sync(path: string, options?: any) {
 // Async
 // ---------------------------------------------------------
 
-function inspectTreeNodeAsync(path: string, options, parent) {
+function inspectTreeNodeAsync(path: string, options: Options, parent: any) {
   return new Promise((resolve, reject) => {
     function inspectAllChildren(treeBranch) {
       let subDirDeferred = Q.defer();
@@ -134,8 +139,8 @@ function inspectTreeNodeAsync(path: string, options, parent) {
   });
 };
 
-export function async(path, options) {
-  options = options || {};
+export function async(path:string, options?:Options) {
+  options = options || {} as Options;
   options.symlinks = true;
   return inspectTreeNodeAsync(path, options, null);
 };

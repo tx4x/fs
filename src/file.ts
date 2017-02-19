@@ -5,7 +5,13 @@ import { normalizeFileMode } from './utils/mode';
 import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync, async as writeASync } from './write';
 
-export function validateInput(methodName: string, path, criteria: string) {
+export interface Options {
+  content: string | Buffer | Object | Array<any>;
+  jsonIndent: number;
+  mode: string | number;
+}
+
+export function validateInput(methodName: string, path, criteria?: Options) {
   const methodSignature = methodName + '(path, [criteria])';
   validateArgument(methodSignature, 'path', path, ['string']);
   validateOptions(methodSignature, 'criteria', criteria, {
@@ -15,7 +21,7 @@ export function validateInput(methodName: string, path, criteria: string) {
   });
 };
 
-function getCriteriaDefaults(passedCriteria: any | null): any {
+function getCriteriaDefaults(passedCriteria: Options | null): Options {
   const criteria: any = passedCriteria || {};
   if (criteria.mode !== undefined) {
     criteria.mode = normalizeFileMode(criteria.mode);
@@ -50,7 +56,7 @@ function checkWhatAlreadyOccupiesPathSync(path: string) {
   return stat;
 };
 
-function checkExistingFileFulfillsCriteriaSync(path: string, stat: Stats, criteria) {
+function checkExistingFileFulfillsCriteriaSync(path: string, stat: Stats, criteria?: Options) {
   const mode = normalizeFileMode(stat.mode);
   const checkContent = function (): boolean {
     if (criteria.content !== undefined) {
@@ -65,7 +71,7 @@ function checkExistingFileFulfillsCriteriaSync(path: string, stat: Stats, criter
 
   const checkMode = function () {
     if (criteria.mode !== undefined && criteria.mode !== mode) {
-      fs.chmodSync(path, criteria.mode);
+      fs.chmodSync(path, criteria.mode as string);
     }
   };
 
@@ -75,8 +81,8 @@ function checkExistingFileFulfillsCriteriaSync(path: string, stat: Stats, criter
   }
 };
 
-function createBrandNewFileSync(path: string, criteria) {
-  let content: string = '';
+function createBrandNewFileSync(path: string, criteria: Options) {
+  let content: string | Buffer | Object | Array<any> = '';
   if (criteria.content !== undefined) {
     content = criteria.content;
   }
@@ -86,7 +92,7 @@ function createBrandNewFileSync(path: string, criteria) {
   });
 };
 
-export function sync(path: string, passedCriteria) {
+export function sync(path: string, passedCriteria: Options) {
   const criteria = getCriteriaDefaults(passedCriteria);
   const stat: Stats = checkWhatAlreadyOccupiesPathSync(path);
   if (stat !== undefined) {
@@ -125,16 +131,16 @@ function checkWhatAlreadyOccupiesPathAsync(path: string) {
   });
 };
 
-function checkExistingFileFulfillsCriteriaAsync(path: string, stat: Stats, criteria) {
+function checkExistingFileFulfillsCriteriaAsync(path: string, stat: Stats, criteria: Options) {
   const mode = normalizeFileMode(stat.mode);
-  const checkContent = function () {
+  const checkContent = () => {
     return new Promise((resolve, reject) => {
       if (criteria.content !== undefined) {
         writeASync(path, criteria.content, {
           mode: mode,
           jsonIndent: criteria.jsonIndent
         })
-          .then(function () {
+          .then(() => {
             resolve(true);
           })
           .catch(reject);

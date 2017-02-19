@@ -48,8 +48,7 @@ function jetpackContext(cwdPath) {
         return pathUtil.resolve.apply(null, arguments);
     };
     let normalizeOptions = function (options) {
-        let opts = options || {};
-        opts.cwd = getCwdPath();
+        let opts = options || { cwd: getCwdPath() };
         return opts;
     };
     // API
@@ -80,7 +79,7 @@ function jetpackContext(cwdPath) {
         },
         dir: function (path, criteria) {
             let normalizedPath;
-            dir.validateInput('dir', path, criteria);
+            dir.validateInput('sync', path, criteria);
             normalizedPath = resolvePath(path);
             dir.sync(normalizedPath, criteria);
             return cwd(normalizedPath);
@@ -226,77 +225,4 @@ function jetpackContext(cwdPath) {
 }
 ;
 module.exports = jetpackContext;
-/*
-var fse = require('fs-extra');
-fse.outputFileSync('file.txt', 'abc');
-const jetpack = jetpackContext();
-var crypto = require('crypto');
-var os = require('os');
-var random = crypto.randomBytes(16).toString('hex');
-var path = os.tmpdir() + '/fs-jetpack-test-' + random + '/ab/';
-*/
-//fse.mkdirsSync('dir');
-/*
-import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
-var stream = treeWalkerStream('file.txt', {
-  inspectOptions: {
-    mode: true,
-    symlinks: true
-  }
-})
-  .on('readable', function () {
-    console.log('r',arguments);
-  });
-*/
-/*
-process.on('unhandledRejection', (reason) => {
-  
-});
-*/
-//Argument "path" passed to dirAsync(path, [criteria]) must be a string. Received undefined
-//Argument "path" passed to async(path, [criteria]) must be a string. Received undefined' but got 'Argument "path"
-//assed to dirAsync(path, [criteria]) must be a string. Received undefined'
-//dir.validateInput('async', undefined);
-/*
-console.error('create path : ',path);
-jetpack.dirAsync(path).then(function (d) {
-  console.log('hgo');
-    
-  console.log('a', jetpack.cwd());
-  console.error('a ' + jetpack.cwd() === d);
-  
-}, function (e) {
-  console.log('err', e);
-})
-*/
-//console.log(jetpack.path());
-/*
-jetpack.copyAsync('dir', 'copied/dir', {}).then(function () {
-  console.log('done!', arguments);
-}, function (e) {
-  console.error('e:', e);
-});
-*/
-/*
-import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
-import { sync as inspectSync, async as inspectASync } from './inspect';
-const _p = jetpack.path();
-inspectASync(_p, {
-  mode: true,
-  symlinks: true
-}).then(function (inspected) {
-  console.log('ins');
-});
-*/
-/*
-const st = treeWalkerStream(jetpack.path(), {
-  inspectOptions: {
-    mode: true,
-    symlinks: true
-  }
-}).on('readable', function () {
-  let a = st.read();
-  console.log(arguments);
-});
-*/
 //# sourceMappingURL=jetpack.js.map

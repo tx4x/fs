@@ -3,7 +3,12 @@ import * as fs from 'fs';
 import * as Q from 'q';
 import * as mkdirp from 'mkdirp';
 import { validateArgument, validateOptions } from './utils/validate';
-export function validateInput(methodName: string, path: string, data, options): void {
+export interface Options {
+  atomic?: boolean;
+  jsonIndent?: number;
+  mode?: string;
+}
+export function validateInput(methodName: string, path: string, data, options: Options): void {
   let methodSignature = methodName + '(path, data, [options])';
   validateArgument(methodSignature, 'path', path, ['string']);
   validateArgument(methodSignature, 'data', data, ['string', 'buffer', 'object', 'array']);
@@ -15,7 +20,7 @@ export function validateInput(methodName: string, path: string, data, options): 
 
 // Temporary file extensions used for atomic file overwriting.
 const newExt: string = '.__new__';
-function serializeToJsonMaybe(data, jsonIndent: number): string {
+function serializeToJsonMaybe(data: string | Buffer | Object, jsonIndent: number): string {
   let indent: number = jsonIndent;
   if (typeof indent !== 'number') {
     indent = 2;
@@ -25,13 +30,13 @@ function serializeToJsonMaybe(data, jsonIndent: number): string {
     && data !== null) {
     return JSON.stringify(data, null, indent);
   }
-  return data;
+  return data as string;
 };
 
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-function writeFileSync(path: string, data: any | string, options?: any): void {
+function writeFileSync(path: string, data: any | string, options?: Options): void {
   try {
     fs.writeFileSync(path, data, options);
   } catch (err) {
@@ -45,7 +50,7 @@ function writeFileSync(path: string, data: any | string, options?: any): void {
   }
 };
 
-function writeAtomicSync(path: string, data: string, options?: any) {
+function writeAtomicSync(path: string, data: string, options?: Options): void {
   // we are assuming there is file on given path, and we don't want
   // to touch it until we are sure our data has been saved correctly,
   // so write the data into temporary file...
@@ -54,7 +59,7 @@ function writeAtomicSync(path: string, data: string, options?: any) {
   fs.renameSync(path + newExt, path);
 };
 
-export function sync(path: string, data: string, options?: any) {
+export function sync(path: string, data: string | Buffer | Object, options?: any): void {
   const opts: any = options || {};
   const processedData = serializeToJsonMaybe(data, opts.jsonIndent);
   let writeStrategy = writeFileSync;
@@ -92,7 +97,7 @@ function writeFileAsync(path: string, data: string, options?: any): Promise<null
   });
 };
 
-function writeAtomicAsync(path: string, data: string, options?: any) {
+function writeAtomicAsync(path: string, data: string, options?: any): Promise<null> {
   return new Promise((resolve, reject) => {
     // We are assuming there is file on given path, and we don't want
     // to touch it until we are sure our data has been saved correctly,
@@ -106,7 +111,7 @@ function writeAtomicAsync(path: string, data: string, options?: any) {
   });
 }
 
-export function async(path: string, data: string, options?: any) {
+export function async(path: string, data: string|Buffer|Object, options?: Options): Promise<null> {
   let opts: any = options || {};
   let processedData: string = serializeToJsonMaybe(data, opts.jsonIndent);
   let writeStrategy = writeFileAsync;

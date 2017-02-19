@@ -34,7 +34,7 @@ function makeNicerJsonParsingError(path: string, err: any) {
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-export function sync(path: string, returnAs?: string) {
+export function sync(path: string, returnAs?: string): string | Buffer | Object {
   const retAs = returnAs || 'utf8';
   let data;
   let encoding: string = 'utf8';
@@ -70,7 +70,8 @@ export function sync(path: string, returnAs?: string) {
 // ASYNC
 // ---------------------------------------------------------
 const promisedReadFile = Q.denodeify(readFile);
-export function async(path: string, returnAs?: string) {
+
+export function async(path: string, returnAs?: string):Promise<string | Buffer | Object>{
   return new Promise((resolve, reject) => {
     const retAs = returnAs || 'utf8';
     let encoding: string = 'utf8';

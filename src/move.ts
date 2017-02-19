@@ -1,7 +1,7 @@
 import * as  pathUtil from "path";
 import * as fs from 'fs';
 import * as denodeify from 'denodeify';
-import * as mkdirp from  'mkdirp';
+import * as mkdirp from 'mkdirp';
 import { async as existsAsync, sync as existsSync } from './exists';
 import { validateArgument } from './utils/validate';
 
@@ -21,7 +21,7 @@ function generateSourceDoesntExistError(path): Error {
 // Sync
 // ---------------------------------------------------------
 
-export function sync(from, to) {
+export function sync(from, to): void {
   try {
     fs.renameSync(from, to);
   } catch (err) {
@@ -51,8 +51,8 @@ export function sync(from, to) {
 let promisedRename = denodeify(fs.rename);
 let promisedMkdirp = denodeify(mkdirp);
 
-function ensureDestinationPathExistsAsync(to: string) {
-  return new Promise((resolve, reject) => {
+function ensureDestinationPathExistsAsync(to: string): Promise<null> {
+  return new Promise<null>((resolve, reject) => {
     let destDir: string = pathUtil.dirname(to);
     existsAsync(destDir)
       .then(dstExists => {
@@ -68,8 +68,8 @@ function ensureDestinationPathExistsAsync(to: string) {
   });
 };
 
-export function async(from: string, to: string) {
-  return new Promise((resolve, reject) => {
+export function async(from: string, to: string): Promise<null> {
+  return new Promise<null>((resolve, reject) => {
     promisedRename(from, to)
       .then(resolve)
       .catch(err => {
@@ -95,6 +95,5 @@ export function async(from: string, to: string) {
             .catch(reject);
         }
       });
-
   });
 };

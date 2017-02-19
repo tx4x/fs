@@ -2,12 +2,17 @@ import * as util from 'util';
 import * as  pathUtil from "path";
 import * as Q from 'q';
 import * as append from './append';
+import { Options as AppendOptions } from './append';
 import * as dir from './dir';
 import { Options as DirOptions } from './dir';
 import * as file from './file';
+import { Options as FileOptions } from './file';
 import * as find from './find';
+import { Options as FindOptions } from './find';
 import * as inspect from './inspect';
+import { Options as InspectOptions } from './inspect';
 import * as inspectTree from './inspect_tree';
+import { Options as InspectTreeOptions } from './inspect_tree';
 import * as copy from './copy';
 import { Options as CopyOptions } from './copy';
 import * as exists from './exists';
@@ -17,18 +22,73 @@ import * as remove from './remove';
 import * as rename from './rename';
 import * as symlink from './symlink';
 import * as streams from './streams';
+import { Options as WriteOptions } from './write';
 import * as write from './write';
 import * as read from './read';
+import { } from './interface';
+
+
+export interface Jetpack {
+  cwd(w?: any): Jetpack | string;
+  path(): string;
+  append(path: string, data: string | Buffer | Object, options?: AppendOptions): void;
+  appendAsync(path: string, data: string | Buffer | Object, options?: AppendOptions): Promise<null>;
+  copy(from: string, to: string, options?: CopyOptions);
+  copyAsync(from: string, to: string, options?: CopyOptions);
+  createWriteStream(path: string, options?: {
+    flags?: string;
+    encoding?: string;
+    fd?: number;
+    mode?: number;
+    autoClose?: boolean;
+    start?: number;
+  });
+  createReadStream(path: string, options?: {
+    flags?: string;
+    encoding?: string;
+    fd?: number;
+    mode?: number;
+    autoClose?: boolean;
+    start?: number;
+    end?: number;
+  });
+  dir(path: string, criteria?: DirOptions): Jetpack;
+  dirAsync(path: string, criteria?: DirOptions): Promise<Jetpack>;
+  exists(path: string): boolean | string;
+  existsAsync(path: string): Promise<boolean | string>;
+  file(path: string, criteria?: FileOptions);
+  fileAsync(path: string, criteria?: FileOptions);
+  find(startPath: string, options: FindOptions): string[];
+  findAsync(startPath: string, options: FindOptions): Promise<string[]>;
+  inspect(path: string, fieldsToInclude: InspectOptions);
+  inspectAsync(path: string, fieldsToInclude: InspectOptions);
+  inspectTree(path: string, options?: InspectTreeOptions);
+  inspectTreeAsync(path: string, options?: InspectTreeOptions);
+  list(path: string): string[];
+  listAsync(path: string): Promise<string[]>;
+  move(from: string, to: string): void;
+  moveAsync(from: string, to: string): Promise<null>;
+  read(path: string, returnAs?: string);
+  readAsync(path: string, returnAs?: string): Promise<string>;
+  remove(path: string): void;
+  removeAsync(path: string): Promise<null>;
+  rename(path: string, newName: string): void;
+  renameAsync(path: string, newName: string): Promise<null>;
+  symlink(symlinkValue: string, path: string): void;
+  symlinkAsync(symlinkValue: string, path: string): Promise<null>;
+  write(path: string, data: string | Buffer | Object, options?: WriteOptions): void;
+  writeAsync(path: string, data: string | Buffer | Object, options?: WriteOptions);
+}
 
 // The Jetpack Context object.
 // It provides the public API, and resolves all paths regarding to
 // passed cwdPath, or default process.cwd() if cwdPath was not specified.
-function jetpackContext(cwdPath?: string) {
+function jetpackContext(cwdPath?: string): Jetpack {
   let getCwdPath = function () {
     return cwdPath || process.cwd();
   };
 
-  let cwd = function (w?: any) {
+  let cwd = function (w?: any): Jetpack | string {
     let args;
     let pathParts;
 
@@ -40,39 +100,35 @@ function jetpackContext(cwdPath?: string) {
     // ...create new CWD context otherwise
     args = Array.prototype.slice.call(arguments);
     pathParts = [getCwdPath()].concat(args);
-
     const res = jetpackContext(pathUtil.resolve.apply(null, pathParts));
     return res;
   };
 
   // resolves path to inner CWD path of this jetpack instance
-  let resolvePath = function (path) {
+  let resolvePath = function (path: string): string {
     return pathUtil.resolve(getCwdPath(), path);
   };
 
-  let getPath = function () {
+  let getPath = function (): string {
     // add CWD base path as first element of arguments array
     Array.prototype.unshift.call(arguments, getCwdPath());
     return pathUtil.resolve.apply(null, arguments);
   };
 
-  let normalizeOptions = function (options) {
-    let opts = options || {};
-    opts.cwd = getCwdPath();
+  let normalizeOptions = function (options: { cwd?: string }): any {
+    let opts = options || { cwd: getCwdPath() };
     return opts;
   };
 
   // API
-
-  let api = {
+  let api: Jetpack = {
     cwd: cwd,
     path: getPath,
-
-    append: function (path, data, options) {
+    append: function (path: string, data: string | Buffer | Object, options?: AppendOptions): void {
       append.validateInput('append', path, data, options);
       append.sync(resolvePath(path), data, options);
     },
-    appendAsync: function (path, data, options) {
+    appendAsync: function (path: string, data: string | Buffer | Object, options?: AppendOptions): Promise<null> {
       append.validateInput('appendAsync', path, data, options);
       return append.async(resolvePath(path), data, options);
     },
@@ -85,22 +141,36 @@ function jetpackContext(cwdPath?: string) {
       copy.validateInput('async', from, to, options);
       return copy.async(resolvePath(from), resolvePath(to), options);
     },
-
-    createWriteStream: function (path, options) {
+    createWriteStream: function (path: string, options?: {
+      flags?: string;
+      encoding?: string;
+      fd?: number;
+      mode?: number;
+      autoClose?: boolean;
+      start?: number;
+    }) {
       return streams.createWriteStream(resolvePath(path), options);
     },
-    createReadStream: function (path, options) {
+    createReadStream: function (path: string, options?: {
+      flags?: string;
+      encoding?: string;
+      fd?: number;
+      mode?: number;
+      autoClose?: boolean;
+      start?: number;
+      end?: number;
+    }) {
       return streams.createReadStream(resolvePath(path), options);
     },
 
-    dir: function (path, criteria?:DirOptions) {
+    dir: function (path: string, criteria?: DirOptions): Jetpack {
       let normalizedPath;
       dir.validateInput('sync', path, criteria);
       normalizedPath = resolvePath(path);
       dir.sync(normalizedPath, criteria);
-      return cwd(normalizedPath);
+      return cwd(normalizedPath) as Jetpack;
     },
-    dirAsync: function (path: string, criteria?: DirOptions) {
+    dirAsync: function (path: string, criteria?: DirOptions): Promise<Jetpack> {
       const deferred = Q.defer();
       let normalizedPath: string;
       dir.validateInput('async', path, criteria);
@@ -112,21 +182,21 @@ function jetpackContext(cwdPath?: string) {
       return deferred.promise;
     },
 
-    exists: function (path) {
+    exists: function (path: string): boolean | string {
       exists.validateInput('exists', path);
       return exists.sync(resolvePath(path));
     },
-    existsAsync: function (path) {
+    existsAsync: function (path: string): Promise<boolean | string> {
       exists.validateInput('existsAsync', path);
       return exists.async(resolvePath(path));
     },
 
-    file: function (path, criteria) {
+    file: function (path: string, criteria?: FileOptions) {
       file.validateInput('file', path, criteria);
       file.sync(resolvePath(path), criteria);
       return this;
     },
-    fileAsync: function (path, criteria) {
+    fileAsync: function (path: string, criteria?: FileOptions) {
       let deferred = Q.defer();
       let that = this;
       file.validateInput('fileAsync', path, criteria);
@@ -137,7 +207,7 @@ function jetpackContext(cwdPath?: string) {
       return deferred.promise;
     },
 
-    find: function (startPath, options) {
+    find: function (startPath: string, options: FindOptions): string[] {
       // startPath is optional parameter, if not specified move rest of params
       // to proper places and default startPath to CWD.
       if (typeof options === 'undefined' && typeof startPath === 'object') {
@@ -147,7 +217,7 @@ function jetpackContext(cwdPath?: string) {
       find.validateInput('find', startPath, options);
       return find.sync(resolvePath(startPath), normalizeOptions(options));
     },
-    findAsync: function (startPath, options) {
+    findAsync: function (startPath: string, options: FindOptions): Promise<string[]> {
       // startPath is optional parameter, if not specified move rest of params
       // to proper places and default startPath to CWD.
       if (typeof options === 'undefined' && typeof startPath === 'object') {
@@ -158,91 +228,88 @@ function jetpackContext(cwdPath?: string) {
       return find.async(resolvePath(startPath), normalizeOptions(options));
     },
 
-    inspect: function (path, fieldsToInclude) {
+    inspect: function (path: string, fieldsToInclude: InspectOptions) {
       inspect.validateInput('inspect', path, fieldsToInclude);
       return inspect.sync(resolvePath(path), fieldsToInclude);
     },
-    inspectAsync: function (path, fieldsToInclude) {
+    inspectAsync: function (path: string, fieldsToInclude: InspectOptions) {
       inspect.validateInput('inspectAsync', path, fieldsToInclude);
       return inspect.async(resolvePath(path), fieldsToInclude);
     },
-
-    inspectTree: function (path, options) {
+    inspectTree: function (path: string, options?: InspectTreeOptions) {
       inspectTree.validateInput('inspectTree', path, options);
       return inspectTree.sync(resolvePath(path), options);
     },
-    inspectTreeAsync: function (path, options) {
+    inspectTreeAsync: function (path: string, options?: InspectTreeOptions) {
       inspectTree.validateInput('inspectTreeAsync', path, options);
       return inspectTree.async(resolvePath(path), options);
     },
 
-    list: function (path) {
+    list: function (path: string): string[] {
       list.validateInput('list', path);
       return list.sync(resolvePath(path || '.'));
     },
-    listAsync: function (path) {
+    listAsync: function (path: string): Promise<string[]> {
       list.validateInput('listAsync', path);
       return list.async(resolvePath(path || '.'));
     },
 
-    move: function (from, to) {
+    move: function (from: string, to: string): void {
       move.validateInput('move', from, to);
       move.sync(resolvePath(from), resolvePath(to));
     },
-    moveAsync: function (from, to) {
+    moveAsync: function (from: string, to: string): Promise<null> {
       move.validateInput('moveAsync', from, to);
       return move.async(resolvePath(from), resolvePath(to));
     },
 
-    read: function (path, returnAs) {
+    read: function (path: string, returnAs?: string) {
       read.validateInput('read', path, returnAs);
       return read.sync(resolvePath(path), returnAs);
     },
-    readAsync: function (path, returnAs) {
+    readAsync: function (path: string, returnAs?: string): Promise<string> {
       read.validateInput('readAsync', path, returnAs);
       return read.async(resolvePath(path), returnAs);
     },
 
-    remove: function (path) {
+    remove: function (path: string): void {
       remove.validateInput('remove', path);
       // If path not specified defaults to CWD
       remove.sync(resolvePath(path || '.'));
     },
-    removeAsync: function (path) {
+    removeAsync: function (path: string): Promise<null> {
       remove.validateInput('removeAsync', path);
       // If path not specified defaults to CWD
       return remove.async(resolvePath(path || '.'));
     },
 
-    rename: function (path, newName) {
+    rename: function (path: string, newName: string): void {
       rename.validateInput('rename', path, newName);
       rename.sync(resolvePath(path), newName);
     },
-    renameAsync: function (path, newName) {
+    renameAsync: function (path: string, newName: string): Promise<null> {
       rename.validateInput('renameAsync', path, newName);
       return rename.async(resolvePath(path), newName);
     },
 
-    symlink: function (symlinkValue, path) {
+    symlink: function (symlinkValue: string, path: string): void {
       symlink.validateInput('symlink', symlinkValue, path);
       symlink.sync(symlinkValue, resolvePath(path));
     },
-    symlinkAsync: function (symlinkValue, path) {
+    symlinkAsync: function (symlinkValue: string, path: string): Promise<null> {
       symlink.validateInput('symlinkAsync', symlinkValue, path);
       return symlink.async(symlinkValue, resolvePath(path));
     },
 
-    write: function (path, data, options) {
+    write: function (path: string, data: string | Buffer | Object, options?: WriteOptions): void {
       write.validateInput('write', path, data, options);
       write.sync(resolvePath(path), data, options);
     },
-    writeAsync: function (path, data, options) {
+    writeAsync: function (path: string, data: string | Buffer | Object, options?: WriteOptions) {
       write.validateInput('writeAsync', path, data, options);
       return write.async(resolvePath(path), data, options);
     }
   };
-
-
   if (util.inspect['custom'] !== undefined) {
     // Without this console.log(jetpack) throws obscure error. Details:
     // https://github.com/szwacz/fs-jetpack/issues/29
@@ -254,91 +321,4 @@ function jetpackContext(cwdPath?: string) {
 
   return api;
 };
-
 module.exports = jetpackContext;
-
-/*
-var fse = require('fs-extra');
-fse.outputFileSync('file.txt', 'abc');
-const jetpack = jetpackContext();
-var crypto = require('crypto');
-var os = require('os');
-var random = crypto.randomBytes(16).toString('hex');
-var path = os.tmpdir() + '/fs-jetpack-test-' + random + '/ab/';
-*/
-//fse.mkdirsSync('dir');
-
-/*
-import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
-var stream = treeWalkerStream('file.txt', {
-  inspectOptions: {
-    mode: true,
-    symlinks: true
-  }
-})
-  .on('readable', function () {
-    console.log('r',arguments);
-  });
-*/
-/*
-process.on('unhandledRejection', (reason) => {
-  
-});
-*/
-
-
-
-//Argument "path" passed to dirAsync(path, [criteria]) must be a string. Received undefined
-//Argument "path" passed to async(path, [criteria]) must be a string. Received undefined' but got 'Argument "path"
-//assed to dirAsync(path, [criteria]) must be a string. Received undefined'
-
-//dir.validateInput('async', undefined);
-
-
-/*
-console.error('create path : ',path);
-jetpack.dirAsync(path).then(function (d) {  
-  console.log('hgo');
-    
-  console.log('a', jetpack.cwd());
-  console.error('a ' + jetpack.cwd() === d);
-  
-}, function (e) {
-  console.log('err', e);
-})
-*/
-
-
-
-//console.log(jetpack.path());
-/*
-jetpack.copyAsync('dir', 'copied/dir', {}).then(function () {
-  console.log('done!', arguments);
-}, function (e) {
-  console.error('e:', e);
-});
-*/
-
-/*
-import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
-import { sync as inspectSync, async as inspectASync } from './inspect';
-const _p = jetpack.path();
-inspectASync(_p, {
-  mode: true,
-  symlinks: true
-}).then(function (inspected) {
-  console.log('ins');
-});
-*/
-
-/*
-const st = treeWalkerStream(jetpack.path(), {
-  inspectOptions: {
-    mode: true,
-    symlinks: true
-  }
-}).on('readable', function () {
-  let a = st.read();
-  console.log(arguments);
-});
-*/

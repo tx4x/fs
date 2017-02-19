@@ -1,6 +1,7 @@
 import { readdirSync, readdir } from 'fs';
 import * as Q from 'q';
 import { validateArgument } from './utils/validate';
+
 export function validateInput(methodName: string, path: string) {
   const methodSignature = methodName + '(path)';
   validateArgument(methodSignature, 'path', path, ['string', 'undefined']);
@@ -9,7 +10,7 @@ export function validateInput(methodName: string, path: string) {
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-export function sync(path: string): any[] {
+export function sync(path: string): string[] {
   try {
     return readdirSync(path);
   } catch (err) {
@@ -25,8 +26,8 @@ export function sync(path: string): any[] {
 // Async
 // ---------------------------------------------------------
 const promisedReaddir = Q.denodeify(readdir);
-export function async(path: string) {
-  return new Promise((resolve, reject) => {
+export function async(path: string): Promise<string[]> {
+  return new Promise<string[]>((resolve, reject) => {
     promisedReaddir(path)
       .then(function (list) {
         resolve(list);

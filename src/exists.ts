@@ -10,7 +10,7 @@ export function validateInput(methodName: string, path: string) {
 // Sync
 // ---------------------------------------------------------
 
-export function sync(path) {
+export function sync(path: string): boolean | string {
   let stat: Stats;
   try {
     stat = statSync(path);
@@ -33,7 +33,7 @@ export function sync(path) {
 // Async
 // ---------------------------------------------------------
 
-export function async(path) {
+export function async(path): Promise<boolean | string> {
   return new Promise((resolve, reject) => {
     stat(path, function (err, stat) {
       if (err) {

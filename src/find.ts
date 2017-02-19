@@ -3,7 +3,14 @@ import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree
 import { sync as inspectSync, async as inspectASync } from './inspect';
 import { create as matcher } from './utils/matcher';
 import { validateArgument, validateOptions } from './utils/validate';
-export function validateInput(methodName: string, path: string, _options: any): void {
+export interface Options {
+  matching?: string[];
+  files?: boolean;
+  directories?: boolean;
+  recursive?: boolean;
+  cwd?: string;
+}
+export function validateInput(methodName: string, path: string, _options?: Options): void {
   const methodSignature = methodName + '([path], options)';
   validateArgument(methodSignature, 'path', path, ['string']);
   validateOptions(methodSignature, 'options', _options, {
@@ -14,7 +21,7 @@ export function validateInput(methodName: string, path: string, _options: any): 
   });
 };
 
-function normalizeOptions(options?: any) {
+function normalizeOptions(options?: Options) {
   let opts = options || {};
   // defaults:
   if (opts.files === undefined) {
@@ -29,19 +36,19 @@ function normalizeOptions(options?: any) {
   return opts;
 };
 
-function processFoundObjects(foundObjects: any, cwd: string) {
+function processFoundObjects(foundObjects: any, cwd: string):string[] {
   return foundObjects.map(inspectObj => {
     return pathUtil.relative(cwd, inspectObj.absolutePath);
   });
 };
 
-function generatePathDoesntExistError(path: string) {
+function generatePathDoesntExistError(path: string):Error {
   const err = new Error("Path you want to find stuff in doesn't exist " + path);
   err['code'] = 'ENOENT';
   return err;
 };
 
-function generatePathNotDirectoryError(path: string) {
+function generatePathNotDirectoryError(path: string):Error {
   const err = new Error('Path you want to find stuff in must be a directory ' + path);
   err['code'] = 'ENOTDIR';
   return err;
@@ -50,7 +57,7 @@ function generatePathNotDirectoryError(path: string) {
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-function findSync(path: string, options: any) {
+function findSync(path: string, options: Options): string[] {
   const foundInspectObjects = [];
   const matchesAnyOfGlobs = matcher(path, options.matching);
   treeWalkerSync(path, {
@@ -69,7 +76,7 @@ function findSync(path: string, options: any) {
   return processFoundObjects(foundInspectObjects, options.cwd);
 };
 
-export function sync(path: string, options: any) {
+export function sync(path: string, options: Options): string[] {
   const entryPointInspect = inspectSync(path);
   if (entryPointInspect === undefined) {
     throw generatePathDoesntExistError(path);
@@ -83,8 +90,8 @@ export function sync(path: string, options: any) {
 // Async
 // ---------------------------------------------------------
 
-function findAsync(path: string, options: any) {
-  return new Promise((resolve, reject) => {
+function findAsync(path: string, options: Options): Promise<string[]> {
+  return new Promise<string[]>((resolve, reject) => {
     const foundInspectObjects = [];
     const matchesAnyOfGlobs = matcher(path, options.matching);
     const walker = treeWalkerStream(path, {
@@ -109,7 +116,7 @@ function findAsync(path: string, options: any) {
   });
 };
 
-export function async(path: string, options: any) {
+export function async(path: string, options: Options): Promise<string[]> {
   return inspectASync(path)
     .then(entryPointInspect => {
       if (entryPointInspect === undefined) {

@@ -5,7 +5,14 @@ import { createHash } from 'crypto';
 import { promisify } from './promisify';
 import * as Q from 'q';
 export const supportedChecksumAlgorithms: string[] = ['md5', 'sha1', 'sha256', 'sha512'];
-export function validateInput(methodName: string, path: string, options: any): void {
+export interface Options {
+  checksum?: string;
+  mode?: boolean;
+  times?: boolean;
+  absolutePath?: boolean;
+  symlinks?: string | boolean;
+}
+export function validateInput(methodName: string, path: string, options?: Options): void {
   const methodSignature: string = methodName + '(path, [options])';
   validateArgument(methodSignature, 'path', path, ['string']);
   validateOptions(methodSignature, 'options', options, {
@@ -23,7 +30,7 @@ export function validateInput(methodName: string, path: string, options: any): v
   }
 };
 
-function createInspectObj(path, options, stat) {
+function createInspectObj(path: string, options: Options, stat: Stats) {
   let obj: any = {};
   obj.name = pathUtil.basename(path);
   if (stat.isFile()) {
@@ -64,7 +71,7 @@ function fileChecksum(path: string, algo: string) {
   return hash.digest('hex');
 };
 
-function addExtraFieldsSync(path: string, inspectObj: any, options: any) {
+function addExtraFieldsSync(path: string, inspectObj: any, options: Options) {
   if (inspectObj.type === 'file' && options.checksum) {
     inspectObj[options.checksum] = fileChecksum(path, options.checksum);
   } else if (inspectObj.type === 'symlink') {
@@ -72,11 +79,11 @@ function addExtraFieldsSync(path: string, inspectObj: any, options: any) {
   }
 };
 
-export function sync(path, options?: any) {
+export function sync(path: string, options?: Options) {
   let statOperation = statSync;
   let stat: Stats;
   let inspectObj: any;
-  options = options || {};
+  options = options || {} as Options;
   if (options.symlinks) {
     statOperation = lstatSync;
   }
@@ -121,7 +128,7 @@ function fileChecksumAsync(path: string, algo: string) {
   return deferred.promise;
 };
 
-function addExtraFieldsAsync(path: string, inspectObj, options) {
+function addExtraFieldsAsync(path: string, inspectObj: any, options: Options) {
   if (inspectObj.type === 'file' && options.checksum) {
     return fileChecksumAsync(path, options.checksum)
       .then(function (checksum) {
@@ -138,10 +145,10 @@ function addExtraFieldsAsync(path: string, inspectObj, options) {
   return new Q(inspectObj);
 }
 
-export function async(path: string, options?: any) {
+export function async(path: string, options?: Options) {
   return new Promise((resolve, reject) => {
     let statOperation = promisedStat;
-    options = options || {};
+    options = options || {} as Options;
     if (options.symlinks) {
       statOperation = promisedLstat;
     }

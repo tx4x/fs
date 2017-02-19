@@ -8,13 +8,13 @@ export function validateInput(methodName: string, path: string) {
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-export function sync(path: string) {
+export function sync(path: string):void {
   rimraf.sync(path);
 };
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
 const qRimraf = denodeify(rimraf);
-export function async(path: string) {
+export function async(path: string): Promise<null> {
   return qRimraf(path);
 };

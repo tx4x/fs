@@ -125,14 +125,14 @@ function checkWhatAlreadyOccupiesPathAsync(path) {
 ;
 function checkExistingFileFulfillsCriteriaAsync(path, stat, criteria) {
     const mode = mode_1.normalizeFileMode(stat.mode);
-    const checkContent = function () {
+    const checkContent = () => {
         return new Promise((resolve, reject) => {
             if (criteria.content !== undefined) {
                 write_1.async(path, criteria.content, {
                     mode: mode,
                     jsonIndent: criteria.jsonIndent
                 })
-                    .then(function () {
+                    .then(() => {
                     resolve(true);
                 })
                     .catch(reject);

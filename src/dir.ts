@@ -18,7 +18,7 @@ export let validateInput = function (methodName: string, path: string, criteria?
   });
 };
 
-function getCriteriaDefaults(passedCriteria?: Options):Options {
+function getCriteriaDefaults(passedCriteria?: Options): Options {
   const criteria = passedCriteria || {};
   if (typeof criteria.empty !== 'boolean') {
     criteria.empty = false;
@@ -81,7 +81,7 @@ function checkExistingDirectoryFulfillsCriteriaSync(path: string, stat: Stats, c
   checkEmptiness();
 };
 
-export function sync(path:string, passedCriteria?:Options) {
+export function sync(path: string, passedCriteria?: Options) {
   let criteria = getCriteriaDefaults(passedCriteria);
   let stat = checkWhatAlreadyOccupiesPathSync(path);
   if (stat) {
@@ -175,7 +175,7 @@ export function async(path: string, passedCriteria?: Options) {
   const criteria = getCriteriaDefaults(passedCriteria);
   return new Promise((resolve, reject) => {
     checkWhatAlreadyOccupiesPathAsync(path)
-      .then(function (stat: Stats) {
+      .then((stat: Stats) => {
         if (stat !== undefined) {
           return checkExistingDirectoryFulfillsCriteriaAsync(path, stat, criteria);
         }

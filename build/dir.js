@@ -181,7 +181,7 @@ function async(path, passedCriteria) {
     const criteria = getCriteriaDefaults(passedCriteria);
     return new Promise((resolve, reject) => {
         checkWhatAlreadyOccupiesPathAsync(path)
-            .then(function (stat) {
+            .then((stat) => {
             if (stat !== undefined) {
                 return checkExistingDirectoryFulfillsCriteriaAsync(path, stat, criteria);
             }

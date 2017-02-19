@@ -76,16 +76,16 @@ function checksBeforeCopyingSync(from: string, to: string, options?: ICopyOption
 };
 async function copyFileSyncWithProgress(from: string, to: string, options?: ICopyOptions) {
   return new Promise((resolve, reject) => {
-    let cbCalled = false;
     const started = Date.now();
+    let cbCalled = false;
     let elapsed = Date.now();
     let speed = 0;
-    function done(err?: any) {
+    let done = (err?: any) => {
       if (!cbCalled) {
         cbCalled = true;
         resolve();
       }
-    }
+    };
     const rd = fs.createReadStream(from);
     const str = progress({
       length: fs.statSync(from).size,
@@ -146,12 +146,8 @@ export function sync(from: string, to: string, options?: ICopyOptions) {
   let nodes: ICopyTask[] = [];
   let current: number = 0;
   let sizeTotal: number = 0;
-  treeWalkerSync(from, {
-    inspectOptions: {
-      mode: true,
-      symlinks: true
-    }
-  }, (path: string, inspectData: IInspectItem) => {
+
+  const visitor = function (path: string, inspectData: IInspectItem) {
     const rel = pathUtil.relative(from, path);
     const destPath = pathUtil.resolve(to, rel);
     if (opts.allowedToCopy(path)) {
@@ -163,23 +159,21 @@ export function sync(from: string, to: string, options?: ICopyOptions) {
       });
       sizeTotal += inspectData.size;
     }
-  });
-  Promise.all(nodes.map(async (item) => {
+  };
+
+  treeWalkerSync(from, {
+    inspectOptions: {
+      mode: true,
+      symlinks: true
+    }
+  }, visitor);
+
+  Promise.all(nodes.map(async (item, current) => {
     await copyItemSync(item.path, item.item, item.dst, options);
-    current++;
     if (opts.progress) {
       opts.progress(item.path, current, nodes.length, item.item);
     }
   }));
-  /*
-  nodes.forEach(item => {
-    copyItemSync(item.path, item.item, item.dst, options);
-    current++;
-    if (opts.progress) {
-      opts.progress(item.path, current, nodes.length, item.item);    
-    }
-  });  
-  */
 };
 
 // ---------------------------------------------------------

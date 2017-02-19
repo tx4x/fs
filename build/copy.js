@@ -78,16 +78,16 @@ function checksBeforeCopyingSync(from, to, options) {
 function copyFileSyncWithProgress(from, to, options) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
-            let cbCalled = false;
             const started = Date.now();
+            let cbCalled = false;
             let elapsed = Date.now();
             let speed = 0;
-            function done(err) {
+            let done = (err) => {
                 if (!cbCalled) {
                     cbCalled = true;
                     resolve();
                 }
-            }
+            };
             const rd = fs.createReadStream(from);
             const str = progress({
                 length: fs.statSync(from).size,
@@ -162,12 +162,7 @@ function sync(from, to, options) {
     let nodes = [];
     let current = 0;
     let sizeTotal = 0;
-    tree_walker_1.sync(from, {
-        inspectOptions: {
-            mode: true,
-            symlinks: true
-        }
-    }, (path, inspectData) => {
+    const visitor = function (path, inspectData) {
         const rel = pathUtil.relative(from, path);
         const destPath = pathUtil.resolve(to, rel);
         if (opts.allowedToCopy(path)) {
@@ -179,23 +174,19 @@ function sync(from, to, options) {
             });
             sizeTotal += inspectData.size;
         }
-    });
-    Promise.all(nodes.map((item) => __awaiter(this, void 0, void 0, function* () {
+    };
+    tree_walker_1.sync(from, {
+        inspectOptions: {
+            mode: true,
+            symlinks: true
+        }
+    }, visitor);
+    Promise.all(nodes.map((item, current) => __awaiter(this, void 0, void 0, function* () {
         yield copyItemSync(item.path, item.item, item.dst, options);
-        current++;
         if (opts.progress) {
             opts.progress(item.path, current, nodes.length, item.item);
         }
     })));
-    /*
-    nodes.forEach(item => {
-      copyItemSync(item.path, item.item, item.dst, options);
-      current++;
-      if (opts.progress) {
-        opts.progress(item.path, current, nodes.length, item.item);
-      }
-    });
-    */
 }
 exports.sync = sync;
 ;

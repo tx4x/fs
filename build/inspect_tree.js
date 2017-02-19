@@ -121,9 +121,7 @@ function inspectTreeNodeAsync(path, options, parent) {
                 }
                 else {
                     inspectAllChildren(treeBranch)
-                        .then(() => {
-                        resolve(treeBranch);
-                    })
+                        .then(() => resolve(treeBranch))
                         .catch(reject);
                 }
             }

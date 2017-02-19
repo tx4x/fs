@@ -15,7 +15,7 @@ function validateInput(methodName, path, criteria) {
 }
 exports.validateInput = validateInput;
 ;
-function getCriteriaDefaults(passedCriteria) {
+function defaults(passedCriteria) {
     const criteria = passedCriteria || {};
     if (criteria.mode !== undefined) {
         criteria.mode = mode_1.normalizeFileMode(criteria.mode);
@@ -83,7 +83,7 @@ function createBrandNewFileSync(path, criteria) {
 }
 ;
 function sync(path, passedCriteria) {
-    const criteria = getCriteriaDefaults(passedCriteria);
+    const criteria = defaults(passedCriteria);
     const stat = checkWhatAlreadyOccupiesPathSync(path);
     if (stat !== undefined) {
         checkExistingFileFulfillsCriteriaSync(path, stat, criteria);
@@ -110,16 +110,7 @@ function checkWhatAlreadyOccupiesPathAsync(path) {
                 reject(generatePathOccupiedByNotFileError(path));
             }
         })
-            .catch(err => {
-            if (err.code === 'ENOENT') {
-                // Path doesn't exist.
-                resolve(undefined);
-            }
-            else {
-                // This is other error. Must end here.
-                reject(err);
-            }
-        });
+            .catch(err => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
     });
 }
 ;
@@ -131,8 +122,7 @@ function checkExistingFileFulfillsCriteriaAsync(path, stat, criteria) {
                 write_1.async(path, criteria.content, {
                     mode: mode,
                     jsonIndent: criteria.jsonIndent
-                })
-                    .then(() => resolve(true))
+                }).then(() => resolve(true))
                     .catch(reject);
             }
             else {
@@ -156,11 +146,7 @@ function checkExistingFileFulfillsCriteriaAsync(path, stat, criteria) {
 }
 ;
 function createBrandNewFileAsync(path, criteria) {
-    let content = '';
-    if (criteria.content !== undefined) {
-        content = criteria.content;
-    }
-    return write_1.async(path, content, {
+    return write_1.async(path, criteria.content !== undefined ? criteria.content : '', {
         mode: criteria.mode,
         jsonIndent: criteria.jsonIndent
     });
@@ -168,7 +154,7 @@ function createBrandNewFileAsync(path, criteria) {
 ;
 function async(path, passedCriteria) {
     return new Promise((resolve, reject) => {
-        const criteria = getCriteriaDefaults(passedCriteria);
+        const criteria = defaults(passedCriteria);
         checkWhatAlreadyOccupiesPathAsync(path)
             .then(stat => {
             if (stat !== undefined) {

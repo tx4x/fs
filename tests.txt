@@ -1,0 +1,672 @@
+
+> fs-jetpack-ts@0.11.3 test /PMaster/projects/x4mm/subs/fs-jet/fs_xblox
+> mocha "spec/**/*.spec.js"
+
+
+
+  append
+    appends String to file
+      ✓ sync
+      ✓ async
+    appends Buffer to file
+      ✓ sync
+      ✓ async
+    if file doesn't exist creates it
+      ✓ sync
+      ✓ async
+    if parent directory doesn't exist creates it
+      ✓ sync
+      ✓ async
+    respects internal CWD of jetpack instance
+      ✓ sync
+      ✓ async
+    input validation
+      "path" argument
+        ✓ sync
+        ✓ async
+      "data" argument
+        ✓ sync
+        ✓ async
+      "options" object
+        "mode" argument
+          ✓ sync
+          ✓ async
+    sets file mode on created file (unix only)
+      ✓ sync
+      ✓ async
+
+  copy
+    copies a file
+      ✓ sync
+      ✓ async
+    can copy file to nonexistent directory (will create directory)
+      ✓ sync
+      1) async
+    copies empty directory
+      ✓ sync
+      2) "after each" hook for "sync"
+
+  cwd
+    ✓ returns the same path as process.cwd for main instance of jetpack
+    ✓ can create new context with different cwd
+    ✓ cwd contexts can be created recursively
+    ✓ cwd can join path parts
+
+  dir
+    creates directory if it doesn't exist
+      ✓ sync
+      ✓ async
+    does nothing if directory already exists
+      ✓ sync
+      ✓ async
+    creates nested directories if necessary
+      ✓ sync
+      ✓ async
+    doesn't touch directory content by default
+      ✓ sync
+      ✓ async
+    makes directory empty if that option specified
+      ✓ sync
+      ✓ async
+    throws if given path is something other than directory
+      ✓ sync
+      ✓ async
+    respects internal CWD of jetpack instance
+      ✓ sync
+      ✓ async
+    returns jetack instance pointing on this directory
+got /tmp/fs-jetpack-test-97cbe47185a50a954124e809b9731930/a
+      ✓ sync
+got /tmp/fs-jetpack-test-f3a13788f22222b3149c58152578a3b0/a
+      ✓ async
+    sets mode to newly created directory (unix only)
+      ✓ sync, mode passed as string
+      ✓ sync, mode passed as number
+      ✓ async, mode passed as string
+      ✓ async, mode passed as number
+    sets desired mode to every created directory (unix only)
+      ✓ sync
+      ✓ async
+    changes mode of existing directory to desired (unix only)
+      ✓ sync
+      ✓ async
+    leaves mode of directory intact by default (unix only)
+      ✓ sync
+      ✓ async
+    input validation
+      "path" argument
+        ✓ sync
+        ✓ async
+      "criteria" object
+        "empty" argument
+          ✓ sync
+          ✓ async
+        "mode" argument
+          ✓ sync
+          ✓ async
+
+  exists
+    returns false if file doesn't exist
+      ✓ sync
+      ✓ async
+    returns 'dir' if directory exists on given path
+      ✓ sync
+      ✓ async
+    returns 'file' if file exists on given path
+      ✓ sync
+      ✓ async
+    respects internal CWD of jetpack instance
+      ✓ sync
+      ✓ async
+    (edge case) ENOTDIR error changed into 'false'
+      ✓ sync
+      ✓ async
+    input validation
+      "path" argument
+        ✓ sync
+        ✓ async
+
+  file
+    creates file if it doesn't exist
+      ✓ sync
+      ✓ async
+    leaves file intact if it already exists
+      ✓ sync
+      ✓ async
+    can save file content given as string
+      ✓ sync
+      ✓ async
+    can save file content given as buffer
+      ✓ sync
+      ✓ async
+    can save file content given as plain JS object (will be saved as JSON)
+      ✓ sync
+      ✓ async
+    written JSON data can be indented
+      ✓ sync
+      ✓ async
+    replaces content of already existing file
+      ✓ sync
+      ✓ async
+    throws if given path is not a file
+      ✓ sync
+      ✓ async
+    if directory for file doesn't exist creates it as well
+      ✓ sync
+      ✓ async
+    returns currently used jetpack instance
+      ✓ sync
+      ✓ async
+    respects internal CWD of jetpack instance
+      ✓ sync
+      ✓ async
+    sets mode of newly created file (unix only)
+      ✓ sync, mode passed as string
+      ✓ sync, mode passed as number
+      ✓ async, mode passed as string
+      ✓ async, mode passed as number
+    changes mode of existing file if it doesn't match (unix only)
+      ✓ sync
+      ✓ async
+    leaves mode of file intact if not explicitly specified (unix only)
+      ✓ sync, ensure exists
+      ✓ sync, ensure content
+      ✓ async, ensure exists
+      ✓ async, ensure content
+    input validation
+      "path" argument
+        ✓ sync
+        ✓ async
+      "criteria" object
+        "content" argument
+          ✓ sync
+          ✓ async
+        "jsonIndent" argument
+          ✓ sync
+          ✓ async
+        "mode" argument
+          ✓ sync
+          ✓ async
+
+  find
+    returns list of relative paths anchored to CWD
+      ✓ sync
+      ✓ async
+    if recursive=false will exclude subfolders from search
+      ✓ sync
+      ✓ async
+    defaults to CWD if no path provided
+      ✓ sync
+      ✓ async
+    returns empty list if nothing found
+      ✓ sync
+      ✓ async
+    finds all paths which match globs
+      ✓ sync
+      ✓ async
+    anchors globs to directory you're finding in
+      ✓ sync
+      ✓ async
+    can use ./ as indication of anchor directory
+      ✓ sync
+      ✓ async
+    deals with negation globs
+      ✓ sync
+      ✓ async
+    doesn't look for directories by default
+      ✓ sync
+      ✓ async
+    can look for files and directories
+      ✓ sync
+      ✓ async
+    can look for only directories
+      ✓ sync
+      ✓ async
+    looking for directories works ok with only negation globs in set
+      ✓ sync
+      ✓ async
+    when you turn off files and directoies returns empty list
+      ✓ sync
+      ✓ async
+    throws if path doesn't exist
+      ✓ sync
+      ✓ async
+    throws if path is a file, not a directory
+      ✓ sync
+      ✓ async
+    respects internal CWD of jetpack instance
+      ✓ sync
+      ✓ async
+    finds dot-dirs and dot-files
+      ✓ sync
+      ✓ async
+    input validation
+      "path" argument
+        ✓ sync
+        ✓ async
+      "options" object
+        "matching" argument
+          ✓ sync
+          ✓ async
+        "files" argument
+          ✓ sync
+          ✓ async
+        "directories" argument
+          ✓ sync
+          ✓ async
+        "recursive" argument
+          ✓ sync
+          ✓ async
+
+  inspectTree
+    inspects whole tree of files
+      ✓ sync
+      ✓ async
+    can calculate size of a whole tree
+      ✓ sync
+      ✓ async
+    can output relative path for every tree node
+      ✓ sync
+      ✓ async
+    if given path is a file just inspects that file
+      ✓ sync
+      ✓ async
+    behaves ok with empty directory
+      ✓ sync
+      ✓ async
+    returns undefined if path doesn't exist
+      ✓ sync
+      ✓ async
+    respects internal CWD of jetpack instance
+      ✓ sync
+      ✓ async
+    can compute checksum of a whole tree
+      ✓ sync
+      ✓ async
+    can count checksum of empty directory
+      ✓ sync
+      ✓ async
+    input validation
+      "path" argument
+        ✓ sync
+        ✓ async
+      "options" object
+        "checksum" argument
+          ✓ sync
+          ✓ sync
+          ✓ async
+          ✓ async
+        "relativePath" argument
+          ✓ sync
+          ✓ async
+
+  inspect
+    can inspect a file
+      ✓ sync
+      ✓ async
+    can inspect a directory
+      ✓ sync
+      ✓ async
+    returns undefined if path doesn't exist
+      ✓ sync
+      ✓ async
+    can output file times (ctime, mtime, atime)
+      ✓ sync
+      ✓ async
+    can output absolute path
+      ✓ sync
+      ✓ async
+    respects internal CWD of jetpack instance
+      ✓ sync
+      ✓ async
+    follows symlink by default
+      ✓ sync
+      ✓ async
+    stats symlink if option specified
+      ✓ sync
+      ✓ async
+    can output file mode (unix only)
+      ✓ sync
+      ✓ async
+    checksums
+      md5
+        ✓ sync
+        ✓ async
+      sha1
+        ✓ sync
+        ✓ async
+      sha256
+        ✓ sync
+        ✓ async
+      sha512
+        ✓ sync
+        ✓ async
+      calculates correctly checksum of an empty file
+        ✓ sync
+        ✓ async
+    input validation
+      "path" argument
+        ✓ sync
+        ✓ async
+      "options" object
+        "checksum" argument
+          ✓ sync
+          ✓ sync
+          ✓ async
+          ✓ async
+        "mode" argument
+          ✓ sync
+          ✓ async
+        "times" argument
+          ✓ sync
+          ✓ async
+        "absolutePath" argument
+          ✓ sync
+          ✓ async
+        "symlinks" argument
+          ✓ sync
+          ✓ async
+
+  list
+    lists file names in given path
+      ✓ sync
+      ✓ async
+    lists CWD if no path parameter passed
+      ✓ sync
+      ✓ async
+    returns undefined if path doesn't exist
+      ✓ sync
+      ✓ async
+    throws if given path is not a directory
+      ✓ sync
+      ✓ async
+    respects internal CWD of jetpack instance
+      ✓ sync
+      ✓ async
+    input validation
+      "path" argument
+        ✓ sync
+        ✓ async
+
+  console.log
+/PMaster/projects/x4mm/subs/fs-jet/fs_xblox
+    ✓ can be printed by console.log
+
+  move
+    moves file
+      ✓ sync
+      ✓ async
+    moves directory
+      ✓ sync
+      ✓ async
+    creates nonexistent directories for destination path
+      ✓ sync
+      ✓ async
+    generates nice error when source path doesn't exist
+      ✓ sync
+      ✓ async
+    respects internal CWD of jetpack instance
+      ✓ sync
+      ✓ async
+    input validation
+      "from" argument
+        ✓ sync
+        ✓ async
+      "to" argument
+        ✓ sync
+        ✓ async
+
+  path
+    ✓ if no parameters passed returns same path as cwd()
+    ✓ is absolute if prepending slash present
+    ✓ resolves to CWD path of this jetpack instance
+    ✓ can take unlimited number of arguments as path parts
+
+  read
+    reads file as a string
+      ✓ sync
+      ✓ async
+    reads file as a Buffer
+      ✓ sync
+      ✓ async
+    reads file as JSON
+      ✓ sync
+      ✓ async
+    gives nice error message when JSON parsing failed
+      ✓ sync
+      ✓ async
+    reads file as JSON with Date parsing
+      ✓ sync
+      ✓ async
+    returns undefined if file doesn't exist
+      ✓ sync
+      ✓ async
+    throws if given path is a directory
+      ✓ sync
+      ✓ async
+    respects internal CWD of jetpack instance
+      ✓ sync
+      ✓ async
+    input validation
+      "path" argument
+        ✓ sync
+        ✓ async
+      "returnAs" argument
+        ✓ sync
+        ✓ async
+
+  remove
+    doesn't throw if path already doesn't exist
+      ✓ sync
+      ✓ async
+    should delete file
+      ✓ sync
+      ✓ async
+    removes directory with stuff inside
+      ✓ sync
+      ✓ async
+    respects internal CWD of jetpack instance
+      ✓ sync
+      ✓ async
+    can be called witn no parameters, what will remove CWD directory
+      ✓ sync
+      ✓ async
+    removes only symlinks, never real content where symlinks point
+      ✓ sync
+      ✓ async
+    input validation
+      "path" argument
+        ✓ sync
+        ✓ async
+
+  rename
+    renames file
+      ✓ sync
+      ✓ async
+    renames directory
+      ✓ sync
+      ✓ async
+    respects internal CWD of jetpack instance
+      ✓ sync
+      ✓ async
+    input validation
+      "path" argument
+        ✓ sync
+        ✓ async
+      "newName" argument
+        ✓ sync
+        ✓ async
+
+  streams
+    ✓ exposes vanilla stream methods
+    ✓ stream methods respect jetpack internal CWD
+
+  symlink
+    can create a symlink
+      ✓ sync
+      ✓ async
+    can create nonexistent parent directories
+      ✓ sync
+      ✓ async
+    respects internal CWD of jetpack instance
+      ✓ sync
+      ✓ async
+    input validation
+      "symlinkValue" argument
+        ✓ sync
+        ✓ async
+      "path" argument
+        ✓ sync
+        ✓ async
+
+  matcher
+    ✓ can test against one pattern passed as a string
+    ✓ can test against many patterns passed as an array
+    pattern types
+      ✓ only basename
+      ✓ absolute
+      ✓ relative with ./
+      ✓ relative (because has slash inside)
+    possible tokens
+      ✓ *
+      ✓ **
+      ✓ **/something
+      ✓ @(pattern|pattern) - exactly one of patterns
+      ✓ +(pattern|pattern) - one or more of patterns
+      ✓ ?(pattern|pattern) - zero or one of patterns
+      ✓ *(pattern|pattern) - zero or more of patterns
+      ✓ {a,b}
+      ✓ ?
+      ✓ [...] - characters range
+      ✓ combining different tokens together
+      ✓ comment character # has no special meaning
+    negation
+      ✓ selects everything except negated
+      ✓ selects everything except negated (multiple patterns)
+      ✓ filters previous match if negation is farther in order
+    dotfiles
+      ✓ has no problem with matching dotfile
+      ✓ dotfile negation
+
+  tree walker
+    inspects all files and folders recursively and returns them one by one
+      ✓ sync
+      ✓ async
+    can walk through many nested directories
+      ✓ sync
+      ✓ async
+    won't penetrate folder tree deeper than maxLevelsDeep option tells
+      ✓ sync
+      ✓ async
+    will do fine with empty directory as entry point
+      ✓ sync
+      ✓ async
+    will do fine with file as entry point
+      ✓ sync
+      ✓ async
+    will do fine with nonexistent entry point
+      ✓ sync
+      ✓ async
+    supports inspect options
+      ✓ sync
+      ✓ async
+
+  util validate
+    validates arguments passed to methods
+      ✓ validates its own input
+      ✓ validates that given thing is a(n) string
+      ✓ validates that given thing is a(n) number
+      ✓ validates that given thing is a(n) boolean
+      ✓ validates that given thing is a(n) array
+      ✓ validates that given thing is a(n) object
+      ✓ validates that given thing is a(n) buffer
+      ✓ validates that given thing is a(n) null
+      ✓ validates that given thing is a(n) undefined
+      ✓ can detect wrong type: string
+      ✓ can detect wrong type: number
+      ✓ can detect wrong type: boolean
+      ✓ can detect wrong type: array
+      ✓ can detect wrong type: object
+      ✓ can detect wrong type: buffer
+      ✓ can detect wrong type: null
+      ✓ can detect wrong type: undefined
+      ✓ supports more than one allowed type
+      ✓ validates array internal data
+    validates options object
+      ✓ options object might be undefined
+      ✓ option key in options object is optional (doh!)
+      ✓ throws if option key definition not found
+      ✓ validates option
+
+  atomic write
+    fresh write (file doesn't exist yet)
+      ✓ sync
+      ✓ async
+    overwrite existing file
+      ✓ sync
+      ✓ async
+    if previous operation failed
+      ✓ sync
+      ✓ async
+
+  write
+    writes data from string
+      ✓ sync
+      ✓ async
+    writes data from Buffer
+      ✓ sync
+      ✓ async
+    writes data as JSON
+      ✓ sync
+      ✓ async
+    written JSON data can be indented
+      ✓ sync
+      ✓ async
+    writes and reads file as JSON with Date parsing
+      ✓ sync
+      ✓ async
+    can create nonexistent parent directories
+      ✓ sync
+      ✓ async
+    respects internal CWD of jetpack instance
+      ✓ sync
+      ✓ async
+    input validation
+      "path" argument
+        ✓ sync
+        ✓ async
+      "data" argument
+        ✓ sync
+        ✓ async
+      "options" object
+        "atomic" argument
+          ✓ sync
+          ✓ async
+        "jsonIndent" argument
+          ✓ sync
+          ✓ async
+
+
+  397 passing (3s)
+  2 failing
+
+  1) copy can copy file to nonexistent directory (will create directory) async:
+     Error: Timeout of 2000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+  
+
+  2) copy "after each" hook for "sync":
+     Error: EACCES: permission denied, scandir '/tmp/fs-jetpack-test-1e78294395eff124f1af00a88343a457/copied'
+      at Object.fs.readdirSync (fs.js:871:18)
+      at rmkidsSync (node_modules/rimraf/rimraf.js:339:11)
+      at rmdirSync (node_modules/rimraf/rimraf.js:332:7)
+      at rimrafSync (node_modules/rimraf/rimraf.js:303:9)
+      at node_modules/rimraf/rimraf.js:340:5
+      at Array.forEach (native)
+      at rmkidsSync (node_modules/rimraf/rimraf.js:339:26)
+      at rmdirSync (node_modules/rimraf/rimraf.js:332:7)
+      at Function.rimrafSync [as sync] (node_modules/rimraf/rimraf.js:303:9)
+      at Object.removeSync (node_modules/fs-extra/lib/remove.js:4:17)
+      at Context.exports.switchBackToCorrectCwd (spec/helper.js:29:7)
+
+
+

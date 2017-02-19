@@ -28,8 +28,6 @@ import { Options as WriteOptions } from './write';
 import * as write from './write';
 import * as read from './read';
 
-
-
 export interface IJetpack {
   cwd(w?: any): IJetpack | string;
   path(): string;
@@ -322,6 +320,7 @@ export function jetpack(cwdPath?: string): IJetpack {
 
   return api;
 };
+/*
 
 process.on('unhandledRejection', (reason) => {
   console.error('Unhandled rejection, reason: ', reason);
@@ -338,5 +337,5 @@ jetpack().copy('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
     console.log('write ' + current + ' from ' + total);
   }
 });
-
+*/
 

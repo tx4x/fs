@@ -25,8 +25,6 @@ import * as streams from './streams';
 import { Options as WriteOptions } from './write';
 import * as write from './write';
 import * as read from './read';
-import { } from './interface';
-
 
 export interface Jetpack {
   cwd(w?: any): Jetpack | string;

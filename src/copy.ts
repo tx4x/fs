@@ -13,6 +13,16 @@ import { InspectItem } from './inspect';
 const progress = require('progress-stream');
 export type ItemProgressCallback = (path: string, current: number, total: number, item?: InspectItem) => void;
 export type WriteProgressCallback = (path: string, current: number, total: number) => void;
+export enum EOverwriteMode {
+  SKIP = 0,
+  OVERWRITE,
+  IF_NEWER,
+  IF_SIZE_DIFFERS
+}
+
+export interface IConflictResolver {
+  overwrite: EOverwriteMode;
+}
 export interface Options {
   overwrite?: boolean;
   matching?: string[];
@@ -71,12 +81,12 @@ function generateDestinationExistsError(path): Error {
 // Sync
 // ---------------------------------------------------------
 
-function checksBeforeCopyingSync(from: string, to: string, opts?: any) {
+function checksBeforeCopyingSync(from: string, to: string, options?: Options) {
   if (!existsSync(from)) {
     throw generateNoSourceError(from);
   }
 
-  if (existsSync(to) && !opts.overwrite) {
+  if (existsSync(to) && !options.overwrite) {
     throw generateDestinationExistsError(to);
   }
 };
@@ -95,7 +105,7 @@ async function copyFileSyncWithProgress(from: string, to: string, options?: Opti
     const rd = fs.createReadStream(from);
     const str = progress({
       length: fs.statSync(from).size,
-      time: 0
+      time: 100
     });
     str.on('progress', e => {
       elapsed = (Date.now() - started) / 1000;
@@ -138,12 +148,12 @@ function copySymlinkSync(from: string, to: string) {
   }
 };
 
-function copyItemSync(from: string, inspectData: InspectItem, to: string, options: Options) {
+async function copyItemSync(from: string, inspectData: InspectItem, to: string, options: Options) {
   const mode: string = fileMode(inspectData.mode);
   if (inspectData.type === 'dir') {
     mkdirp.sync(to, { mode: parseInt(mode, 8), fs: null });
   } else if (inspectData.type === 'file') {
-    copyFileSync(from, to, mode, options);
+    await copyFileSync(from, to, mode, options);
   } else if (inspectData.type === 'symlink') {
     copySymlinkSync(from, to);
   }
@@ -173,13 +183,22 @@ export function sync(from: string, to: string, options?: Options) {
       sizeTotal += inspectData.size;
     }
   });
-  nodes.forEach(item => {
-    copyItemSync(item.path, item.item, item.dst, options);
+  Promise.all(nodes.map(async (item) => {
+    await copyItemSync(item.path, item.item, item.dst, options);
     current++;
     if (opts.progress) {
       opts.progress(item.path, current, nodes.length, item.item);
     }
-  });
+  }));
+  /*
+  nodes.forEach(item => {
+    copyItemSync(item.path, item.item, item.dst, options);
+    current++;
+    if (opts.progress) {
+      opts.progress(item.path, current, nodes.length, item.item);    
+    }
+  });  
+  */
 };
 
 // ---------------------------------------------------------

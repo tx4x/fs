@@ -15,4 +15,4 @@ Typescript port of 'fs-jetpack'
 
 ## Status
 
-- ported only, no testing done
+- ported only, mostly tested

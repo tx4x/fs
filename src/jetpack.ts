@@ -136,7 +136,7 @@ function jetpackContext(cwdPath?: string): Jetpack {
       copy.sync(resolvePath(from), resolvePath(to), options);
     },
     copyAsync: function (from: string, to: string, options?: CopyOptions) {
-      copy.validateInput('async', from, to, options);
+      copy.validateInput('copyAsync', from, to, options);
       return copy.async(resolvePath(from), resolvePath(to), options);
     },
     createWriteStream: function (path: string, options?: {
@@ -163,7 +163,7 @@ function jetpackContext(cwdPath?: string): Jetpack {
 
     dir: function (path: string, criteria?: DirOptions): Jetpack {
       let normalizedPath;
-      dir.validateInput('sync', path, criteria);
+      dir.validateInput('dir', path, criteria);
       normalizedPath = resolvePath(path);
       dir.sync(normalizedPath, criteria);
       return cwd(normalizedPath) as Jetpack;
@@ -171,7 +171,7 @@ function jetpackContext(cwdPath?: string): Jetpack {
     dirAsync: function (path: string, criteria?: DirOptions): Promise<Jetpack> {
       const deferred = Q.defer();
       let normalizedPath: string;
-      dir.validateInput('async', path, criteria);
+      dir.validateInput('dirAsync', path, criteria);
       normalizedPath = resolvePath(path);
       dir.async(normalizedPath, criteria)
         .then(function () {

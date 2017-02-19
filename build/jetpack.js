@@ -68,7 +68,7 @@ function jetpackContext(cwdPath) {
             copy.sync(resolvePath(from), resolvePath(to), options);
         },
         copyAsync: function (from, to, options) {
-            copy.validateInput('async', from, to, options);
+            copy.validateInput('copyAsync', from, to, options);
             return copy.async(resolvePath(from), resolvePath(to), options);
         },
         createWriteStream: function (path, options) {
@@ -79,7 +79,7 @@ function jetpackContext(cwdPath) {
         },
         dir: function (path, criteria) {
             let normalizedPath;
-            dir.validateInput('sync', path, criteria);
+            dir.validateInput('dir', path, criteria);
             normalizedPath = resolvePath(path);
             dir.sync(normalizedPath, criteria);
             return cwd(normalizedPath);
@@ -87,7 +87,7 @@ function jetpackContext(cwdPath) {
         dirAsync: function (path, criteria) {
             const deferred = Q.defer();
             let normalizedPath;
-            dir.validateInput('async', path, criteria);
+            dir.validateInput('dirAsync', path, criteria);
             normalizedPath = resolvePath(path);
             dir.async(normalizedPath, criteria)
                 .then(function () {

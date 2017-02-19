@@ -81,7 +81,7 @@ function checkExistingDirectoryFulfillsCriteriaSync(path: string, stat: Stats, c
   checkEmptiness();
 };
 
-export function sync(path, passedCriteria:Options) {
+export function sync(path:string, passedCriteria?:Options) {
   let criteria = getCriteriaDefaults(passedCriteria);
   let stat = checkWhatAlreadyOccupiesPathSync(path);
   if (stat) {

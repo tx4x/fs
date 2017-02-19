@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as Q from 'q';
-import * as promisify from './promisify';
 import { sync as writeSync, async as writeASync } from './write';
 import { validateArgument, validateOptions } from './utils/validate';
 export interface Options {
@@ -19,9 +18,9 @@ export function validateInput(methodName: string, path: string, data: any, optio
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-export function sync(path: string, data: any, options?: Options): void {
+export function sync(path: string, data: any, options: Options): void {
   try {
-    fs.appendFileSync(path, data, { encoding: options.encoding, mode: options.mode as string });
+    fs.appendFileSync(path, data, options ? { encoding: options.encoding, mode: options.mode as string } : {});
   } catch (err) {
     if (err.code === 'ENOENT') {
       // Parent directory doesn't exist, so just pass the task to `write`,

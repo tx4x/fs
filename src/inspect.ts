@@ -10,7 +10,7 @@ export interface Options {
   mode?: boolean;
   times?: boolean;
   absolutePath?: boolean;
-  symlinks?: string | boolean;
+  symlinks?: boolean;
 }
 export function validateInput(methodName: string, path: string, options?: Options): void {
   const methodSignature: string = methodName + '(path, [options])';

@@ -323,7 +323,7 @@ describe('dir', function () {
   describe('input validation', function () {
     var tests = [
       { type: 'sync', method: jetpack.dir, methodName: 'dir' },
-      { type: 'async', method: jetpack.dirAsync, methodName: 'async' }
+      { type: 'async', method: jetpack.dirAsync, methodName: 'dirAsync' }
     ];
 
     describe('"path" argument', function () {

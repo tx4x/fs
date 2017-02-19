@@ -7,7 +7,7 @@ import { validateArgument, validateOptions } from './utils/validate';
 export interface Options {
   checksum: string;
   relativePath: boolean;
-  symlinks: string|boolean;
+  symlinks: boolean;
 }
 export function validateInput(methodName: string, path: string, options: Options): void {
   const methodSignature = methodName + '(path, options)';
@@ -45,7 +45,7 @@ function checksumOfDir(inspectList: any[], algo: string): string {
 // Sync
 // ---------------------------------------------------------
 function inspectTreeNodeSync(path: string, options: Options, parent: any): any {
-  const treeBranch = inspectSync(path, { checksum: options.checksum, symlinks: options.symlinks as string });
+  const treeBranch = inspectSync(path, { checksum: options.checksum, symlinks: options.symlinks });
   if (treeBranch) {
     if (options.relativePath) {
       treeBranch.relativePath = generateTreeNodeRelativePath(parent, path);
@@ -139,7 +139,7 @@ function inspectTreeNodeAsync(path: string, options: Options, parent: any) {
   });
 };
 
-export function async(path:string, options?:Options) {
+export function async(path: string, options?: Options) {
   options = options || {} as Options;
   options.symlinks = true;
   return inspectTreeNodeAsync(path, options, null);

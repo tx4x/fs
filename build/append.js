@@ -18,7 +18,7 @@ exports.validateInput = validateInput;
 // ---------------------------------------------------------
 function sync(path, data, options) {
     try {
-        fs.appendFileSync(path, data, { encoding: options.encoding, mode: options.mode });
+        fs.appendFileSync(path, data, options ? { encoding: options.encoding, mode: options.mode } : {});
     }
     catch (err) {
         if (err.code === 'ENOENT') {

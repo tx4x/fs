@@ -150,7 +150,7 @@ export function sync(from: string, to: string, options?: ICopyOptions) {
   let current: number = 0;
   let sizeTotal: number = 0;
 
-  const visitor = function (path: string, inspectData: IInspectItem) {
+  const visitor = (path: string, inspectData: IInspectItem) => {
     const rel = pathUtil.relative(from, path);
     const destPath = pathUtil.resolve(to, rel);
     if (opts.allowedToCopy(path)) {

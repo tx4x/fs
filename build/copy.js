@@ -20,9 +20,10 @@ const validate_1 = require("./utils/validate");
 const write_1 = require("./write");
 const progress = require("progress-stream");
 const interfaces_1 = require("./interfaces");
-process.on('unhandledRejection', (reason) => {
-    console.error('Unhandled rejection, reason: ', reason);
-});
+const promisedSymlink = Q.denodeify(fs.symlink);
+const promisedReadlink = Q.denodeify(fs.readlink);
+const promisedUnlink = Q.denodeify(fs.unlink);
+const promisedMkdirp = Q.denodeify(mkdirp);
 function validateInput(methodName, from, to, options) {
     const methodSignature = methodName + '(from, to, [options])';
     validate_1.validateArgument(methodSignature, 'from', from, ['string']);
@@ -86,7 +87,7 @@ function copyFileSyncWithProgress(from, to, options) {
                     resolve();
                 }
             };
-            const rd = fs.createReadStream(from);
+            const rd = fs_1.createReadStream(from);
             const str = progress({
                 length: fs.statSync(from).size,
                 time: 100
@@ -97,7 +98,7 @@ function copyFileSyncWithProgress(from, to, options) {
                 options.writeProgress(from, e.transferred, e.length);
             });
             rd.on("error", err => done(err));
-            const wr = fs.createWriteStream(to);
+            const wr = fs_1.createWriteStream(to);
             wr.on("error", err => done(err));
             wr.on("close", done);
             rd.pipe(str).pipe(wr);
@@ -191,11 +192,7 @@ exports.sync = sync;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-const promisedSymlink = Q.denodeify(fs.symlink);
-const promisedReadlink = Q.denodeify(fs.readlink);
-const promisedUnlink = Q.denodeify(fs.unlink);
-const promisedMkdirp = Q.denodeify(mkdirp);
-function checksBeforeCopyingAsync(from, to, opts) {
+const check = (from, to, opts) => {
     return exists_1.async(from)
         .then(srcPathExists => {
         if (!srcPathExists) {
@@ -210,9 +207,8 @@ function checksBeforeCopyingAsync(from, to, opts) {
             throw ErrDestinationExists(to);
         }
     });
-}
-;
-function copyFileAsync(from, to, mode, retriedAttempt) {
+};
+const copyFileAsync = (from, to, mode, retriedAttempt) => {
     return new Promise((resolve, reject) => {
         const readStream = fs.createReadStream(from);
         const writeStream = fs.createWriteStream(to, { mode: mode });
@@ -240,11 +236,10 @@ function copyFileAsync(from, to, mode, retriedAttempt) {
         writeStream.on('finish', resolve);
         readStream.pipe(writeStream);
     });
-}
-;
+};
 function copySymlinkAsync(from, to) {
     return promisedReadlink(from)
-        .then(function (symlinkPointsAt) {
+        .then((symlinkPointsAt) => {
         return new Promise((resolve, reject) => {
             promisedSymlink(symlinkPointsAt, to)
                 .then(resolve)
@@ -253,10 +248,7 @@ function copySymlinkAsync(from, to) {
                     // There is already file/symlink with this name on destination location.
                     // Must erase it manually, otherwise system won't allow us to place symlink there.
                     promisedUnlink(to)
-                        .then(() => {
-                        // Retry...
-                        return promisedSymlink(symlinkPointsAt, to);
-                    })
+                        .then(() => { return promisedSymlink(symlinkPointsAt, to); })
                         .then(resolve, reject);
                 }
                 else {
@@ -285,7 +277,7 @@ function copyItemAsync(from, inspectData, to) {
 function async(from, to, options) {
     const opts = parseOptions(options, from);
     return new Promise((resolve, reject) => {
-        checksBeforeCopyingAsync(from, to, opts).then(function () {
+        check(from, to, opts).then(() => {
             let allFilesDelivered = false;
             let filesInProgress = 0;
             const stream = tree_walker_1.stream(from, {
@@ -303,7 +295,7 @@ function async(from, to, options) {
                     if (opts.allowedToCopy(item.path)) {
                         filesInProgress += 1;
                         copyItemAsync(item.path, item.item, destPath)
-                            .then(function () {
+                            .then(() => {
                             filesInProgress -= 1;
                             if (allFilesDelivered && filesInProgress === 0) {
                                 resolve();

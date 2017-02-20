@@ -6,4 +6,3 @@ export const json = {
     parse: JSON.parse,
     serialize: JSON.stringify
 };
-import * as denodeify from 'denodeify';

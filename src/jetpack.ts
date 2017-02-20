@@ -22,7 +22,7 @@ import * as remove from './remove';
 import * as rename from './rename';
 import * as symlink from './symlink';
 import * as streams from './streams';
-import { Options as WriteOptions } from './write';
+import { WriteOptions } from './interfaces';
 import * as write from './write';
 import * as read from './read';
 

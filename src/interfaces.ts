@@ -61,3 +61,12 @@ export interface ICopyOptions {
 export interface IConflictResolver {
     overwrite: ECopyOverwriteMode;
 }
+/////////////////////////////////////////////////////////
+//
+//  File operations : write
+//
+export interface WriteOptions {
+  atomic?: boolean;
+  jsonIndent?: number;
+  mode?: string;
+}

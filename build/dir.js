@@ -157,15 +157,15 @@ const checkMode = function (criteria, stat, path) {
     }
     return Promise.resolve(null);
 };
-const checkExistingDirectoryFulfillsCriteriaAsync = (path, stat, criteria) => {
+const checkExistingDirectoryFulfillsCriteriaAsync = (path, stat, options) => {
     return new Promise((resolve, reject) => {
         const checkEmptiness = function () {
-            if (criteria.empty) {
+            if (options.empty) {
                 return emptyAsync(path);
             }
             return Promise.resolve();
         };
-        checkMode(criteria, stat, path)
+        checkMode(options, stat, path)
             .then(checkEmptiness)
             .then(resolve, reject);
     });

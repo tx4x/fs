@@ -4,6 +4,8 @@ const fs = require("fs");
 const mkdirp = require("mkdirp");
 const pathUtil = require("path");
 const validate_1 = require("./utils/validate");
+const promisedSymlink = Q.denodeify(fs.symlink);
+const promisedMkdirp = Q.denodeify(mkdirp);
 function validateInput(methodName, symlinkValue, path) {
     const methodSignature = methodName + '(symlinkValue, path)';
     validate_1.validateArgument(methodSignature, 'symlinkValue', symlinkValue, ['string']);
@@ -33,8 +35,6 @@ exports.sync = sync;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-const promisedSymlink = Q.denodeify(fs.symlink);
-const promisedMkdirp = Q.denodeify(mkdirp);
 function async(symlinkValue, path) {
     return new Promise((resolve, reject) => {
         promisedSymlink(symlinkValue, path)
@@ -43,9 +43,7 @@ function async(symlinkValue, path) {
             if (err.code === 'ENOENT') {
                 // Parent directories don't exist. Just create them and rety.
                 promisedMkdirp(pathUtil.dirname(path))
-                    .then(() => {
-                    return promisedSymlink(symlinkValue, path);
-                })
+                    .then(() => { return promisedSymlink(symlinkValue, path); })
                     .then(resolve, reject);
             }
             else {

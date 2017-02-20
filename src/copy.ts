@@ -1,6 +1,6 @@
 import * as  pathUtil from "path";
 import * as fs from 'fs';
-import { symlinkSync, readFileSync } from 'fs';
+import { symlinkSync, readFileSync, createReadStream, createWriteStream } from 'fs';
 import * as Q from 'q';
 import * as mkdirp from 'mkdirp';
 import { sync as existsSync, async as existsASync } from './exists';
@@ -8,10 +8,14 @@ import { create as matcher } from './utils/matcher';
 import { normalizeFileMode as fileMode } from './utils/mode';
 import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
 import { validateArgument, validateOptions } from './utils/validate';
-import { sync as writeSync, Options as WriteOptions } from './write';
-import { ICopyOptions, ECopyOverwriteMode, ItemProgressCallback, WriteProgressCallback } from './interfaces';
+import { sync as writeSync } from './write';
 import * as  progress from 'progress-stream';
-import { IInspectItem, IInspectOptions, EInspectItemType } from './interfaces';
+import { IInspectItem, IInspectOptions, EInspectItemType, WriteOptions } from './interfaces';
+import { ICopyOptions, ECopyOverwriteMode, ItemProgressCallback, WriteProgressCallback } from './interfaces';
+const promisedSymlink = Q.denodeify(fs.symlink);
+const promisedReadlink = Q.denodeify(fs.readlink);
+const promisedUnlink = Q.denodeify(fs.unlink);
+const promisedMkdirp = Q.denodeify(mkdirp);
 
 interface ICopyTask {
   path: string;
@@ -19,10 +23,6 @@ interface ICopyTask {
   dst: string;
   done: boolean;
 }
-process.on('unhandledRejection', (reason) => {
-  console.error('Unhandled rejection, reason: ', reason);
-});
-
 export function validateInput(methodName: string, from: string, to: string, options?: ICopyOptions): void {
   const methodSignature = methodName + '(from, to, [options])';
   validateArgument(methodSignature, 'from', from, ['string']);
@@ -86,7 +86,7 @@ async function copyFileSyncWithProgress(from: string, to: string, options?: ICop
         resolve();
       }
     };
-    const rd = fs.createReadStream(from);
+    const rd = createReadStream(from);
     const str = progress({
       length: fs.statSync(from).size,
       time: 100
@@ -97,7 +97,7 @@ async function copyFileSyncWithProgress(from: string, to: string, options?: ICop
       options.writeProgress(from, e.transferred, e.length);
     });
     rd.on("error", err => done(err));
-    const wr = fs.createWriteStream(to);
+    const wr = createWriteStream(to);
     wr.on("error", err => done(err));
     wr.on("close", done);
     rd.pipe(str).pipe(wr);
@@ -111,7 +111,7 @@ async function copyFileSync(from: string, to: string, mode, options?: ICopyOptio
   if (options && options.writeProgress) {
     await copyFileSyncWithProgress(from, to, options);
   } else {
-    writeSync(to, data as any, writeOptions);
+    writeSync(to, data, writeOptions);
   }
 };
 
@@ -182,12 +182,7 @@ export function sync(from: string, to: string, options?: ICopyOptions) {
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-const promisedSymlink = Q.denodeify(fs.symlink);
-const promisedReadlink = Q.denodeify(fs.readlink);
-const promisedUnlink = Q.denodeify(fs.unlink);
-const promisedMkdirp = Q.denodeify(mkdirp);
-
-function checksBeforeCopyingAsync(from: string, to: string, opts?: ICopyOptions) {
+const check = (from: string, to: string, opts?: ICopyOptions) => {
   return existsASync(from)
     .then(srcPathExists => {
       if (!srcPathExists) {
@@ -203,7 +198,7 @@ function checksBeforeCopyingAsync(from: string, to: string, opts?: ICopyOptions)
     });
 };
 
-function copyFileAsync(from: string, to: string, mode: any, retriedAttempt?: any) {
+const copyFileAsync = (from: string, to: string, mode: any, retriedAttempt?: boolean) => {
   return new Promise((resolve, reject) => {
     const readStream = fs.createReadStream(from);
     const writeStream = fs.createWriteStream(to, { mode: mode });
@@ -227,16 +222,14 @@ function copyFileAsync(from: string, to: string, mode: any, retriedAttempt?: any
         reject(err);
       }
     });
-
     writeStream.on('finish', resolve);
-
     readStream.pipe(writeStream);
   });
 };
 
 function copySymlinkAsync(from: string, to: string) {
   return promisedReadlink(from)
-    .then(function (symlinkPointsAt) {
+    .then((symlinkPointsAt: string) => {
       return new Promise((resolve, reject) => {
         promisedSymlink(symlinkPointsAt, to)
           .then(resolve)
@@ -245,10 +238,8 @@ function copySymlinkAsync(from: string, to: string) {
               // There is already file/symlink with this name on destination location.
               // Must erase it manually, otherwise system won't allow us to place symlink there.
               promisedUnlink(to)
-                .then(() => {
-                  // Retry...
-                  return promisedSymlink(symlinkPointsAt, to);
-                })
+                // Retry...
+                .then(() => { return promisedSymlink(symlinkPointsAt, to); })
                 .then(resolve, reject);
             } else {
               reject(err);
@@ -274,7 +265,7 @@ function copyItemAsync(from: string, inspectData: any, to: string) {
 export function async(from: string, to: string, options?: ICopyOptions) {
   const opts = parseOptions(options, from);
   return new Promise((resolve, reject) => {
-    checksBeforeCopyingAsync(from, to, opts).then(function () {
+    check(from, to, opts).then(() => {
       let allFilesDelivered: boolean = false;
       let filesInProgress: number = 0;
       const stream = treeWalkerStream(from, {
@@ -292,7 +283,7 @@ export function async(from: string, to: string, options?: ICopyOptions) {
           if (opts.allowedToCopy(item.path)) {
             filesInProgress += 1;
             copyItemAsync(item.path, item.item, destPath)
-              .then(function () {
+              .then(() => {
                 filesInProgress -= 1;
                 if (allFilesDelivered && filesInProgress === 0) {
                   resolve();

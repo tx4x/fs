@@ -4,15 +4,11 @@ import { writeFileSync } from 'fs';
 import * as Q from 'q';
 import * as mkdirp from 'mkdirp';
 import { json, file } from './imports';
+import { WriteOptions } from './interfaces';
 import { validateArgument, validateOptions } from './utils/validate';
-export interface Options {
-  atomic?: boolean;
-  jsonIndent?: number;
-  mode?: string;
-}
+// Temporary file extensions used for atomic file overwriting.
 const newExt: string = '.__new__';
-
-export function validateInput(methodName: string, path: string, data, options: Options): void {
+export function validateInput(methodName: string, path: string, data, options: WriteOptions): void {
   const methodSignature = methodName + '(path, data, [options])';
   validateArgument(methodSignature, 'path', path, ['string']);
   validateArgument(methodSignature, 'data', data, ['string', 'buffer', 'object', 'array']);
@@ -23,16 +19,11 @@ export function validateInput(methodName: string, path: string, data, options: O
   });
 };
 
-// Temporary file extensions used for atomic file overwriting.
-function serializeToJsonMaybe(data: string | Buffer | Object, jsonIndent: number): string {
-  let indent: number = jsonIndent;
-  if (typeof indent !== 'number') {
-    indent = 2;
-  }
+const toJson = (data: string | Buffer | Object, jsonIndent: number): string => {
   if (typeof data === 'object'
     && !Buffer.isBuffer(data)
     && data !== null) {
-    return json.serialize(data, null, indent);
+    return json.serialize(data, null, typeof jsonIndent !== 'number' ? 2 : jsonIndent);
   }
   return data as string;
 };
@@ -40,7 +31,7 @@ function serializeToJsonMaybe(data: string | Buffer | Object, jsonIndent: number
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-function _writeFileSync(path: string, data: any | string, options?: Options): void {
+const _writeFileSync = (path: string, data: any | string, options?: WriteOptions): void => {
   try {
     writeFileSync(path, data, options);
   } catch (err) {
@@ -54,13 +45,13 @@ function _writeFileSync(path: string, data: any | string, options?: Options): vo
   }
 };
 
-function writeAtomicSync(path: string, data: string, options?: Options): void {
+const writeAtomicSync = (path: string, data: string, options?: WriteOptions): void => {
   return file.write_atomic(path + newExt, data, options);
 };
 
-export function sync(path: string, data: string | Buffer | Object, options?: Options) {
+export function sync(path: string, data: string | Buffer | Object, options?: WriteOptions) {
   const opts: any = options || {};
-  const processedData = serializeToJsonMaybe(data, opts.jsonIndent);
+  const processedData = toJson(data, opts.jsonIndent);
   const writeStrategy = opts.atomic ? writeAtomicSync : _writeFileSync;
   writeStrategy(path, processedData, { mode: opts.mode });
 };
@@ -71,7 +62,7 @@ export function sync(path: string, data: string | Buffer | Object, options?: Opt
 const promisedRename = Q.denodeify(fs.rename);
 const promisedWriteFile = Q.denodeify(fs.writeFile);
 const promisedMkdirp = Q.denodeify(mkdirp);
-function writeFileAsync(path: string, data: string, options?: Options): Promise<null> {
+function writeFileAsync(path: string, data: string, options?: WriteOptions): Promise<null> {
   return new Promise<null>((resolve, reject) => {
     promisedWriteFile(path, data, options)
       .then(resolve)
@@ -91,7 +82,7 @@ function writeFileAsync(path: string, data: string, options?: Options): Promise<
   });
 };
 
-function writeAtomicAsync(path: string, data: string, options?: Options): Promise<null> {
+function writeAtomicAsync(path: string, data: string, options?: WriteOptions): Promise<null> {
   return new Promise((resolve, reject) => {
     // We are assuming there is file on given path, and we don't want
     // to touch it until we are sure our data has been saved correctly,
@@ -103,9 +94,8 @@ function writeAtomicAsync(path: string, data: string, options?: Options): Promis
   });
 }
 
-export function async(path: string, data: string | Buffer | Object, options?: Options): Promise<null> {
+export function async(path: string, data: string | Buffer | Object, options?: WriteOptions): Promise<null> {
   const opts: any = options || {};
-  const processedData: string = serializeToJsonMaybe(data, opts.jsonIndent);
-  const writeStrategy = opts.atomic ? writeAtomicAsync : writeFileAsync;
-  return writeStrategy(path, processedData, { mode: opts.mode });
+  const processedData: string = toJson(data, opts.jsonIndent);
+  return (opts.atomic ? writeAtomicAsync : writeFileAsync)(path, processedData, { mode: opts.mode });
 };

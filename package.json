@@ -1,5 +1,5 @@
 {
-  "name": "fs-jetpack-ts",
+  "name": "@gbaumgart/fs",
   "description": "Simplified file system API in Typescript",
   "version": "0.11.4",
   "contributors": [

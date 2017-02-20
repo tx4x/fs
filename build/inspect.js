@@ -1,12 +1,23 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 const fs_1 = require("fs");
 const pathUtil = require("path");
 const validate_1 = require("./utils/validate");
 const crypto_1 = require("crypto");
-const promisify_1 = require("./promisify");
 const interfaces_1 = require("./interfaces");
 const Q = require("q");
+const denodeify = require("denodeify");
 exports.supportedChecksumAlgorithms = ['md5', 'sha1', 'sha256', 'sha512'];
+const promisedStat = denodeify(fs_1.stat);
+const promisedLstat = denodeify(fs_1.lstat);
+const promisedReadlink = denodeify(fs_1.readlink);
 function validateInput(methodName, path, options) {
     const methodSignature = methodName + '(path, [options])';
     validate_1.validateArgument(methodSignature, 'path', path, ['string']);
@@ -25,7 +36,7 @@ function validateInput(methodName, path, options) {
 }
 exports.validateInput = validateInput;
 ;
-function createInspectObj(path, options, stat) {
+const createInspectObj = (path, options, stat) => {
     let obj = {};
     obj.name = pathUtil.basename(path);
     if (stat.isFile()) {
@@ -52,39 +63,33 @@ function createInspectObj(path, options, stat) {
     if (options.absolutePath) {
         obj.absolutePath = path;
     }
-    obj.total = 1;
+    //obj.total = 1;
     return obj;
-}
-;
+};
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-function fileChecksum(path, algo) {
+const fileChecksum = (path, algo) => {
     const hash = crypto_1.createHash(algo);
     const data = fs_1.readFileSync(path);
     hash.update(data);
     return hash.digest('hex');
-}
-;
-function addExtraFieldsSync(path, inspectObj, options) {
-    if (inspectObj.type === 'file' && options.checksum) {
+};
+const addExtraFieldsSync = (path, inspectObj, options) => {
+    if (inspectObj.type === interfaces_1.EInspectItemType.FILE && options.checksum) {
         inspectObj[options.checksum] = fileChecksum(path, options.checksum);
     }
-    else if (inspectObj.type === 'symlink') {
+    else if (inspectObj.type === interfaces_1.EInspectItemType.SYMLINK) {
         inspectObj.pointsAt = fs_1.readlinkSync(path);
     }
-}
-;
+    return inspectObj;
+};
 function sync(path, options) {
-    let statOperation = fs_1.statSync;
     let stat;
     let inspectObj;
     options = options || {};
-    if (options.symlinks) {
-        statOperation = fs_1.lstatSync;
-    }
     try {
-        stat = statOperation(path);
+        stat = (options.symlinks ? fs_1.lstatSync : fs_1.statSync)(path);
     }
     catch (err) {
         // Detection if path exists
@@ -94,36 +99,26 @@ function sync(path, options) {
         }
         throw err;
     }
-    inspectObj = createInspectObj(path, options, stat);
-    addExtraFieldsSync(path, inspectObj, options);
-    return inspectObj;
+    return addExtraFieldsSync(path, createInspectObj(path, options, stat), options);
 }
 exports.sync = sync;
 ;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-const promisedStat = promisify_1.promisify(fs_1.stat);
-const promisedLstat = promisify_1.promisify(fs_1.lstat);
-const promisedReadlink = promisify_1.promisify(fs_1.readlink);
 function fileChecksumAsync(path, algo) {
-    //return new Promise((resolve, reject) => {
-    const deferred = Q.defer();
-    const hash = crypto_1.createHash(algo);
-    const s = fs_1.createReadStream(path);
-    s.on('data', data => {
-        hash.update(data);
+    return __awaiter(this, void 0, void 0, function* () {
+        const deferred = Q.defer();
+        const hash = crypto_1.createHash(algo);
+        const s = fs_1.createReadStream(path);
+        s.on('data', data => hash.update(data));
+        s.on('end', () => deferred.resolve(hash.digest('hex')));
+        s.on('error', e => deferred.reject(e));
+        return deferred.promise;
     });
-    s.on('end', function () {
-        deferred.resolve(hash.digest('hex'));
-    });
-    s.on('error', function (e) {
-        deferred.reject(e);
-    });
-    return deferred.promise;
 }
 ;
-function addExtraFieldsAsync(path, inspectObj, options) {
+const addExtraFieldsAsync = (path, inspectObj, options) => {
     if (inspectObj.type === interfaces_1.EInspectItemType.FILE && options.checksum) {
         return fileChecksumAsync(path, options.checksum)
             .then(checksum => {
@@ -131,7 +126,7 @@ function addExtraFieldsAsync(path, inspectObj, options) {
             return inspectObj;
         });
     }
-    else if (inspectObj.type === 'symlink') {
+    else if (inspectObj.type === interfaces_1.EInspectItemType.SYMLINK) {
         return promisedReadlink(path)
             .then(linkPath => {
             inspectObj.pointsAt = linkPath;
@@ -139,16 +134,12 @@ function addExtraFieldsAsync(path, inspectObj, options) {
         });
     }
     return new Q(inspectObj);
-}
+};
 function async(path, options) {
     return new Promise((resolve, reject) => {
         options = options || {};
-        const statOperation = options.symlinks ? promisedLstat : promisedStat;
-        statOperation(path)
-            .then((stat) => {
-            const inspectObj = createInspectObj(path, options, stat);
-            addExtraFieldsAsync(path, inspectObj, options).then(resolve, reject);
-        })
+        (options.symlinks ? promisedLstat : promisedStat)(path)
+            .then((stat) => { addExtraFieldsAsync(path, createInspectObj(path, options, stat), options).then(resolve, reject); })
             .catch(err => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
     });
 }

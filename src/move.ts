@@ -11,7 +11,7 @@ export function validateInput(methodName: string, from: string, to: string) {
   validateArgument(methodSignature, 'to', to, ['string']);
 };
 
-function generateSourceDoesntExistError(path): Error {
+const ErrDoesntExists = (path: string): Error => {
   const err = new Error("Path to move doesn't exist " + path);
   err['code'] = 'ENOENT';
   return err;
@@ -32,7 +32,7 @@ export function sync(from, to): void {
       // Ok, source or destination path doesn't exist.
       // Must do more investigation.
       if (!existsSync(from)) {
-        throw generateSourceDoesntExistError(from);
+        throw ErrDoesntExists(from);
       }
       if (!existsSync(to)) {
         // Some parent directory doesn't exist. Create it.
@@ -82,13 +82,11 @@ export function async(from: string, to: string): Promise<null> {
           existsAsync(from)
             .then(srcExists => {
               if (!srcExists) {
-                reject(generateSourceDoesntExistError(from));
+                reject(ErrDoesntExists(from));
               } else {
                 ensureDestinationPathExistsAsync(to)
-                  .then(() => {
-                    // Retry the attempt
-                    return promisedRename(from, to);
-                  })
+                  // Retry the attempt
+                  .then(() => { return promisedRename(from, to); })
                   .then(resolve, reject);
               }
             })

@@ -36,19 +36,19 @@ function normalizeOptions(options?: Options) {
   return opts;
 };
 
-function processFoundObjects(foundObjects: any, cwd: string): string[] {
+function processFoundObjects(foundObjects: any, cwd: string):string[] {
   return foundObjects.map(inspectObj => {
     return pathUtil.relative(cwd, inspectObj.absolutePath);
   });
 };
 
-function generatePathDoesntExistError(path: string): Error {
+function generatePathDoesntExistError(path: string):Error {
   const err = new Error("Path you want to find stuff in doesn't exist " + path);
   err['code'] = 'ENOENT';
   return err;
 };
 
-function generatePathNotDirectoryError(path: string): Error {
+function generatePathNotDirectoryError(path: string):Error {
   const err = new Error('Path you want to find stuff in must be a directory ' + path);
   err['code'] = 'ENOTDIR';
   return err;

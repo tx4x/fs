@@ -52,25 +52,21 @@ function inspectTreeNodeSync(path: string, options: Options, parent: any): IInsp
     if (options.relativePath) {
       treeBranch.relativePath = generateTreeNodeRelativePath(parent, path);
     }
-
-    if (treeBranch.type === 'dir' /*|| (options.symlinks && treeBranch.type === 'symlink')*/) {
+    if (treeBranch.type === EInspectItemType.DIR /*|| (options.symlinks && treeBranch.type === 'symlink')*/) {
       treeBranch.size = 0;
       treeBranch.children = (listSync(path) || []).map(function (filename) {
         let subBranchPath = pathUtil.join(path, filename);
         let treeSubBranch = inspectTreeNodeSync(subBranchPath, options, treeBranch);
         // Add together all childrens' size to get directory combined size.
         treeBranch.size += treeSubBranch.size || 0;
-        treeBranch.total += treeSubBranch.total;
+        //treeBranch.total += treeSubBranch.total;
         return treeSubBranch;
       });
-
-
       if (options.checksum) {
         treeBranch[options.checksum] = checksumOfDir(treeBranch.children, options.checksum);
       }
     }
   }
-
   return treeBranch;
 };
 
@@ -83,49 +79,47 @@ export function sync(path: string, options?: any): any | undefined {
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-
-function inspectTreeNodeAsync(path: string, options: Options, parent?: any) {
+function inspectTreeNodeAsync(path: string, options: Options, parent?: any): Promise<IInspectItem> {
   return new Promise((resolve, reject) => {
-    function inspectAllChildren(treeBranch) {
-      let subDirDeferred = Q.defer();
-      listASync(path).then(function (children: any) {
-        let doNext = function (index: number) {
-          let subPath: string;
-          if (index === children.length) {
-            if (options.checksum) {
-              // We are done, but still have to calculate checksum of whole directory.
-              treeBranch[options.checksum] = checksumOfDir(treeBranch.children, options.checksum);
+    const inspectAllChildren = (treeBranch: IInspectItem) => {
+      return new Promise((resolve, reject) => {
+        listASync(path).then((children: any) => {          
+          const doNext = (index: number) => {
+            let subPath: string;
+            if (index === children.length) {
+              if (options.checksum) {
+                // We are done, but still have to calculate checksum of whole directory.
+                treeBranch[options.checksum] = checksumOfDir(treeBranch.children, options.checksum);
+              }
+              resolve();
+            } else {
+              subPath = pathUtil.join(path, children[index]);
+              inspectTreeNodeAsync(subPath, options, treeBranch)
+                .then((treeSubBranch: IInspectItem) => {
+                  children[index] = treeSubBranch;
+                  treeBranch.size += treeSubBranch.size || 0;
+                  doNext(index + 1);
+                })
+                .catch(reject);
             }
-            subDirDeferred.resolve();
-          } else {
-            subPath = pathUtil.join(path, children[index]);
-            inspectTreeNodeAsync(subPath, options, treeBranch)
-              .then(treeSubBranch => {
-                children[index] = treeSubBranch;
-                treeBranch.size += (treeSubBranch as any).size || 0;
-                doNext(index + 1);
-              })
-              .catch(subDirDeferred.reject);
-          }
-        };
-        treeBranch.children = children;
-        treeBranch.size = 0;
-        doNext(0);
+          };
+          treeBranch.children = children;
+          treeBranch.size = 0;
+          doNext(0);
+        });
       });
-
-      return subDirDeferred.promise;
     };
 
     inspectASync(path, options)
-      .then(treeBranch => {
+      .then((treeBranch: IInspectItem) => {
         if (!treeBranch) {
           // Given path doesn't exist. We are done.
           resolve(treeBranch);
         } else {
           if (options.relativePath) {
-            (treeBranch as any).relativePath = generateTreeNodeRelativePath(parent, path);
+            treeBranch.relativePath = generateTreeNodeRelativePath(parent, path);
           }
-          if ((treeBranch as any).type !== 'dir') {
+          if (treeBranch.type !== EInspectItemType.DIR) {
             resolve(treeBranch);
           } else {
             inspectAllChildren(treeBranch)
@@ -138,7 +132,7 @@ function inspectTreeNodeAsync(path: string, options: Options, parent?: any) {
   });
 };
 
-export function async(path: string, options?: Options) {
+export function async(path: string, options?: Options): Promise<IInspectItem> {
   options = options || {} as Options;
   options.symlinks = true;
   return inspectTreeNodeAsync(path, options);

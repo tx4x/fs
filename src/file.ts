@@ -1,9 +1,12 @@
 import * as fs from 'fs';
 import { Stats } from 'fs';
 import * as Q from 'q';
+import * as denodeify from 'denodeify';
 import { normalizeFileMode } from './utils/mode';
 import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync, async as writeASync } from './write';
+const promisedStat = Q.denodeify(fs.stat);
+const promisedChmod = Q.denodeify(fs.chmod);
 
 export interface Options {
   content: string | Buffer | Object | Array<any>;
@@ -29,7 +32,7 @@ function defaults(passedCriteria: Options | null): Options {
   return criteria;
 };
 
-function generatePathOccupiedByNotFileError(path: string): Error {
+function ErrNotFile(path: string): Error {
   return new Error('Path ' + path + ' exists but is not a file.' +
     ' Halting jetpack.file() call for safety reasons.');
 };
@@ -38,7 +41,7 @@ function generatePathOccupiedByNotFileError(path: string): Error {
 // Sync
 // ---------------------------------------------------------
 
-function checkWhatAlreadyOccupiesPathSync(path: string) {
+function isFile(path: string): Stats {
   let stat: Stats;
   try {
     stat = fs.statSync(path);
@@ -50,55 +53,51 @@ function checkWhatAlreadyOccupiesPathSync(path: string) {
   }
 
   if (stat && !stat.isFile()) {
-    throw generatePathOccupiedByNotFileError(path);
+    throw ErrNotFile(path);
   }
 
   return stat;
 };
 
-function checkExistingFileFulfillsCriteriaSync(path: string, stat: Stats, criteria?: Options) {
-  const mode = normalizeFileMode(stat.mode);
-  const checkContent = function (): boolean {
-    if (criteria.content !== undefined) {
-      writeSync(path, criteria.content, {
-        mode: mode,
-        jsonIndent: criteria.jsonIndent
-      });
-      return true;
-    }
-    return false;
-  };
+const checkContent = function (path: string, mode: string, options: Options): boolean {
+  if (options.content !== undefined) {
+    writeSync(path, options.content, {
+      mode: mode,
+      jsonIndent: options.jsonIndent
+    });
+    return true;
+  }
+  return false;
+};
 
-  const checkMode = function () {
-    if (criteria.mode !== undefined && criteria.mode !== mode) {
-      fs.chmodSync(path, criteria.mode as string);
-    }
-  };
-
-  const contentReplaced = checkContent();
-  if (!contentReplaced) {
-    checkMode();
+const checkMode = function (path: string, mode: string, options: Options) {
+  if (options.mode !== undefined && options.mode !== mode) {
+    fs.chmodSync(path, options.mode);
   }
 };
 
-function createBrandNewFileSync(path: string, criteria: Options) {
-  let content: string | Buffer | Object | Array<any> = '';
-  if (criteria.content !== undefined) {
-    content = criteria.content;
+const accept = (path: string, stat: Stats, options?: Options): void => {
+  const mode = normalizeFileMode(stat.mode);
+  if (!checkContent(path, mode, options)) {
+    checkMode(path, mode, options);
   }
+};
+
+const touch = (path: string, options: Options): void => {
+  const content: string | Buffer | Object | Array<any> = options.content !== undefined ? options.content : '';
   writeSync(path, content, {
-    mode: criteria.mode,
-    jsonIndent: criteria.jsonIndent
+    mode: options.mode,
+    jsonIndent: options.jsonIndent
   });
 };
 
-export function sync(path: string, passedCriteria: Options) {
-  const criteria = defaults(passedCriteria);
-  const stat: Stats = checkWhatAlreadyOccupiesPathSync(path);
+export function sync(path: string, options: Options) {
+  options = defaults(options);
+  const stat: Stats = isFile(path);
   if (stat !== undefined) {
-    checkExistingFileFulfillsCriteriaSync(path, stat, criteria);
+    accept(path, stat, options);
   } else {
-    createBrandNewFileSync(path, criteria);
+    touch(path, options);
   }
 };
 
@@ -106,71 +105,65 @@ export function sync(path: string, passedCriteria: Options) {
 // Async
 // ---------------------------------------------------------
 
-const promisedStat = Q.denodeify(fs.stat);
-const promisedChmod = Q.denodeify(fs.chmod);
-
-function checkWhatAlreadyOccupiesPathAsync(path: string) {
-  return new Promise((resolve, reject) => {
+function isFileAsync(path: string): Promise<Stats> {
+  return new Promise<Stats>((resolve, reject) => {
     promisedStat(path)
-      .then(stat => {
-        if ((stat as Stats).isFile()) {
+      .then((stat: Stats) => {
+        if ((stat).isFile()) {
           resolve(stat);
         } else {
-          reject(generatePathOccupiedByNotFileError(path));
+          reject(ErrNotFile(path));
         }
       })
       .catch(err => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
   });
 };
-
-function checkExistingFileFulfillsCriteriaAsync(path: string, stat: Stats, criteria: Options) {
-  const mode = normalizeFileMode(stat.mode);
-  const checkContent = () => {
-    return new Promise((resolve, reject) => {
-      if (criteria.content !== undefined) {
-        writeASync(path, criteria.content, {
-          mode: mode,
-          jsonIndent: criteria.jsonIndent
-        }).then(() => resolve(true))
-          .catch(reject);
-      } else {
-        resolve(false);
-      }
-    });
-  };
-
-  const checkMode = function () {
-    if (criteria.mode !== undefined && criteria.mode !== mode) {
-      return promisedChmod(path, criteria.mode);
+const checkModeAsync = (path: string, mode: string, options: Options) => {
+  if (options.mode !== undefined && options.mode !== mode) {
+    return promisedChmod(path, options.mode);
+  }
+  return undefined;
+};
+const checkContentAsync = (path: string, mode: string, options: Options) => {
+  return new Promise((resolve, reject) => {
+    if (options.content !== undefined) {
+      writeASync(path, options.content, {
+        mode: mode,
+        jsonIndent: options.jsonIndent
+      }).then(() => resolve(true))
+        .catch(reject);
+    } else {
+      resolve(false);
     }
-    return undefined;
-  };
-
-  return checkContent()
+  });
+};
+async function writeAsync(path: string, stat: Stats, options: Options): Promise<boolean> {
+  const mode = normalizeFileMode(stat.mode);
+  return checkContentAsync(path, mode, options)
     .then(contentReplaced => {
       if (!contentReplaced) {
-        return checkMode();
+        return checkModeAsync(path, mode, options);
       }
       return undefined;
     });
 };
 
-function createBrandNewFileAsync(path, criteria) {
-  return writeASync(path, criteria.content !== undefined ? criteria.content : '', {
-    mode: criteria.mode,
-    jsonIndent: criteria.jsonIndent
+const touchAsync = (path: string, options: Options) => {
+  return writeASync(path, options.content !== undefined ? options.content : '', {
+    mode: options.mode,
+    jsonIndent: options.jsonIndent
   });
 };
 
-export function async(path: string, passedCriteria) {
+export async function async(path: string, options: Options) {
   return new Promise((resolve, reject) => {
-    const criteria = defaults(passedCriteria);
-    checkWhatAlreadyOccupiesPathAsync(path)
-      .then(stat => {
+    options = defaults(options);
+    isFileAsync(path)
+      .then((stat: Stats) => {
         if (stat !== undefined) {
-          return checkExistingFileFulfillsCriteriaAsync(path, stat as Stats, criteria);
+          return writeAsync(path, stat, options);
         }
-        return createBrandNewFileAsync(path, criteria);
+        return touchAsync(path, options);
       })
       .then(resolve, reject);
   });

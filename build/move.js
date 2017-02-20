@@ -12,12 +12,11 @@ function validateInput(methodName, from, to) {
 }
 exports.validateInput = validateInput;
 ;
-function generateSourceDoesntExistError(path) {
+const ErrDoesntExists = (path) => {
     const err = new Error("Path to move doesn't exist " + path);
     err['code'] = 'ENOENT';
     return err;
-}
-;
+};
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
@@ -34,7 +33,7 @@ function sync(from, to) {
             // Ok, source or destination path doesn't exist.
             // Must do more investigation.
             if (!exists_1.sync(from)) {
-                throw generateSourceDoesntExistError(from);
+                throw ErrDoesntExists(from);
             }
             if (!exists_1.sync(to)) {
                 // Some parent directory doesn't exist. Create it.
@@ -85,14 +84,11 @@ function async(from, to) {
                 exists_1.async(from)
                     .then(srcExists => {
                     if (!srcExists) {
-                        reject(generateSourceDoesntExistError(from));
+                        reject(ErrDoesntExists(from));
                     }
                     else {
                         ensureDestinationPathExistsAsync(to)
-                            .then(() => {
-                            // Retry the attempt
-                            return promisedRename(from, to);
-                        })
+                            .then(() => { return promisedRename(from, to); })
                             .then(resolve, reject);
                     }
                 })

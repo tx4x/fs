@@ -2,6 +2,7 @@
 const stream_1 = require("stream");
 const pathUtil = require("path");
 const inspect_1 = require("../inspect");
+const interfaces_1 = require("../interfaces");
 const list_1 = require("../list");
 // ---------------------------------------------------------
 // SYNC
@@ -15,16 +16,14 @@ function sync(path, options, callback, currentLevel) {
         currentLevel = 0;
     }
     let children = [];
-    let hasChildren = item && item.type === 'dir' && currentLevel < options.maxLevelsDeep;
+    const hasChildren = item && item.type === interfaces_1.EInspectItemType.DIR && currentLevel < options.maxLevelsDeep;
     if (hasChildren) {
         children = list_1.sync(path);
     }
     ;
     callback(path, item);
     if (hasChildren) {
-        children.forEach(child => {
-            sync(path + pathUtil.sep + child, options, callback, currentLevel + 1);
-        });
+        children.forEach(child => sync(path + pathUtil.sep + child, options, callback, currentLevel + 1));
     }
 }
 exports.sync = sync;
@@ -41,10 +40,8 @@ function stream(path, options) {
     };
     let running = false;
     let readSome;
-    let error = function (err) {
-        rs.emit('error', err);
-    };
-    let findNextUnprocessedNode = function (node) {
+    const error = (err) => { rs.emit('error', err); };
+    const findNextUnprocessedNode = (node) => {
         if (node.nextSibling) {
             return node.nextSibling;
         }
@@ -53,7 +50,7 @@ function stream(path, options) {
         }
         return undefined;
     };
-    let pushAndContinueMaybe = function (data) {
+    const pushAndContinueMaybe = (data) => {
         let theyWantMore = rs.push(data);
         running = false;
         if (!nextTreeNode) {
@@ -67,16 +64,18 @@ function stream(path, options) {
     if (options.maxLevelsDeep === undefined) {
         options.maxLevelsDeep = Infinity;
     }
-    readSome = function () {
-        let theNode = nextTreeNode;
+    readSome = () => {
+        const theNode = nextTreeNode;
         running = true;
         inspect_1.async(theNode.path, options.inspectOptions)
-            .then(function (inspected) {
+            .then((inspected) => {
             theNode.inspected = inspected;
-            if (inspected && inspected.type === 'dir' && theNode.level < options.maxLevelsDeep) {
+            if (inspected &&
+                (inspected).type === interfaces_1.EInspectItemType.DIR &&
+                theNode.level < options.maxLevelsDeep) {
                 list_1.async(theNode.path)
-                    .then(function (childrenNames) {
-                    let children = childrenNames.map(function (name) {
+                    .then((childrenNames) => {
+                    const children = childrenNames.map(function (name) {
                         return {
                             name: name,
                             path: theNode.path + pathUtil.sep + name,
@@ -84,7 +83,7 @@ function stream(path, options) {
                             level: theNode.level + 1
                         };
                     });
-                    children.forEach(function (child, index) {
+                    children.forEach((child, index) => {
                         child.nextSibling = children[index + 1];
                     });
                     nextTreeNode = children[0] || findNextUnprocessedNode(theNode);

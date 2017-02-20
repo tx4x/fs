@@ -1,6 +1,7 @@
 "use strict";
 const fs_1 = require("fs");
 const validate_1 = require("./utils/validate");
+const interfaces_1 = require("./interfaces");
 function validateInput(methodName, path) {
     const methodSignature = methodName + '(path)';
     validate_1.validateArgument(methodSignature, 'path', path, ['string']);
@@ -38,7 +39,7 @@ function async(path) {
     return new Promise((resolve, reject) => {
         fs_1.stat(path, (err, stat) => {
             if (err) {
-                if (err.code === 'ENOENT' || err.code === 'ENOTDIR') {
+                if (err.code === 'ENOENT') {
                     resolve(false);
                 }
                 else {
@@ -46,13 +47,13 @@ function async(path) {
                 }
             }
             else if (stat.isDirectory()) {
-                resolve('dir');
+                resolve(interfaces_1.EInspectItemType.DIR);
             }
             else if (stat.isFile()) {
-                resolve('file');
+                resolve(interfaces_1.EInspectItemType.FILE);
             }
             else {
-                resolve('other');
+                resolve(interfaces_1.EInspectItemType.OTHER);
             }
         });
     });

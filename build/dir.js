@@ -22,22 +22,20 @@ exports.validateInput = function (methodName, path, criteria) {
         mode: ['string', 'number']
     });
 };
-function getCriteriaDefaults(passedCriteria) {
-    const criteria = passedCriteria || {};
-    if (typeof criteria.empty !== 'boolean') {
-        criteria.empty = false;
+const defaults = (passedOptions) => {
+    const result = passedOptions || {};
+    if (typeof result.empty !== 'boolean') {
+        result.empty = false;
     }
-    if (criteria.mode !== undefined) {
-        criteria.mode = mode_1.normalizeFileMode(criteria.mode);
+    if (result.mode !== undefined) {
+        result.mode = mode_1.normalizeFileMode(result.mode);
     }
-    return criteria;
-}
-;
-function generatePathOccupiedByNotDirectoryError(path) {
+    return result;
+};
+const ErrNoDirectory = (path) => {
     return new Error('Path ' + path + ' exists but is not a directory.' +
         ' Halting jetpack.dir() call for safety reasons.');
-}
-;
+};
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
@@ -53,7 +51,7 @@ function checkWhatAlreadyOccupiesPathSync(path) {
         }
     }
     if (stat && !stat.isDirectory()) {
-        throw generatePathOccupiedByNotDirectoryError(path);
+        throw ErrNoDirectory(path);
     }
     return stat;
 }
@@ -84,7 +82,7 @@ function checkExistingDirectoryFulfillsCriteriaSync(path, stat, criteria) {
 }
 ;
 function sync(path, passedCriteria) {
-    let criteria = getCriteriaDefaults(passedCriteria);
+    let criteria = defaults(passedCriteria);
     let stat = checkWhatAlreadyOccupiesPathSync(path);
     if (stat) {
         checkExistingDirectoryFulfillsCriteriaSync(path, stat, criteria);
@@ -112,7 +110,7 @@ function checkWhatAlreadyOccupiesPathAsync(path) {
                     resolve(stat);
                 }
                 else {
-                    reject(generatePathOccupiedByNotDirectoryError(path));
+                    reject(ErrNoDirectory(path));
                 }
             })
                 .catch(function (err) {
@@ -159,7 +157,7 @@ const checkMode = function (criteria, stat, path) {
     }
     return Promise.resolve(null);
 };
-function checkExistingDirectoryFulfillsCriteriaAsync(path, stat, criteria) {
+const checkExistingDirectoryFulfillsCriteriaAsync = (path, stat, criteria) => {
     return new Promise((resolve, reject) => {
         const checkEmptiness = function () {
             if (criteria.empty) {
@@ -171,14 +169,12 @@ function checkExistingDirectoryFulfillsCriteriaAsync(path, stat, criteria) {
             .then(checkEmptiness)
             .then(resolve, reject);
     });
-}
-;
-function createBrandNewDirectoryAsync(path, criteria) {
+};
+const createBrandNewDirectoryAsync = (path, criteria) => {
     return promisedMkdirp(path, { mode: criteria.mode });
-}
-;
+};
 function async(path, passedCriteria) {
-    const criteria = getCriteriaDefaults(passedCriteria);
+    const criteria = defaults(passedCriteria);
     return new Promise((resolve, reject) => {
         checkWhatAlreadyOccupiesPathAsync(path)
             .then((stat) => {

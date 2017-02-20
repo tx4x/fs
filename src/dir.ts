@@ -9,7 +9,7 @@ export interface Options {
   empty?: boolean;
   mode?: number | string;
 }
-export let validateInput = function (methodName: string, path: string, criteria?: Options) {
+export const validateInput = function (methodName: string, path: string, criteria?: Options) {
   let methodSignature = methodName + '(path, [criteria])';
   validateArgument(methodSignature, 'path', path, ['string']);
   validateOptions(methodSignature, 'criteria', criteria, {
@@ -18,18 +18,18 @@ export let validateInput = function (methodName: string, path: string, criteria?
   });
 };
 
-function getCriteriaDefaults(passedCriteria?: Options): Options {
-  const criteria = passedCriteria || {};
-  if (typeof criteria.empty !== 'boolean') {
-    criteria.empty = false;
+const defaults = (passedOptions?: Options): Options => {
+  const result = passedOptions || {};
+  if (typeof result.empty !== 'boolean') {
+    result.empty = false;
   }
-  if (criteria.mode !== undefined) {
-    criteria.mode = modeUtil(criteria.mode);
+  if (result.mode !== undefined) {
+    result.mode = modeUtil(result.mode);
   }
-  return criteria;
+  return result;
 };
 
-function generatePathOccupiedByNotDirectoryError(path: string): Error {
+const ErrNoDirectory = (path: string): Error => {
   return new Error('Path ' + path + ' exists but is not a directory.' +
     ' Halting jetpack.dir() call for safety reasons.');
 };
@@ -50,7 +50,7 @@ function checkWhatAlreadyOccupiesPathSync(path: string): Stats {
   }
 
   if (stat && !stat.isDirectory()) {
-    throw generatePathOccupiedByNotDirectoryError(path);
+    throw ErrNoDirectory(path);
   }
 
   return stat;
@@ -82,7 +82,7 @@ function checkExistingDirectoryFulfillsCriteriaSync(path: string, stat: Stats, c
 };
 
 export function sync(path: string, passedCriteria?: Options) {
-  let criteria = getCriteriaDefaults(passedCriteria);
+  let criteria = defaults(passedCriteria);
   let stat = checkWhatAlreadyOccupiesPathSync(path);
   if (stat) {
     checkExistingDirectoryFulfillsCriteriaSync(path, stat, criteria);
@@ -108,7 +108,7 @@ async function checkWhatAlreadyOccupiesPathAsync(path: string): Promise<Stats> {
         if (stat.isDirectory()) {
           resolve(stat);
         } else {
-          reject(generatePathOccupiedByNotDirectoryError(path));
+          reject(ErrNoDirectory(path));
         }
       })
       .catch(function (err) {
@@ -153,7 +153,7 @@ const checkMode = function (criteria, stat, path) {
   return Promise.resolve(null);
 };
 
-function checkExistingDirectoryFulfillsCriteriaAsync(path: string, stat: Stats, criteria: Options) {
+const checkExistingDirectoryFulfillsCriteriaAsync = (path: string, stat: Stats, criteria: Options) => {
   return new Promise((resolve, reject) => {
     const checkEmptiness = function () {
       if (criteria.empty) {
@@ -167,12 +167,12 @@ function checkExistingDirectoryFulfillsCriteriaAsync(path: string, stat: Stats, 
   });
 };
 
-function createBrandNewDirectoryAsync(path: string, criteria: Options): Promise<null> {
+const createBrandNewDirectoryAsync = (path: string, criteria: Options): Promise<null> => {
   return promisedMkdirp(path, { mode: criteria.mode });
 };
 
 export function async(path: string, passedCriteria?: Options) {
-  const criteria = getCriteriaDefaults(passedCriteria);
+  const criteria = defaults(passedCriteria);
   return new Promise((resolve, reject) => {
     checkWhatAlreadyOccupiesPathAsync(path)
       .then((stat: Stats) => {

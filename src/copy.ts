@@ -19,6 +19,9 @@ interface ICopyTask {
   dst: string;
   done: boolean;
 }
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled rejection, reason: ', reason);
+});
 
 export function validateInput(methodName: string, from: string, to: string, options?: ICopyOptions): void {
   const methodSignature = methodName + '(from, to, [options])';
@@ -41,21 +44,18 @@ function parseOptions(options: any | null, from: string): ICopyOptions {
   if (opts.matching) {
     parsedOptions.allowedToCopy = matcher(from, opts.matching);
   } else {
-    parsedOptions.allowedToCopy = function () {
-      // Default behaviour - copy everything.
-      return true;
-    };
+    parsedOptions.allowedToCopy = () => { return true; };
   }
   return parsedOptions;
 };
 
-function generateNoSourceError(path: string): Error {
+const ErrDoesntExists = (path: string): Error => {
   const err: any = new Error("Path to copy doesn't exist " + path);
   err.code = 'ENOENT';
   return err;
 };
 
-function generateDestinationExistsError(path): Error {
+const ErrDestinationExists = (path): Error => {
   const err: any = new Error('Destination path already exists ' + path);
   err.code = 'EEXIST';
   return err;
@@ -67,11 +67,11 @@ function generateDestinationExistsError(path): Error {
 
 function checksBeforeCopyingSync(from: string, to: string, options?: ICopyOptions) {
   if (!existsSync(from)) {
-    throw generateNoSourceError(from);
+    throw ErrDoesntExists(from);
   }
 
   if (existsSync(to) && !options.overwrite) {
-    throw generateDestinationExistsError(to);
+    throw ErrDestinationExists(to);
   }
 };
 async function copyFileSyncWithProgress(from: string, to: string, options?: ICopyOptions) {
@@ -108,12 +108,13 @@ async function copyFileSync(from: string, to: string, mode, options?: ICopyOptio
   const writeOptions: WriteOptions = {
     mode: mode
   };
-  if (options.writeProgress) {
+  if (options && options.writeProgress) {
     await copyFileSyncWithProgress(from, to, options);
   } else {
     writeSync(to, data as any, writeOptions);
   }
 };
+
 function copySymlinkSync(from: string, to: string) {
   const symlinkPointsAt = fs.readlinkSync(from);
   try {
@@ -130,6 +131,7 @@ function copySymlinkSync(from: string, to: string) {
     }
   }
 };
+
 async function copyItemSync(from: string, inspectData: IInspectItem, to: string, options: ICopyOptions) {
   const mode: string = fileMode(inspectData.mode);
   if (inspectData.type === EInspectItemType.DIR) {
@@ -140,6 +142,7 @@ async function copyItemSync(from: string, inspectData: IInspectItem, to: string,
     copySymlinkSync(from, to);
   }
 };
+
 export function sync(from: string, to: string, options?: ICopyOptions) {
   const opts = parseOptions(options, from);
   checksBeforeCopyingSync(from, to, opts);
@@ -188,14 +191,14 @@ function checksBeforeCopyingAsync(from: string, to: string, opts?: ICopyOptions)
   return existsASync(from)
     .then(srcPathExists => {
       if (!srcPathExists) {
-        throw generateNoSourceError(from);
+        throw ErrDoesntExists(from);
       } else {
         return existsASync(to);
       }
     })
     .then(destPathExists => {
       if (destPathExists && !opts.overwrite) {
-        throw generateDestinationExistsError(to);
+        throw ErrDestinationExists(to);
       }
     });
 };
@@ -205,7 +208,7 @@ function copyFileAsync(from: string, to: string, mode: any, retriedAttempt?: any
     const readStream = fs.createReadStream(from);
     const writeStream = fs.createWriteStream(to, { mode: mode });
     readStream.on('error', reject);
-    writeStream.on('error', function (err) {
+    writeStream.on('error', (err) => {
       const toDirPath = pathUtil.dirname(to);
       // Force read stream to close, since write stream errored
       // read stream serves us no purpose.
@@ -242,7 +245,7 @@ function copySymlinkAsync(from: string, to: string) {
               // There is already file/symlink with this name on destination location.
               // Must erase it manually, otherwise system won't allow us to place symlink there.
               promisedUnlink(to)
-                .then(function () {
+                .then(() => {
                   // Retry...
                   return promisedSymlink(symlinkPointsAt, to);
                 })

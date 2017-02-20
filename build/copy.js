@@ -20,6 +20,9 @@ const validate_1 = require("./utils/validate");
 const write_1 = require("./write");
 const progress = require("progress-stream");
 const interfaces_1 = require("./interfaces");
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled rejection, reason: ', reason);
+});
 function validateInput(methodName, from, to, options) {
     const methodSignature = methodName + '(from, to, [options])';
     validate_1.validateArgument(methodSignature, 'from', from, ['string']);
@@ -43,35 +46,30 @@ function parseOptions(options, from) {
         parsedOptions.allowedToCopy = matcher_1.create(from, opts.matching);
     }
     else {
-        parsedOptions.allowedToCopy = function () {
-            // Default behaviour - copy everything.
-            return true;
-        };
+        parsedOptions.allowedToCopy = () => { return true; };
     }
     return parsedOptions;
 }
 ;
-function generateNoSourceError(path) {
+const ErrDoesntExists = (path) => {
     const err = new Error("Path to copy doesn't exist " + path);
     err.code = 'ENOENT';
     return err;
-}
-;
-function generateDestinationExistsError(path) {
+};
+const ErrDestinationExists = (path) => {
     const err = new Error('Destination path already exists ' + path);
     err.code = 'EEXIST';
     return err;
-}
-;
+};
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
 function checksBeforeCopyingSync(from, to, options) {
     if (!exists_1.sync(from)) {
-        throw generateNoSourceError(from);
+        throw ErrDoesntExists(from);
     }
     if (exists_1.sync(to) && !options.overwrite) {
-        throw generateDestinationExistsError(to);
+        throw ErrDestinationExists(to);
     }
 }
 ;
@@ -113,7 +111,7 @@ function copyFileSync(from, to, mode, options) {
         const writeOptions = {
             mode: mode
         };
-        if (options.writeProgress) {
+        if (options && options.writeProgress) {
             yield copyFileSyncWithProgress(from, to, options);
         }
         else {
@@ -201,7 +199,7 @@ function checksBeforeCopyingAsync(from, to, opts) {
     return exists_1.async(from)
         .then(srcPathExists => {
         if (!srcPathExists) {
-            throw generateNoSourceError(from);
+            throw ErrDoesntExists(from);
         }
         else {
             return exists_1.async(to);
@@ -209,7 +207,7 @@ function checksBeforeCopyingAsync(from, to, opts) {
     })
         .then(destPathExists => {
         if (destPathExists && !opts.overwrite) {
-            throw generateDestinationExistsError(to);
+            throw ErrDestinationExists(to);
         }
     });
 }
@@ -219,7 +217,7 @@ function copyFileAsync(from, to, mode, retriedAttempt) {
         const readStream = fs.createReadStream(from);
         const writeStream = fs.createWriteStream(to, { mode: mode });
         readStream.on('error', reject);
-        writeStream.on('error', function (err) {
+        writeStream.on('error', (err) => {
             const toDirPath = pathUtil.dirname(to);
             // Force read stream to close, since write stream errored
             // read stream serves us no purpose.
@@ -255,7 +253,7 @@ function copySymlinkAsync(from, to) {
                     // There is already file/symlink with this name on destination location.
                     // Must erase it manually, otherwise system won't allow us to place symlink there.
                     promisedUnlink(to)
-                        .then(function () {
+                        .then(() => {
                         // Retry...
                         return promisedSymlink(symlinkPointsAt, to);
                     })

@@ -161,7 +161,7 @@ function sync(from, to, options) {
     let nodes = [];
     let current = 0;
     let sizeTotal = 0;
-    const visitor = function (path, inspectData) {
+    const visitor = (path, inspectData) => {
         const rel = pathUtil.relative(from, path);
         const destPath = pathUtil.resolve(to, rel);
         if (opts.allowedToCopy(path)) {

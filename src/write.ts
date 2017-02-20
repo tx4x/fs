@@ -6,6 +6,9 @@ import * as mkdirp from 'mkdirp';
 import { json, file } from './imports';
 import { WriteOptions } from './interfaces';
 import { validateArgument, validateOptions } from './utils/validate';
+
+export type Data = string | Buffer | Object;
+
 // Temporary file extensions used for atomic file overwriting.
 const newExt: string = '.__new__';
 export function validateInput(methodName: string, path: string, data, options: WriteOptions): void {
@@ -49,7 +52,7 @@ const writeAtomicSync = (path: string, data: string, options?: WriteOptions): vo
   return file.write_atomic(path + newExt, data, options);
 };
 
-export function sync(path: string, data: string | Buffer | Object, options?: WriteOptions) {
+export function sync(path: string, data: Data, options?: WriteOptions) {
   const opts: any = options || {};
   const processedData = toJson(data, opts.jsonIndent);
   const writeStrategy = opts.atomic ? writeAtomicSync : _writeFileSync;
@@ -94,7 +97,7 @@ function writeAtomicAsync(path: string, data: string, options?: WriteOptions): P
   });
 }
 
-export function async(path: string, data: string | Buffer | Object, options?: WriteOptions): Promise<null> {
+export function async(path: string, data: Data, options?: WriteOptions): Promise<null> {
   const opts: any = options || {};
   const processedData: string = toJson(data, opts.jsonIndent);
   return (opts.atomic ? writeAtomicAsync : writeFileAsync)(path, processedData, { mode: opts.mode });

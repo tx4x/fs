@@ -1,10 +1,10 @@
-let Minimatch = require('minimatch').Minimatch;
-let convertPatternToAbsolutePath = function (basePath, pattern) {
+import { Minimatch } from 'minimatch';
+const patternToAbsolutePath = (basePath: string, pattern): string => {
   // All patterns without slash are left as they are, if pattern contain
   // any slash we need to turn it into absolute path.
-  let hasSlash = (pattern.indexOf('/') !== -1);
-  let isAbsolute = /^!?\//.test(pattern);
-  let isNegated = /^!/.test(pattern);
+  const hasSlash: boolean = (pattern.indexOf('/') !== -1);
+  const isAbsolute: boolean = /^!?\//.test(pattern);
+  const isNegated: boolean = /^!/.test(pattern);
   let separator;
 
   if (!isAbsolute && hasSlash) {
@@ -26,17 +26,14 @@ let convertPatternToAbsolutePath = function (basePath, pattern) {
   return pattern;
 };
 
-export function create (basePath, patterns) {
+export function create(basePath: string, patterns) {
   let matchers;
-
   if (typeof patterns === 'string') {
     patterns = [patterns];
   }
-
-  matchers = patterns.map(function (pattern) {
-    return convertPatternToAbsolutePath(basePath, pattern);
-  })
-  .map(function (pattern) {
+  matchers = patterns.map(pattern => {
+    return patternToAbsolutePath(basePath, pattern);
+  }).map(pattern => {
     return new Minimatch(pattern, {
       matchBase: true,
       nocomment: true,
@@ -44,7 +41,7 @@ export function create (basePath, patterns) {
     });
   });
 
-  return function performMatch(absolutePath) {
+  return function performMatch(absolutePath: string): boolean {
     let mode = 'matching';
     let weHaveMatch = false;
     let currentMatcher;
@@ -52,7 +49,6 @@ export function create (basePath, patterns) {
 
     for (i = 0; i < matchers.length; i += 1) {
       currentMatcher = matchers[i];
-
       if (currentMatcher.negate) {
         mode = 'negation';
         if (i === 0) {

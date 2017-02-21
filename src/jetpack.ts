@@ -25,8 +25,8 @@ import * as streams from './streams';
 import { WriteOptions } from './interfaces';
 import * as write from './write';
 import * as read from './read';
-
 import { ECopyOverwriteMode, ICopyOptions, IInspectItem, IInspectOptions } from './interfaces';
+import { testCollision } from './playground';
 
 export interface IJetpack {
   cwd(w?: any): IJetpack | string;
@@ -321,20 +321,5 @@ export function jetpack(cwdPath?: string): IJetpack {
   return api;
 };
 
-/*
 
-process.on('unhandledRejection', (reason) => {
-  console.error('Unhandled rejection, reason: ', reason);
-});
-
-jetpack().copy('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
-  overwrite: true,
-  progress: (path: string, current: number, total: number, item: IInspectItem) => {
-    console.log('copied item ' + path + ' ' + current + ' from ' + total);
-  },
-  writeProgress: (path: string, current: number, total: number) => {
-    console.log('write ' + path + ' / ' + current + ' from ' + total);
-  }
-});
-*/
-
+testCollision();

@@ -58,7 +58,14 @@ const createInspectObj = (path: string, options: IInspectOptions, stat: Stats): 
   //obj.total = 1;
   return obj;
 };
-
+export function createItem(path: string, options?: IInspectOptions):IInspectItem {
+  options = options || {
+    times:true,
+    mode:true
+  } as IInspectOptions;
+  const stat = (options.symlinks ? lstatSync : statSync)(path);
+  return createInspectObj(path, options, stat);
+}
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
@@ -98,7 +105,7 @@ export function sync(path: string, options?: IInspectOptions): IInspectItem {
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-async function fileChecksumAsync(path: string, algo: string): Promise<string>{
+async function fileChecksumAsync(path: string, algo: string): Promise<string> {
   const deferred = Q.defer();
   const hash = createHash(algo);
   const s = createReadStream(path);

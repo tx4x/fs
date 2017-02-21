@@ -9,13 +9,14 @@ import { normalizeFileMode as fileMode } from './utils/mode';
 import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
 import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync } from './write';
-import * as  progress from 'progress-stream';
+
 import { IInspectItem, IInspectOptions, EInspectItemType, WriteOptions } from './interfaces';
 import { ICopyOptions, ECopyOverwriteMode, ItemProgressCallback, WriteProgressCallback } from './interfaces';
 const promisedSymlink = Q.denodeify(fs.symlink);
 const promisedReadlink = Q.denodeify(fs.readlink);
 const promisedUnlink = Q.denodeify(fs.unlink);
 const promisedMkdirp = Q.denodeify(mkdirp);
+const progress = require('progress-stream');
 
 interface ICopyTask {
   path: string;

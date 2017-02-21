@@ -18,12 +18,12 @@ const mode_1 = require("./utils/mode");
 const tree_walker_1 = require("./utils/tree_walker");
 const validate_1 = require("./utils/validate");
 const write_1 = require("./write");
-const progress = require("progress-stream");
 const interfaces_1 = require("./interfaces");
 const promisedSymlink = Q.denodeify(fs.symlink);
 const promisedReadlink = Q.denodeify(fs.readlink);
 const promisedUnlink = Q.denodeify(fs.unlink);
 const promisedMkdirp = Q.denodeify(mkdirp);
+const progress = require('progress-stream');
 function validateInput(methodName, from, to, options) {
     const methodSignature = methodName + '(from, to, [options])';
     validate_1.validateArgument(methodSignature, 'from', from, ['string']);

@@ -94,6 +94,7 @@ function writeAtomicAsync(path, data, options) {
             .then(resolve, reject);
     });
 }
+;
 function async(path, data, options) {
     const opts = options || {};
     const processedData = toJson(data, opts.jsonIndent);

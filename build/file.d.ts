@@ -1,3 +1,4 @@
+/// <reference types="node" />
 export interface Options {
     content: string | Buffer | Object | Array<any>;
     jsonIndent: number;

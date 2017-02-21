@@ -1,3 +1,4 @@
+/// <reference types="node" />
 export interface Options {
     mode: string;
     encoding?: string;

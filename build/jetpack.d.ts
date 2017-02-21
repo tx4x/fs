@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { Options as AppendOptions } from './append';
 import { Options as DirOptions } from './dir';
 import { Options as FileOptions } from './file';

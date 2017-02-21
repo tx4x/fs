@@ -95,7 +95,7 @@ function writeAtomicAsync(path: string, data: string, options?: WriteOptions): P
       .then(() => promisedRename(path + newExt, path))
       .then(resolve, reject);
   });
-}
+};
 
 export function async(path: string, data: Data, options?: WriteOptions): Promise<null> {
   const opts: any = options || {};

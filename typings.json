@@ -1,11 +1,10 @@
 {
+  "name": "gbaumgart-fs",
   "dependencies": {
     "denodeify": "registry:dt/denodeify#1.2.1+20160428043022",
     "minimatch": "registry:npm/minimatch#3.0.0+20170119000329",
     "mkdirp": "registry:npm/mkdirp#0.5.0+20160723033700",
     "rimraf": "registry:npm/rimraf#2.5.0+20160723033700"
   },
-  "globalDependencies": {
-    "node": "registry:dt/node#7.0.0+20170204020307"
-  }
+  "globalDependencies": {}
 }

@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { Readable } from 'stream';
 import { IInspectOptions, IInspectItem } from '../interfaces';
 export interface Options {

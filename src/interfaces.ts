@@ -8,6 +8,14 @@ export enum ENodeType {
   SYMLINK = <any>'symlink',
   OTHER = <any>'other'
 }
+
+export let EError: any = {
+  NONE: 'None',
+  EXISTS: 'EEXIST',
+  PERMISSION: 'EACCES',
+  NOEXISTS: 'EACCES'
+};
+
 /////////////////////////////////////////////////////////
 //
 //  Data structures
@@ -50,9 +58,8 @@ export class ErrnoException extends Error {
 //  File operations : copy
 //
 export type ItemProgressCallback = (path: string, current: number, total: number, item?: INode) => void;
-export type ResolveConflictCallback = (path: string, item: INode, err: EError) => Promise<IConflictSettings>;
+export type ResolveConflictCallback = (path: string, item: INode, err: string) => Promise<IConflictSettings>;
 export type WriteProgressCallback = (path: string, current: number, total: number) => void;
-
 export enum EResolveMode {
   SKIP = 0,
   OVERWRITE,
@@ -63,12 +70,6 @@ export enum EResolveMode {
   ABORT
 }
 
-export enum EError {
-  NONE = <any>'None',
-  EXISTS = <any>'EEXIST',
-  PERMISSION = <any>'EEXISTS',
-  NOEXISTS = <any>'EACCESS'
-}
 
 /**
  * Copy options

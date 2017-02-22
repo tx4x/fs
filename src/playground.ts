@@ -1,7 +1,7 @@
 import { IJetpack, jetpack } from './jetpack';
-import { IInspectOptions as InspectOptions, INode, EResolveMode, EResolve } from './interfaces';
+import { IInspectOptions as InspectOptions, INode, EResolveMode, EResolve, EError } from './interfaces';
 export function testBig() {
-  process.on('unhandledRejection', (reason:string) => {
+  process.on('unhandledRejection', (reason: string) => {
     console.error('Unhandled rejection, reason: ', reason);
   });
   jetpack().copy('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
@@ -25,9 +25,11 @@ export function testCollisionDirectory() {
   jp.copyAsync('./src/', './srcout', {
     matching: ['**/*.ts'],
     overwrite: false,
-    conflictCallback: (path: string, item: INode) => {
+    conflictCallback: (path: string, item: INode, err: string) => {
       if (~path.indexOf('remove.ts')) {
-        return Promise.resolve({ overwrite: EResolveMode.ABORT, mode: EResolve.THIS });
+        if (err === 'EACCES') {
+          return Promise.resolve({ overwrite: EResolveMode.ABORT, mode: EResolve.THIS });
+        }
       }
       return Promise.resolve({ overwrite: EResolveMode.OVERWRITE, mode: EResolve.THIS });
     },
@@ -46,9 +48,10 @@ export function testCollisionDirectory() {
   });
 }
 
+
 export function testCollisionFile() {
 
-  process.on('unhandledRejection', (reason:string) => {
+  process.on('unhandledRejection', (reason: string) => {
     console.error('Unhandled rejection, reason: ', reason);
   });
   const jp = jetpack('./');
@@ -71,3 +74,5 @@ export function testCollisionFile() {
     console.error('error ', e);
   });
 }
+
+

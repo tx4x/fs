@@ -300,6 +300,26 @@ const onConflict = (from, to, options, settings) => {
     }
     return undefined;
 };
+function onError(from, to, options, settings) {
+    /*
+    switch (settings.overwrite) {
+      case EResolveMode.THROW: {
+        throw ErrDestinationExists(to);
+      }
+      case EResolveMode.OVERWRITE:
+      case EResolveMode.APPEND:
+      case EResolveMode.IF_NEWER:
+      case EResolveMode.ABORT:
+      case EResolveMode.IF_SIZE_DIFFERS:
+      case EResolveMode.SKIP: {
+        return settings.overwrite;
+      }
+    }
+    return undefined;
+    */
+    //return new Promise<void>;
+}
+;
 const resolveConflict = (from, to, options, resolveMode) => {
     // New logic for overwriting
     if (resolveMode !== undefined) {
@@ -354,15 +374,13 @@ function async(from, to, options) {
             let allFilesDelivered = false;
             let filesInProgress = 0;
             let abort = false;
-            const stream = tree_walker_1.stream(from, {
-                inspectOptions: {
-                    mode: true,
-                    symlinks: true
-                }
-            }).on('readable', () => {
+            let onCopyErrorResolveSettings = null;
+            let hadError = false;
+            function visitor() {
                 if (abort) {
                     return resolve();
                 }
+                let stream = this;
                 const item = stream.read();
                 let rel;
                 let destPath;
@@ -376,32 +394,80 @@ function async(from, to, options) {
                 }
                 filesInProgress += 1;
                 checkAsync(item.path, destPath, opts).then((subResolveSettings) => {
+                    if (!subResolveSettings) {
+                        console.log('have no resolver settings for ' + item.path, new Error().stack);
+                    }
                     // if the first resolve callback returned an individual resolve settings "THIS",
                     // ask the user again with the particular item
                     let proceed = resolveSettings.mode === interfaces_3.EResolve.ALWAYS;
-                    if (!proceed) {
-                        let overwriteMode = subResolveSettings.overwrite;
-                        overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
-                        if (overwriteMode === interfaces_3.EResolveMode.ABORT) {
-                            abort = true;
-                        }
-                        if (abort) {
-                            return;
-                        }
-                        if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
-                            filesInProgress -= 1;
-                            return;
+                    if (subResolveSettings) {
+                        if (!proceed) {
+                            let overwriteMode = subResolveSettings.overwrite;
+                            overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
+                            if (overwriteMode === interfaces_3.EResolveMode.ABORT) {
+                                abort = true;
+                            }
+                            if (abort) {
+                                return;
+                            }
+                            if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
+                                filesInProgress -= 1;
+                                return;
+                            }
                         }
                     }
                     console.log('cp ' + item.path + ' ' + overwriteMode);
+                    //console.log('had error : ' + hadError);
+                    // try copy operation
+                    //try {
                     copyItemAsync(item.path, item.item, destPath).then(() => {
                         filesInProgress -= 1;
                         if (allFilesDelivered && filesInProgress === 0) {
                             resolve();
                         }
-                    }).catch(reject);
+                    }).catch((err) => {
+                        if (options.conflictCallback) {
+                            if (err.code === interfaces_2.EError.PERMISSION) {
+                                options.conflictCallback(item.path, inspect_1.createItem(destPath), interfaces_2.EError.PERMISSION).then((errorResolveSettings) => {
+                                    // the user has set the error resolver to always, so we use the last one
+                                    if (onCopyErrorResolveSettings) {
+                                        errorResolveSettings = onCopyErrorResolveSettings;
+                                    }
+                                    // user said use this settings always, we track and use this last setting from now on
+                                    if (errorResolveSettings.mode === interfaces_3.EResolve.ALWAYS && !onCopyErrorResolveSettings) {
+                                        onCopyErrorResolveSettings = errorResolveSettings;
+                                    }
+                                    if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.ABORT) {
+                                        abort = true;
+                                        return resolve();
+                                    }
+                                    if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.THROW) {
+                                        abort = true;
+                                        return reject(err);
+                                    }
+                                    if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.SKIP) {
+                                        filesInProgress -= 1;
+                                        console.log('skip!');
+                                    }
+                                    // catch modes which make no sense:
+                                    if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.IF_NEWER ||
+                                        errorResolveSettings.overwrite === interfaces_3.EResolveMode.IF_SIZE_DIFFERS ||
+                                        errorResolveSettings.overwrite === interfaces_3.EResolveMode.OVERWRITE) {
+                                        reject(new interfaces_2.ErrnoException('settings make no sense'));
+                                    }
+                                });
+                            }
+                        }
+                    });
                 });
-            }).on('error', reject)
+            }
+            const stream = tree_walker_1.stream(from, {
+                inspectOptions: {
+                    mode: true,
+                    symlinks: true
+                }
+            }).on('readable', visitor)
+                .on('error', reject)
                 .on('end', () => {
                 allFilesDelivered = true;
                 if (allFilesDelivered && filesInProgress === 0) {

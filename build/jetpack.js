@@ -18,6 +18,7 @@ const symlink = require("./symlink");
 const streams = require("./streams");
 const write = require("./write");
 const read = require("./read");
+const playground_1 = require("./playground");
 // The Jetpack Context object.
 // It provides the public API, and resolves all paths regarding to
 // passed cwdPath, or default process.cwd() if cwdPath was not specified.
@@ -225,6 +226,6 @@ function jetpack(cwdPath) {
 }
 exports.jetpack = jetpack;
 ;
-//testCollisionDirectory();
+playground_1.testCollisionDirectory();
 //testCollisionFile();
 //# sourceMappingURL=jetpack.js.map

@@ -26,9 +26,11 @@ function testCollisionDirectory() {
     jp.copyAsync('./src/', './srcout', {
         matching: ['**/*.ts'],
         overwrite: false,
-        conflictCallback: (path, item) => {
+        conflictCallback: (path, item, err) => {
             if (~path.indexOf('remove.ts')) {
-                return Promise.resolve({ overwrite: interfaces_1.EResolveMode.ABORT, mode: interfaces_1.EResolve.THIS });
+                if (err === 'EACCES') {
+                    return Promise.resolve({ overwrite: interfaces_1.EResolveMode.ABORT, mode: interfaces_1.EResolve.THIS });
+                }
             }
             return Promise.resolve({ overwrite: interfaces_1.EResolveMode.OVERWRITE, mode: interfaces_1.EResolve.THIS });
         },

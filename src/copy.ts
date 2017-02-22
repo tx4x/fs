@@ -291,6 +291,25 @@ const onConflict = (from: string, to: string, options: ICopyOptions, settings: I
   }
   return undefined;
 };
+function onError(from: string, to: string, options: ICopyOptions, settings: IConflictSettings) {
+  /*
+  switch (settings.overwrite) {
+    case EResolveMode.THROW: {
+      throw ErrDestinationExists(to);
+    }
+    case EResolveMode.OVERWRITE:
+    case EResolveMode.APPEND:
+    case EResolveMode.IF_NEWER:
+    case EResolveMode.ABORT:
+    case EResolveMode.IF_SIZE_DIFFERS:
+    case EResolveMode.SKIP: {
+      return settings.overwrite;
+    }
+  }
+  return undefined;
+  */
+  //return new Promise<void>;
+};
 const resolveConflict = (from: string, to: string, options: ICopyOptions, resolveMode: EResolveMode): boolean => {
   // New logic for overwriting
   if (resolveMode !== undefined) {
@@ -341,15 +360,13 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
       let allFilesDelivered: boolean = false;
       let filesInProgress: number = 0;
       let abort: boolean = false;
-      const stream = treeWalkerStream(from, {
-        inspectOptions: {
-          mode: true,
-          symlinks: true
-        }
-      }).on('readable', () => {
+      let onCopyErrorResolveSettings: IConflictSettings = null;
+      let hadError = false;
+      function visitor() {
         if (abort) {
           return resolve();
         }
+        let stream: any = this;
         const item: { path: string, name: string, item: INode } = stream.read();
         let rel: string;
         let destPath: string;
@@ -362,33 +379,89 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
           return;
         }
         filesInProgress += 1;
+
         checkAsync(item.path, destPath, opts).then((subResolveSettings: IConflictSettings) => {
+          if (!subResolveSettings) {
+            console.log('have no resolver settings for ' + item.path, new Error().stack);
+          }
           // if the first resolve callback returned an individual resolve settings "THIS",
           // ask the user again with the particular item
           let proceed = resolveSettings.mode === EResolve.ALWAYS;
-          if (!proceed) {
-            let overwriteMode = subResolveSettings.overwrite;
-            overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
-            if (overwriteMode === EResolveMode.ABORT) {
-              abort = true;
-            }
-            if (abort) {
-              return;
-            }
-            if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
-              filesInProgress -= 1;
-              return;
+          if (subResolveSettings) {
+            if (!proceed) {
+              let overwriteMode = subResolveSettings.overwrite;
+              overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
+              if (overwriteMode === EResolveMode.ABORT) {
+                abort = true;
+              }
+              if (abort) {
+                return;
+              }
+              if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
+                filesInProgress -= 1;
+                return;
+              }
             }
           }
+
           console.log('cp ' + item.path + ' ' + overwriteMode);
+          //console.log('had error : ' + hadError);
+
+          // try copy operation
+
+          //try {
           copyItemAsync(item.path, item.item, destPath).then(() => {
             filesInProgress -= 1;
             if (allFilesDelivered && filesInProgress === 0) {
               resolve();
             }
-          }).catch(reject);
+          }).catch((err: ErrnoException) => {
+            if (options.conflictCallback) {
+              if (err.code === EError.PERMISSION) {
+                options.conflictCallback(item.path, createItem(destPath), EError.PERMISSION).then((errorResolveSettings: IConflictSettings) => {
+                  // the user has set the error resolver to always, so we use the last one
+                  if (onCopyErrorResolveSettings) {
+                    errorResolveSettings = onCopyErrorResolveSettings;
+                  }
+                  // user said use this settings always, we track and use this last setting from now on
+                  if (errorResolveSettings.mode === EResolve.ALWAYS && !onCopyErrorResolveSettings) {
+                    onCopyErrorResolveSettings = errorResolveSettings;
+                  }
+
+                  if (errorResolveSettings.overwrite === EResolveMode.ABORT) {
+                    abort = true;
+                    return resolve();
+                  }
+                  if (errorResolveSettings.overwrite === EResolveMode.THROW) {
+                    abort = true;
+                    return reject(err);
+                  }
+                  if (errorResolveSettings.overwrite === EResolveMode.SKIP) {
+                    filesInProgress -= 1;
+                    console.log('skip!');
+                  }
+
+                  // catch modes which make no sense:
+                  if (errorResolveSettings.overwrite === EResolveMode.IF_NEWER ||
+                    errorResolveSettings.overwrite === EResolveMode.IF_SIZE_DIFFERS ||
+                    errorResolveSettings.overwrite === EResolveMode.OVERWRITE) {
+                    reject(new ErrnoException('settings make no sense'));
+                  }
+
+                });
+              }
+            }
+          });
         });
-      }).on('error', reject)
+      }
+
+      const stream = treeWalkerStream(from, {
+        inspectOptions: {
+          mode: true,
+          symlinks: true
+        }
+      }).on('readable', visitor)
+        .on('error', reject)
         .on('end', () => {
           allFilesDelivered = true;
           if (allFilesDelivered && filesInProgress === 0) {

@@ -10,6 +10,12 @@ var ENodeType;
     ENodeType[ENodeType["SYMLINK"] = 'symlink'] = "SYMLINK";
     ENodeType[ENodeType["OTHER"] = 'other'] = "OTHER";
 })(ENodeType = exports.ENodeType || (exports.ENodeType = {}));
+exports.EError = {
+    NONE: 'None',
+    EXISTS: 'EEXIST',
+    PERMISSION: 'EACCES',
+    NOEXISTS: 'EACCES'
+};
 class ErrnoException extends Error {
 }
 exports.ErrnoException = ErrnoException;
@@ -23,13 +29,6 @@ var EResolveMode;
     EResolveMode[EResolveMode["THROW"] = 5] = "THROW";
     EResolveMode[EResolveMode["ABORT"] = 6] = "ABORT";
 })(EResolveMode = exports.EResolveMode || (exports.EResolveMode = {}));
-var EError;
-(function (EError) {
-    EError[EError["NONE"] = 'None'] = "NONE";
-    EError[EError["EXISTS"] = 'EEXIST'] = "EXISTS";
-    EError[EError["PERMISSION"] = 'EEXISTS'] = "PERMISSION";
-    EError[EError["NOEXISTS"] = 'EACCESS'] = "NOEXISTS";
-})(EError = exports.EError || (exports.EError = {}));
 var EResolve;
 (function (EResolve) {
     EResolve[EResolve["ALWAYS"] = 0] = "ALWAYS";

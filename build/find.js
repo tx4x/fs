@@ -4,10 +4,12 @@ const tree_walker_1 = require("./utils/tree_walker");
 const inspect_1 = require("./inspect");
 const matcher_1 = require("./utils/matcher");
 const validate_1 = require("./utils/validate");
-function validateInput(methodName, path, _options) {
+const interfaces_1 = require("./interfaces");
+const errors_1 = require("./errors");
+function validateInput(methodName, path, options) {
     const methodSignature = methodName + '([path], options)';
     validate_1.validateArgument(methodSignature, 'path', path, ['string']);
-    validate_1.validateOptions(methodSignature, 'options', _options, {
+    validate_1.validateOptions(methodSignature, 'options', options, {
         matching: ['string', 'array of string'],
         files: ['boolean'],
         directories: ['boolean'],
@@ -16,7 +18,7 @@ function validateInput(methodName, path, _options) {
 }
 exports.validateInput = validateInput;
 ;
-function normalizeOptions(options) {
+const defaults = (options) => {
     let opts = options || {};
     // defaults:
     if (opts.files === undefined) {
@@ -29,26 +31,12 @@ function normalizeOptions(options) {
         opts.recursive = true;
     }
     return opts;
-}
-;
-function processFoundObjects(foundObjects, cwd) {
+};
+const processFoundObjects = (foundObjects, cwd) => {
     return foundObjects.map((inspectObj) => {
         return pathUtil.relative(cwd, inspectObj.absolutePath);
     });
-}
-;
-function generatePathDoesntExistError(path) {
-    const err = new Error("Path you want to find stuff in doesn't exist " + path);
-    err['code'] = 'ENOENT';
-    return err;
-}
-;
-function generatePathNotDirectoryError(path) {
-    const err = new Error('Path you want to find stuff in must be a directory ' + path);
-    err['code'] = 'ENOTDIR';
-    return err;
-}
-;
+};
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
@@ -62,8 +50,8 @@ function findSync(path, options) {
         }
     }, (itemPath, item) => {
         if (itemPath !== path && matchesAnyOfGlobs(itemPath)) {
-            if ((item.type === 'file' && options.files === true)
-                || (item.type === 'dir' && options.directories === true)) {
+            if ((item.type === interfaces_1.ENodeType.FILE && options.files === true)
+                || (item.type === interfaces_1.ENodeType.DIR && options.directories === true)) {
                 foundInspectObjects.push(item);
             }
         }
@@ -74,12 +62,12 @@ function findSync(path, options) {
 function sync(path, options) {
     const entryPointInspect = inspect_1.sync(path);
     if (entryPointInspect === undefined) {
-        throw generatePathDoesntExistError(path);
+        throw errors_1.ErrDoesntExists(path);
     }
     else if (entryPointInspect.type !== 'dir') {
-        throw generatePathNotDirectoryError(path);
+        throw errors_1.ErrIsNotDirectory(path);
     }
-    return findSync(path, normalizeOptions(options));
+    return findSync(path, defaults(options));
 }
 exports.sync = sync;
 ;
@@ -100,8 +88,8 @@ function findAsync(path, options) {
             let item;
             if (data && data.path !== path && matchesAnyOfGlobs(data.path)) {
                 item = data.item;
-                if ((item.type === 'file' && options.files === true)
-                    || (item.type === 'dir' && options.directories === true)) {
+                if ((item.type === interfaces_1.ENodeType.FILE && options.files === true)
+                    || (item.type === interfaces_1.ENodeType.DIR && options.directories === true)) {
                     foundInspectObjects.push(item);
                 }
             }
@@ -116,12 +104,12 @@ function async(path, options) {
     return inspect_1.async(path)
         .then(entryPointInspect => {
         if (entryPointInspect === undefined) {
-            throw generatePathDoesntExistError(path);
+            throw errors_1.ErrDoesntExists(path);
         }
-        else if (entryPointInspect.type !== 'dir') {
-            throw generatePathNotDirectoryError(path);
+        else if (entryPointInspect.type !== interfaces_1.ENodeType.DIR) {
+            throw errors_1.ErrIsNotDirectory(path);
         }
-        return findAsync(path, normalizeOptions(options));
+        return findAsync(path, defaults(options));
     });
 }
 exports.async = async;

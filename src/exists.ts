@@ -1,6 +1,6 @@
 import { Stats, statSync, stat } from 'fs';
 import { validateArgument } from './utils/validate';
-import { ENodeType } from './interfaces';
+import { ENodeType, ErrnoException } from './interfaces';
 
 export function validateInput(methodName: string, path: string) {
   const methodSignature = methodName + '(path)';
@@ -33,7 +33,7 @@ export function sync(path: string): boolean | string {
 // ---------------------------------------------------------
 export function async(path: string): Promise<boolean | string> {
   return new Promise((resolve, reject) => {
-    stat(path, (err, stat: Stats) => {
+    stat(path, (err: ErrnoException, stat: Stats) => {
       if (err) {
         if (err.code === 'ENOENT') {
           resolve(false);

@@ -3,7 +3,9 @@ import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree
 import { sync as inspectSync, async as inspectASync } from './inspect';
 import { create as matcher } from './utils/matcher';
 import { validateArgument, validateOptions } from './utils/validate';
-import { INode, ENodeType } from './interfaces';
+import { INode, ENodeType, ErrnoException } from './interfaces';
+import { ErrDoesntExists, ErrIsNotDirectory } from './errors';
+
 export interface Options {
   matching?: string[];
   files?: boolean;
@@ -11,10 +13,10 @@ export interface Options {
   recursive?: boolean;
   cwd?: string;
 }
-export function validateInput(methodName: string, path: string, _options?: Options): void {
+export function validateInput(methodName: string, path: string, options?: Options): void {
   const methodSignature = methodName + '([path], options)';
   validateArgument(methodSignature, 'path', path, ['string']);
-  validateOptions(methodSignature, 'options', _options, {
+  validateOptions(methodSignature, 'options', options, {
     matching: ['string', 'array of string'],
     files: ['boolean'],
     directories: ['boolean'],
@@ -22,8 +24,8 @@ export function validateInput(methodName: string, path: string, _options?: Optio
   });
 };
 
-function normalizeOptions(options?: Options) {
-  let opts = options || {};
+const defaults = (options?: Options): Options =>{
+  let opts = options || {} as Options;
   // defaults:
   if (opts.files === undefined) {
     opts.files = true;
@@ -37,23 +39,12 @@ function normalizeOptions(options?: Options) {
   return opts;
 };
 
-function processFoundObjects(foundObjects: any, cwd: string): string[] {
+const processFoundObjects = (foundObjects: any, cwd: string): string[] => {
   return foundObjects.map((inspectObj: INode) => {
     return pathUtil.relative(cwd, inspectObj.absolutePath);
   });
 };
 
-function generatePathDoesntExistError(path: string): Error {
-  const err = new Error("Path you want to find stuff in doesn't exist " + path);
-  (err as any)['code'] = 'ENOENT';
-  return err;
-};
-
-function generatePathNotDirectoryError(path: string): Error {
-  const err = new Error('Path you want to find stuff in must be a directory ' + path);
-  (err as any)['code'] = 'ENOTDIR';
-  return err;
-};
 
 // ---------------------------------------------------------
 // Sync
@@ -68,8 +59,8 @@ function findSync(path: string, options: Options): string[] {
     }
   }, (itemPath, item) => {
     if (itemPath !== path && matchesAnyOfGlobs(itemPath)) {
-      if ((item.type === 'file' && options.files === true)
-        || (item.type === 'dir' && options.directories === true)) {
+      if ((item.type === ENodeType.FILE && options.files === true)
+        || (item.type === ENodeType.DIR && options.directories === true)) {
         foundInspectObjects.push(item);
       }
     }
@@ -80,11 +71,11 @@ function findSync(path: string, options: Options): string[] {
 export function sync(path: string, options: Options): string[] {
   const entryPointInspect = inspectSync(path);
   if (entryPointInspect === undefined) {
-    throw generatePathDoesntExistError(path);
+    throw ErrDoesntExists(path);
   } else if (entryPointInspect.type !== 'dir') {
-    throw generatePathNotDirectoryError(path);
+    throw ErrIsNotDirectory(path);
   }
-  return findSync(path, normalizeOptions(options));
+  return findSync(path, defaults(options));
 };
 
 // ---------------------------------------------------------
@@ -102,11 +93,11 @@ function findAsync(path: string, options: Options): Promise<string[]> {
       }
     }).on('readable', () => {
       const data = walker.read();
-      let item: any;
+      let item: INode;
       if (data && data.path !== path && matchesAnyOfGlobs(data.path)) {
         item = data.item;
-        if ((item.type === 'file' && options.files === true)
-          || (item.type === 'dir' && options.directories === true)) {
+        if ((item.type === ENodeType.FILE && options.files === true)
+          || (item.type === ENodeType.DIR && options.directories === true)) {
           foundInspectObjects.push(item);
         }
       }
@@ -121,10 +112,10 @@ export function async(path: string, options: Options): Promise<string[]> {
   return inspectASync(path)
     .then(entryPointInspect => {
       if (entryPointInspect === undefined) {
-        throw generatePathDoesntExistError(path);
-      } else if ((entryPointInspect as any).type !== 'dir') {
-        throw generatePathNotDirectoryError(path);
+        throw ErrDoesntExists(path);
+      } else if ((entryPointInspect as any).type !== ENodeType.DIR) {
+        throw ErrIsNotDirectory(path);
       }
-      return findAsync(path, normalizeOptions(options));
+      return findAsync(path, defaults(options));
     });
 };

@@ -12,15 +12,16 @@ declare module '@gbaumgart/fs/imports' {
 
 }
 declare module '@gbaumgart/fs/interfaces' {
-	export enum EInspectItemType {
+	/// <reference types="node" />
+	export enum ENodeType {
 	    FILE,
 	    DIR,
 	    SYMLINK,
 	    OTHER,
 	}
-	export interface IInspectItem {
+	export interface INode {
 	    name: string;
-	    type: EInspectItemType | string;
+	    type: ENodeType | string;
 	    size?: number;
 	    accessTime?: Date;
 	    modifyTime?: Date;
@@ -29,8 +30,9 @@ declare module '@gbaumgart/fs/interfaces' {
 	    mode?: number;
 	    pointsAt?: string;
 	    relativePath?: string;
-	    children?: IInspectItem[];
+	    children?: INode[];
 	    total?: number;
+	    checksum?: string;
 	}
 	export interface IInspectOptions {
 	    checksum?: string;
@@ -39,26 +41,94 @@ declare module '@gbaumgart/fs/interfaces' {
 	    absolutePath?: boolean;
 	    symlinks?: boolean;
 	}
-	export type ItemProgressCallback = (path: string, current: number, total: number, item?: IInspectItem) => void;
+	export type ReadWriteDataType = string | Buffer | Object;
+	export class ErrnoException extends Error {
+	    errno?: number;
+	    code?: string;
+	    path?: string;
+	    syscall?: string;
+	    stack?: string;
+	}
+	export type ItemProgressCallback = (path: string, current: number, total: number, item?: INode) => void;
+	export type ResolveConflictCallback = (path: string, item: INode, err: EError) => Promise<IConflictSettings>;
 	export type WriteProgressCallback = (path: string, current: number, total: number) => void;
-	export enum ECopyOverwriteMode {
+	export enum EResolveMode {
 	    SKIP = 0,
 	    OVERWRITE = 1,
 	    IF_NEWER = 2,
 	    IF_SIZE_DIFFERS = 3,
 	    APPEND = 4,
+	    THROW = 5,
+	    ABORT = 6,
 	}
+	export enum EError {
+	    NONE,
+	    EXISTS,
+	    PERMISSION,
+	    NOEXISTS,
+	}
+	/**
+	 * Copy options
+	 *
+	 * @export
+	 * @interface ICopyOptions
+	 */
 	export interface ICopyOptions {
+	    /**
+	     * @type {boolean}
+	     * @deprecated Use conflict callback instead.
+	     * @memberOf ICopyOptions
+	     */
 	    overwrite?: boolean;
+	    /**
+	     * Array of glob minimatch patterns
+	     *
+	     * @type {string[]}
+	     * @memberOf ICopyOptions
+	     */
 	    matching?: string[];
-	    progress?: ItemProgressCallback;
-	    writeProgress?: WriteProgressCallback;
+	    /**
+	     * A function called to reject or accept nodes to be copied. This is used only when matching
+	     * has been left empty.
+	     * @memberOf ICopyOptions
+	     */
 	    allowedToCopy?: (from: string) => boolean;
+	    /**
+	     * A progress callback for any copied item. Only excecuted in async.
+	     */
+	    progress?: ItemProgressCallback;
+	    /**
+	     * A progress function called for async and larger files only.
+	     *
+	     * @type {WriteProgressCallback}
+	     * @memberOf ICopyOptions
+	     */
+	    writeProgress?: WriteProgressCallback;
+	    /**
+	     * A callback when a conflict or error occurs. This is being called only if the user
+	     * didn't provide conflictSettings.
+	     *
+	     * @type {ResolveConflictCallback}
+	     * @memberOf ICopyOptions
+	     */
+	    conflictCallback?: ResolveConflictCallback;
+	    /**
+	     * Ability to set conflict resolver settings in advance, so that no callback will be called.
+	     *
+	     * @type {IConflictSettings}
+	     * @memberOf ICopyOptions
+	     */
+	    conflictSettings?: IConflictSettings;
 	}
-	export interface IConflictResolver {
-	    overwrite: ECopyOverwriteMode;
+	export enum EResolve {
+	    ALWAYS = 0,
+	    THIS = 1,
 	}
-	export interface WriteOptions {
+	export interface IConflictSettings {
+	    overwrite: EResolveMode;
+	    mode: EResolve;
+	}
+	export interface IWriteOptions {
 	    atomic?: boolean;
 	    jsonIndent?: number;
 	    mode?: string;
@@ -67,16 +137,17 @@ declare module '@gbaumgart/fs/interfaces' {
 }
 declare module '@gbaumgart/fs/utils/validate' {
 	export function validateArgument(methodName: string, argumentName: string, argumentValue: string, argumentMustBe: any): boolean;
-	export function validateOptions(methodName: any, optionsObjName: any, obj: any, allowedOptions: any): void;
+	export function validateOptions(methodName: string, optionsObjName: string, obj: any, allowedOptions: any): void;
 
 }
 declare module '@gbaumgart/fs/write' {
 	/// <reference types="node" />
-	import { WriteOptions } from '@gbaumgart/fs/interfaces';
+	import { IWriteOptions } from '@gbaumgart/fs/interfaces';
 	export type Data = string | Buffer | Object;
-	export function validateInput(methodName: string, path: string, data: any, options: WriteOptions): void;
-	export function sync(path: string, data: Data, options?: WriteOptions): void;
-	export function async(path: string, data: Data, options?: WriteOptions): Promise<null>;
+	import { ReadWriteDataType } from '@gbaumgart/fs/interfaces';
+	export function validateInput(methodName: string, path: string, data: ReadWriteDataType, options: IWriteOptions): void;
+	export function sync(path: string, data: Data, options?: IWriteOptions): void;
+	export function async(path: string, data: Data, options?: IWriteOptions): Promise<null>;
 
 }
 declare module '@gbaumgart/fs/append' {
@@ -92,7 +163,7 @@ declare module '@gbaumgart/fs/append' {
 
 }
 declare module '@gbaumgart/fs/utils/mode' {
-	export function normalizeFileMode(mode: any): string;
+	export function normalizeFileMode(mode: string | number): string;
 
 }
 declare module '@gbaumgart/fs/dir' {
@@ -112,17 +183,19 @@ declare module '@gbaumgart/fs/file' {
 	    jsonIndent: number;
 	    mode: string;
 	}
-	export function validateInput(methodName: string, path: any, criteria?: Options): void;
+	export function validateInput(methodName: string, path: string, criteria?: Options): void;
 	export function sync(path: string, options: Options): void;
 	export function async(path: string, options: Options): Promise<{}>;
 
 }
 declare module '@gbaumgart/fs/inspect' {
-	import { IInspectItem, IInspectOptions } from '@gbaumgart/fs/interfaces';
+	import { INode, IInspectOptions } from '@gbaumgart/fs/interfaces';
 	export const supportedChecksumAlgorithms: string[];
+	export function DefaultInspectOptions(): IInspectOptions;
 	export function validateInput(methodName: string, path: string, options?: IInspectOptions): void;
-	export function sync(path: string, options?: IInspectOptions): IInspectItem;
-	export function async(path: string, options?: IInspectOptions): Promise<{}>;
+	export function createItem(path: string, options?: IInspectOptions): INode;
+	export function sync(path: string, options?: IInspectOptions): INode;
+	export function async(path: string, options?: IInspectOptions): Promise<INode>;
 
 }
 declare module '@gbaumgart/fs/list' {
@@ -134,17 +207,23 @@ declare module '@gbaumgart/fs/list' {
 declare module '@gbaumgart/fs/utils/tree_walker' {
 	/// <reference types="node" />
 	import { Readable } from 'stream';
-	import { IInspectOptions, IInspectItem } from '@gbaumgart/fs/interfaces';
+	import { IInspectOptions, INode } from '@gbaumgart/fs/interfaces';
 	export interface Options {
 	    inspectOptions: IInspectOptions;
 	    maxLevelsDeep?: number;
 	}
-	export function sync(path: string, options: Options, callback: (path: string, item: IInspectItem) => void, currentLevel?: number): void;
-	export function stream(path: string, options: any): Readable;
+	export function sync(path: string, options: Options, callback: (path: string, item: INode) => void, currentLevel?: number): void;
+	export function stream(path: string, options: Options): Readable;
 
 }
 declare module '@gbaumgart/fs/utils/matcher' {
-	export function create(basePath: any, patterns: any): (absolutePath: any) => boolean;
+	export function create(basePath: string, patterns: string[]): (absolutePath: string) => boolean;
+
+}
+declare module '@gbaumgart/fs/errors' {
+	export function ErrDoesntExists(path: string): Error;
+	export function ErrDestinationExists(path: string): Error;
+	export function ErrIsNotDirectory(path: string): Error;
 
 }
 declare module '@gbaumgart/fs/find' {
@@ -155,13 +234,13 @@ declare module '@gbaumgart/fs/find' {
 	    recursive?: boolean;
 	    cwd?: string;
 	}
-	export function validateInput(methodName: string, path: string, _options?: Options): void;
+	export function validateInput(methodName: string, path: string, options?: Options): void;
 	export function sync(path: string, options: Options): string[];
 	export function async(path: string, options: Options): Promise<string[]>;
 
 }
 declare module '@gbaumgart/fs/inspect_tree' {
-	import { IInspectItem } from '@gbaumgart/fs/interfaces';
+	import { INode } from '@gbaumgart/fs/interfaces';
 	export interface Options {
 	    checksum: string;
 	    relativePath: boolean;
@@ -169,25 +248,35 @@ declare module '@gbaumgart/fs/inspect_tree' {
 	}
 	export function validateInput(methodName: string, path: string, options: Options): void;
 	export function sync(path: string, options?: any): any | undefined;
-	export function async(path: string, options?: Options): Promise<IInspectItem>;
+	export function async(path: string, options?: Options): Promise<INode>;
 
 }
 declare module '@gbaumgart/fs/exists' {
 	export function validateInput(methodName: string, path: string): void;
 	export function sync(path: string): boolean | string;
-	export function async(path: any): Promise<boolean | string>;
+	export function async(path: string): Promise<boolean | string>;
 
 }
 declare module '@gbaumgart/fs/copy' {
 	import { ICopyOptions } from '@gbaumgart/fs/interfaces';
 	export function validateInput(methodName: string, from: string, to: string, options?: ICopyOptions): void;
 	export function sync(from: string, to: string, options?: ICopyOptions): void;
-	export function async(from: string, to: string, options?: ICopyOptions): Promise<{}>;
+	/**
+	 * Copy
+	 *
+	 *
+	 * @export
+	 * @param {string} from
+	 * @param {string} to
+	 * @param {ICopyOptions} [options]
+	 * @returns
+	 */
+	export function async(from: string, to: string, options?: ICopyOptions): Promise<void>;
 
 }
 declare module '@gbaumgart/fs/move' {
 	export function validateInput(methodName: string, from: string, to: string): void;
-	export function sync(from: any, to: any): void;
+	export function sync(from: string, to: string): void;
 	export function async(from: string, to: string): Promise<null>;
 
 }
@@ -200,13 +289,13 @@ declare module '@gbaumgart/fs/remove' {
 declare module '@gbaumgart/fs/rename' {
 	export function validateInput(methodName: string, path: string, newName: string): void;
 	export function sync(path: string, newName: string): void;
-	export function async(path: any, newName: any): Promise<null>;
+	export function async(path: string, newName: string): Promise<null>;
 
 }
 declare module '@gbaumgart/fs/symlink' {
-	export function validateInput(methodName: any, symlinkValue: any, path: any): void;
-	export function sync(symlinkValue: any, path: any): void;
-	export function async(symlinkValue: any, path: any): Promise<{}>;
+	export function validateInput(methodName: string, symlinkValue: string, path: string): void;
+	export function sync(symlinkValue: string, path: string): void;
+	export function async(symlinkValue: string, path: string): Promise<{}>;
 
 }
 declare module '@gbaumgart/fs/streams' {
@@ -215,10 +304,16 @@ declare module '@gbaumgart/fs/streams' {
 
 }
 declare module '@gbaumgart/fs/read' {
-	/// <reference types="node" />
+	import { ReadWriteDataType } from '@gbaumgart/fs/interfaces';
 	export function validateInput(methodName: string, path: string, returnAs: string): void;
-	export function sync(path: string, returnAs?: string): string | Buffer | Object;
-	export function async(path: string, returnAs?: string): Promise<string | Buffer | Object>;
+	export function sync(path: string, returnAs?: string): ReadWriteDataType;
+	export function async(path: string, returnAs?: string): Promise<ReadWriteDataType>;
+
+}
+declare module '@gbaumgart/fs/playground' {
+	export function testBig(): void;
+	export function testCollisionDirectory(): void;
+	export function testCollisionFile(): void;
 
 }
 declare module '@gbaumgart/fs/jetpack' {
@@ -228,15 +323,16 @@ declare module '@gbaumgart/fs/jetpack' {
 	import { Options as FileOptions } from '@gbaumgart/fs/file';
 	import { Options as FindOptions } from '@gbaumgart/fs/find';
 	import { Options as InspectTreeOptions } from '@gbaumgart/fs/inspect_tree';
-	import { WriteOptions } from '@gbaumgart/fs/interfaces';
-	import { ICopyOptions, IInspectOptions } from '@gbaumgart/fs/interfaces';
+	import { IWriteOptions } from '@gbaumgart/fs/interfaces';
+	import { ICopyOptions, INode, IInspectOptions } from '@gbaumgart/fs/interfaces';
+	import { ReadWriteDataType } from '@gbaumgart/fs/interfaces';
 	export interface IJetpack {
 	    cwd(w?: any): IJetpack | string;
 	    path(): string;
 	    append(path: string, data: string | Buffer | Object, options?: AppendOptions): void;
 	    appendAsync(path: string, data: string | Buffer | Object, options?: AppendOptions): Promise<null>;
-	    copy(from: string, to: string, options?: ICopyOptions): any;
-	    copyAsync(from: string, to: string, options?: ICopyOptions): any;
+	    copy(from: string, to: string, options?: ICopyOptions): void;
+	    copyAsync(from: string, to: string, options?: ICopyOptions): Promise<void>;
 	    createWriteStream(path: string, options?: {
 	        flags?: string;
 	        encoding?: string;
@@ -258,28 +354,28 @@ declare module '@gbaumgart/fs/jetpack' {
 	    dirAsync(path: string, criteria?: DirOptions): Promise<IJetpack>;
 	    exists(path: string): boolean | string;
 	    existsAsync(path: string): Promise<boolean | string>;
-	    file(path: string, criteria?: FileOptions): any;
-	    fileAsync(path: string, criteria?: FileOptions): any;
+	    file(path: string, criteria?: FileOptions): void;
+	    fileAsync(path: string, criteria?: FileOptions): Promise<null>;
 	    find(startPath: string, options: FindOptions): string[];
 	    findAsync(startPath: string, options: FindOptions): Promise<string[]>;
-	    inspect(path: string, fieldsToInclude: IInspectOptions): any;
-	    inspectAsync(path: string, fieldsToInclude: IInspectOptions): any;
-	    inspectTree(path: string, options?: InspectTreeOptions): any;
-	    inspectTreeAsync(path: string, options?: InspectTreeOptions): any;
+	    inspect(path: string, fieldsToInclude: IInspectOptions): INode;
+	    inspectAsync(path: string, fieldsToInclude: IInspectOptions): Promise<INode>;
+	    inspectTree(path: string, options?: InspectTreeOptions): INode;
+	    inspectTreeAsync(path: string, options?: InspectTreeOptions): Promise<INode>;
 	    list(path: string): string[];
 	    listAsync(path: string): Promise<string[]>;
 	    move(from: string, to: string): void;
 	    moveAsync(from: string, to: string): Promise<null>;
-	    read(path: string, returnAs?: string): any;
-	    readAsync(path: string, returnAs?: string): Promise<string>;
+	    read(path: string, returnAs?: string): ReadWriteDataType;
+	    readAsync(path: string, returnAs?: string): Promise<ReadWriteDataType>;
 	    remove(path: string): void;
 	    removeAsync(path: string): Promise<null>;
 	    rename(path: string, newName: string): void;
 	    renameAsync(path: string, newName: string): Promise<null>;
 	    symlink(symlinkValue: string, path: string): void;
 	    symlinkAsync(symlinkValue: string, path: string): Promise<null>;
-	    write(path: string, data: string | Buffer | Object, options?: WriteOptions): void;
-	    writeAsync(path: string, data: string | Buffer | Object, options?: WriteOptions): any;
+	    write(path: string, data: string | Buffer | Object, options?: IWriteOptions): void;
+	    writeAsync(path: string, data: string | Buffer | Object, options?: IWriteOptions): Promise<null>;
 	}
 	export function jetpack(cwdPath?: string): IJetpack;
 

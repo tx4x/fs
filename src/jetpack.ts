@@ -322,6 +322,5 @@ export function jetpack(cwdPath?: string): IJetpack {
   return api;
 };
 
-
-testCollisionDirectory();
+//testCollisionDirectory();
 //testCollisionFile();

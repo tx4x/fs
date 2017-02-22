@@ -25,7 +25,7 @@ export interface INode {
   relativePath?: string;
   children?: INode[];
   total?: number;
-  checksum?:string;
+  checksum?: string;
 }
 
 export interface IInspectOptions {
@@ -38,6 +38,13 @@ export interface IInspectOptions {
 
 export type ReadWriteDataType = string | Buffer | Object;
 
+export class ErrnoException extends Error {
+  errno?: number;
+  code?: string;
+  path?: string;
+  syscall?: string;
+  stack?: string;
+}
 /////////////////////////////////////////////////////////
 //
 //  File operations : copy
@@ -58,7 +65,7 @@ export enum EResolveMode {
 
 export enum EError {
   NONE = <any>'None',
-  EXISTS = <any>'EEXISTS',
+  EXISTS = <any>'EEXIST',
   PERMISSION = <any>'EEXISTS',
   NOEXISTS = <any>'EACCESS'
 }
@@ -76,11 +83,30 @@ export interface ICopyOptions {
    * @memberOf ICopyOptions
    */
   overwrite?: boolean;
+  /**
+   * Array of glob minimatch patterns
+   *
+   * @type {string[]}
+   * @memberOf ICopyOptions
+   */
   matching?: string[];
+  /**
+   * A function called to reject or accept nodes to be copied. This is used only when matching
+   * has been left empty.
+   * @memberOf ICopyOptions
+   */
   allowedToCopy?: (from: string) => boolean;
+  /**
+   * A progress callback for any copied item. Only excecuted in async.
+   */
   progress?: ItemProgressCallback;
+  /**
+   * A progress function called for async and larger files only.
+   *
+   * @type {WriteProgressCallback}
+   * @memberOf ICopyOptions
+   */
   writeProgress?: WriteProgressCallback;
-
   /**
    * A callback when a conflict or error occurs. This is being called only if the user
    * didn't provide conflictSettings.

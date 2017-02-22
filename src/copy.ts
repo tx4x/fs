@@ -11,7 +11,7 @@ import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync } from './write';
 import { ErrDestinationExists, ErrDoesntExists } from './errors';
 import { INode, IInspectOptions, ENodeType, IWriteOptions } from './interfaces';
-import { EError } from './interfaces';
+import { EError, ErrnoException } from './interfaces';
 import { createItem } from './inspect';
 import { ICopyOptions, EResolveMode, ItemProgressCallback, WriteProgressCallback, IConflictSettings, EResolve } from './interfaces';
 const Q = require('q');
@@ -21,13 +21,13 @@ const promisedUnlink = Q.denodeify(fs.unlink);
 const promisedMkdirp = Q.denodeify(mkdirp);
 const progress = require('progress-stream');
 
-
 interface ICopyTask {
   path: string;
   item: INode;
   dst: string;
   done: boolean;
 }
+
 export function validateInput(methodName: string, from: string, to: string, options?: ICopyOptions): void {
   const methodSignature = methodName + '(from, to, [options])';
   validateArgument(methodSignature, 'from', from, ['string']);
@@ -42,7 +42,7 @@ export function validateInput(methodName: string, from: string, to: string, opti
   });
 };
 const parseOptions = (options: any | null, from: string): ICopyOptions => {
-  const opts: any = options || {};
+  const opts: ICopyOptions = options || {} as ICopyOptions;
   const parsedOptions: ICopyOptions = {};
   parsedOptions.overwrite = opts.overwrite;
   parsedOptions.progress = opts.progress;
@@ -86,20 +86,20 @@ async function copyFileSyncWithProgress(from: string, to: string, options?: ICop
       length: fs.statSync(from).size,
       time: 100
     });
-    str.on('progress', (e:any) => {
+    str.on('progress', (e: any) => {
       elapsed = (Date.now() - started) / 1000;
       speed = e.transferred / elapsed;
       options.writeProgress(from, e.transferred, e.length);
     });
-    rd.on("error", (err:Error) => done(err));
+    rd.on("error", (err: Error) => done(err));
     const wr = createWriteStream(to);
-    wr.on("error", (err:Error) => done(err));
+    wr.on("error", (err: Error) => done(err));
     wr.on("close", done);
     rd.pipe(str).pipe(wr);
   });
 };
 
-async function copyFileSync(from: string, to: string, mode:string, options?: ICopyOptions) {
+async function copyFileSync(from: string, to: string, mode: string, options?: ICopyOptions) {
   const data = readFileSync(from);
   const writeOptions: IWriteOptions = {
     mode: mode
@@ -137,7 +137,7 @@ async function copyItemSync(from: string, inspectData: INode, to: string, option
     copySymlinkSync(from, to);
   }
 };
-export function sync(from: string, to: string, options?: ICopyOptions):void {
+export function sync(from: string, to: string, options?: ICopyOptions): void {
   const opts = parseOptions(options, from);
   checksBeforeCopyingSync(from, to, opts);
   let nodes: ICopyTask[] = [];
@@ -215,7 +215,7 @@ const copyFileAsync = (from: string, to: string, mode: any, retriedAttempt?: boo
     const readStream = fs.createReadStream(from);
     const writeStream = fs.createWriteStream(to, { mode: mode });
     readStream.on('error', reject);
-    writeStream.on('error', (err:any) => {
+    writeStream.on('error', (err: ErrnoException) => {
       const toDirPath = pathUtil.dirname(to);
       // Force read stream to close, since write stream errored
       // read stream serves us no purpose.
@@ -245,7 +245,7 @@ const copySymlinkAsync = (from: string, to: string) => {
       return new Promise((resolve, reject) => {
         promisedSymlink(symlinkPointsAt, to)
           .then(resolve)
-          .catch((err:any) => {
+          .catch((err: ErrnoException) => {
             if (err.code === 'EEXIST') {
               // There is already file/symlink with this name on destination location.
               // Must erase it manually, otherwise system won't allow us to place symlink there.
@@ -329,7 +329,7 @@ const resolveConflict = (from: string, to: string, options: ICopyOptions, resolv
  * @param {ICopyOptions} [options]
  * @returns
  */
-export function async(from: string, to: string, options?: ICopyOptions):Promise<void> {
+export function async(from: string, to: string, options?: ICopyOptions): Promise<void> {
   const opts = parseOptions(options, from);
   return new Promise<void>((resolve, reject) => {
     checkAsync(from, to, opts).then((resolveSettings: IConflictSettings) => {
@@ -340,7 +340,6 @@ export function async(from: string, to: string, options?: ICopyOptions):Promise<
       }
       let allFilesDelivered: boolean = false;
       let filesInProgress: number = 0;
-
       let abort: boolean = false;
       const stream = treeWalkerStream(from, {
         inspectOptions: {

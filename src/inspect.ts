@@ -110,7 +110,7 @@ async function fileChecksumAsync(path: string, algo: string): Promise<string> {
   const deferred = Q.defer();
   const hash = createHash(algo);
   const s = createReadStream(path);
-  s.on('data', (data: any) => hash.update(data));
+  s.on('data', (data: string | Buffer) => hash.update(data));
   s.on('end', () => deferred.resolve(hash.digest('hex')));
   s.on('error', (e: Error) => deferred.reject(e));
   return deferred.promise;

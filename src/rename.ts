@@ -18,6 +18,6 @@ export function sync(path: string, newName: string) {
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-export function async(path, newName): Promise<null> {
+export function async(path: string, newName: string): Promise<null> {
   return moveASync(path, pathUtil.join(pathUtil.dirname(path), newName));
 }

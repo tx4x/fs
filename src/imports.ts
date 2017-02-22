@@ -1,8 +1,8 @@
-import * as write_fs from 'write-file-atomic';
+const write_fs = require('write-file-atomic');
 export const file = {
-    write_atomic: write_fs
+  write_atomic: write_fs
 };
 export const json = {
-    parse: JSON.parse,
-    serialize: JSON.stringify
+  parse: JSON.parse,
+  serialize: JSON.stringify
 };

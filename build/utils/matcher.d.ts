@@ -1,1 +1,1 @@
-export declare function create(basePath: any, patterns: any): (absolutePath: any) => boolean;
+export declare function create(basePath: string, patterns: string[]): (absolutePath: string) => boolean;

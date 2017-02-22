@@ -1,5 +1,5 @@
 "use strict";
-const Q = require("q");
+const Q = require('q');
 const fs = require("fs");
 const mkdirp = require("mkdirp");
 const pathUtil = require("path");
@@ -39,7 +39,7 @@ function async(symlinkValue, path) {
     return new Promise((resolve, reject) => {
         promisedSymlink(symlinkValue, path)
             .then(resolve)
-            .catch(err => {
+            .catch((err) => {
             if (err.code === 'ENOENT') {
                 // Parent directories don't exist. Just create them and rety.
                 promisedMkdirp(pathUtil.dirname(path))

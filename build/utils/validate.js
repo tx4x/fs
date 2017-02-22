@@ -1,6 +1,6 @@
 "use strict";
 let prettyPrintTypes = function (types) {
-    let addArticle = function (str) {
+    const addArticle = (str) => {
         let vowels = ['a', 'e', 'i', 'o', 'u'];
         if (vowels.indexOf(str[0]) !== -1) {
             return 'an ' + str;
@@ -16,7 +16,7 @@ let extractTypeFromArrayOfNotation = function (typeDefinition) {
     // The notation is e.g. 'array of string'
     return typeDefinition.split(' of ')[1];
 };
-let isValidTypeDefinition = function (typeStr) {
+let isValidTypeDefinition = (typeStr) => {
     if (isArrayOfNotation(typeStr)) {
         return isValidTypeDefinition(extractTypeFromArrayOfNotation(typeStr));
     }
@@ -54,7 +54,7 @@ let detectTypeDeep = function (value) {
     let typesInArray;
     if (type === 'array') {
         typesInArray = value
-            .map(function (element) {
+            .map((element) => {
             return detectType(element);
         })
             .filter(onlyUniqueValuesInArrayFilter);

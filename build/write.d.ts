@@ -1,6 +1,7 @@
 /// <reference types="node" />
-import { WriteOptions } from './interfaces';
+import { IWriteOptions } from './interfaces';
 export declare type Data = string | Buffer | Object;
-export declare function validateInput(methodName: string, path: string, data: any, options: WriteOptions): void;
-export declare function sync(path: string, data: Data, options?: WriteOptions): void;
-export declare function async(path: string, data: Data, options?: WriteOptions): Promise<null>;
+import { ReadWriteDataType } from './interfaces';
+export declare function validateInput(methodName: string, path: string, data: ReadWriteDataType, options: IWriteOptions): void;
+export declare function sync(path: string, data: Data, options?: IWriteOptions): void;
+export declare function async(path: string, data: Data, options?: IWriteOptions): Promise<null>;

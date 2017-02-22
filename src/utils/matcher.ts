@@ -1,5 +1,5 @@
 import { Minimatch } from 'minimatch';
-const patternToAbsolutePath = (basePath: string, pattern): string => {
+const patternToAbsolutePath = (basePath: string, pattern: string): string => {
   // All patterns without slash are left as they are, if pattern contain
   // any slash we need to turn it into absolute path.
   const hasSlash: boolean = (pattern.indexOf('/') !== -1);
@@ -26,8 +26,8 @@ const patternToAbsolutePath = (basePath: string, pattern): string => {
   return pattern;
 };
 
-export function create(basePath: string, patterns) {
-  let matchers;
+export function create(basePath: string, patterns:string[]) {
+  let matchers:any[];
   if (typeof patterns === 'string') {
     patterns = [patterns];
   }

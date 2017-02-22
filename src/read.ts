@@ -1,9 +1,12 @@
 import { readFile, readFileSync } from 'fs';
-import * as Q from 'q';
+
 import { json, file } from './imports';
 import { validateArgument } from './utils/validate';
+import { ReadWriteDataType } from './interfaces';
+const Q = require('q');
 const supportedReturnAs = ['utf8', 'buffer', 'json', 'jsonWithDates'];
 const promisedReadFile = Q.denodeify(readFile);
+
 export function validateInput(methodName: string, path: string, returnAs: string) {
   const methodSignature = methodName + '(path, returnAs)';
   validateArgument(methodSignature, 'path', path, ['string']);
@@ -36,7 +39,7 @@ const ErrJson = (path: string, err: Error): Error => {
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-export function sync(path: string, returnAs?: string): string | Buffer | Object {
+export function sync(path: string, returnAs?: string): ReadWriteDataType {
   const retAs = returnAs || 'utf8';
   let data;
   try {
@@ -66,17 +69,17 @@ export function sync(path: string, returnAs?: string): string | Buffer | Object 
 // ---------------------------------------------------------
 // ASYNC
 // ---------------------------------------------------------
-export function async(path: string, returnAs?: string): Promise<string | Buffer | Object> {
+export function async(path: string, returnAs?: string): Promise<ReadWriteDataType> {
   return new Promise((resolve, reject) => {
     const retAs = returnAs || 'utf8';
     promisedReadFile(path, { encoding: retAs === 'buffer' ? null : 'utf8' })
-      .then(data => {
+      .then((data: ReadWriteDataType) => {
         // Make final parsing of the data before returning.
         try {
           if (retAs === 'json') {
-            resolve(json.parse(data));
+            resolve(json.parse(data as any));
           } else if (retAs === 'jsonWithDates') {
-            resolve(json.parse(data, jsonDateParser));
+            resolve(json.parse(data as any, jsonDateParser));
           } else {
             resolve(data);
           }
@@ -84,6 +87,6 @@ export function async(path: string, returnAs?: string): Promise<string | Buffer 
           reject(ErrJson(path, err));
         }
       })
-      .catch(err => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
+      .catch((err:any) => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
   });
 };

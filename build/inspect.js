@@ -12,12 +12,19 @@ const pathUtil = require("path");
 const validate_1 = require("./utils/validate");
 const crypto_1 = require("crypto");
 const interfaces_1 = require("./interfaces");
-const Q = require("q");
+const Q = require('q');
 const denodeify = require("denodeify");
 exports.supportedChecksumAlgorithms = ['md5', 'sha1', 'sha256', 'sha512'];
 const promisedStat = denodeify(fs_1.stat);
 const promisedLstat = denodeify(fs_1.lstat);
 const promisedReadlink = denodeify(fs_1.readlink);
+function DefaultInspectOptions() {
+    return {
+        times: true,
+        mode: true
+    };
+}
+exports.DefaultInspectOptions = DefaultInspectOptions;
 function validateInput(methodName, path, options) {
     const methodSignature = methodName + '(path, [options])';
     validate_1.validateArgument(methodSignature, 'path', path, ['string']);
@@ -40,17 +47,17 @@ const createInspectObj = (path, options, stat) => {
     let obj = {};
     obj.name = pathUtil.basename(path);
     if (stat.isFile()) {
-        obj.type = interfaces_1.EInspectItemType.FILE;
+        obj.type = interfaces_1.ENodeType.FILE;
         obj.size = stat.size;
     }
     else if (stat.isDirectory()) {
-        obj.type = interfaces_1.EInspectItemType.DIR;
+        obj.type = interfaces_1.ENodeType.DIR;
     }
     else if (stat.isSymbolicLink()) {
-        obj.type = interfaces_1.EInspectItemType.SYMLINK;
+        obj.type = interfaces_1.ENodeType.SYMLINK;
     }
     else {
-        obj.type = interfaces_1.EInspectItemType.OTHER;
+        obj.type = interfaces_1.ENodeType.OTHER;
     }
     if (options.mode) {
         obj.mode = stat.mode;
@@ -63,9 +70,15 @@ const createInspectObj = (path, options, stat) => {
     if (options.absolutePath) {
         obj.absolutePath = path;
     }
-    //obj.total = 1;
     return obj;
 };
+function createItem(path, options) {
+    options = options || DefaultInspectOptions();
+    const stat = (options.symlinks ? fs_1.lstatSync : fs_1.statSync)(path);
+    return createInspectObj(path, options, stat);
+}
+exports.createItem = createItem;
+;
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
@@ -76,10 +89,10 @@ const fileChecksum = (path, algo) => {
     return hash.digest('hex');
 };
 const addExtraFieldsSync = (path, inspectObj, options) => {
-    if (inspectObj.type === interfaces_1.EInspectItemType.FILE && options.checksum) {
+    if (inspectObj.type === interfaces_1.ENodeType.FILE && options.checksum) {
         inspectObj[options.checksum] = fileChecksum(path, options.checksum);
     }
-    else if (inspectObj.type === interfaces_1.EInspectItemType.SYMLINK) {
+    else if (inspectObj.type === interfaces_1.ENodeType.SYMLINK) {
         inspectObj.pointsAt = fs_1.readlinkSync(path);
     }
     return inspectObj;
@@ -111,22 +124,22 @@ function fileChecksumAsync(path, algo) {
         const deferred = Q.defer();
         const hash = crypto_1.createHash(algo);
         const s = fs_1.createReadStream(path);
-        s.on('data', data => hash.update(data));
+        s.on('data', (data) => hash.update(data));
         s.on('end', () => deferred.resolve(hash.digest('hex')));
-        s.on('error', e => deferred.reject(e));
+        s.on('error', (e) => deferred.reject(e));
         return deferred.promise;
     });
 }
 ;
 const addExtraFieldsAsync = (path, inspectObj, options) => {
-    if (inspectObj.type === interfaces_1.EInspectItemType.FILE && options.checksum) {
+    if (inspectObj.type === interfaces_1.ENodeType.FILE && options.checksum) {
         return fileChecksumAsync(path, options.checksum)
             .then(checksum => {
-            inspectObj[options.checksum] = checksum;
+            inspectObj.checksum = checksum;
             return inspectObj;
         });
     }
-    else if (inspectObj.type === interfaces_1.EInspectItemType.SYMLINK) {
+    else if (inspectObj.type === interfaces_1.ENodeType.SYMLINK) {
         return promisedReadlink(path)
             .then(linkPath => {
             inspectObj.pointsAt = linkPath;

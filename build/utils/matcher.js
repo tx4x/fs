@@ -1,11 +1,11 @@
 "use strict";
-let Minimatch = require('minimatch').Minimatch;
-let convertPatternToAbsolutePath = function (basePath, pattern) {
+const minimatch_1 = require("minimatch");
+const patternToAbsolutePath = (basePath, pattern) => {
     // All patterns without slash are left as they are, if pattern contain
     // any slash we need to turn it into absolute path.
-    let hasSlash = (pattern.indexOf('/') !== -1);
-    let isAbsolute = /^!?\//.test(pattern);
-    let isNegated = /^!/.test(pattern);
+    const hasSlash = (pattern.indexOf('/') !== -1);
+    const isAbsolute = /^!?\//.test(pattern);
+    const isNegated = /^!/.test(pattern);
     let separator;
     if (!isAbsolute && hasSlash) {
         // Throw out meaningful characters from the beginning ("!", "./").
@@ -28,11 +28,10 @@ function create(basePath, patterns) {
     if (typeof patterns === 'string') {
         patterns = [patterns];
     }
-    matchers = patterns.map(function (pattern) {
-        return convertPatternToAbsolutePath(basePath, pattern);
-    })
-        .map(function (pattern) {
-        return new Minimatch(pattern, {
+    matchers = patterns.map(pattern => {
+        return patternToAbsolutePath(basePath, pattern);
+    }).map(pattern => {
+        return new minimatch_1.Minimatch(pattern, {
             matchBase: true,
             nocomment: true,
             dot: true

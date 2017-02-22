@@ -5,6 +5,7 @@ const inspect_1 = require("./inspect");
 const interfaces_1 = require("./interfaces");
 const list_1 = require("./list");
 const validate_1 = require("./utils/validate");
+const Q = require('q');
 function validateInput(methodName, path, options) {
     const methodSignature = methodName + '(path, options)';
     validate_1.validateArgument(methodSignature, 'path', path, ['string']);
@@ -46,7 +47,7 @@ function inspectTreeNodeSync(path, options, parent) {
         if (options.relativePath) {
             treeBranch.relativePath = generateTreeNodeRelativePath(parent, path);
         }
-        if (treeBranch.type === interfaces_1.EInspectItemType.DIR /*|| (options.symlinks && treeBranch.type === 'symlink')*/) {
+        if (treeBranch.type === interfaces_1.ENodeType.DIR /*|| (options.symlinks && treeBranch.type === 'symlink')*/) {
             treeBranch.size = 0;
             treeBranch.children = (list_1.sync(path) || []).map(function (filename) {
                 let subBranchPath = pathUtil.join(path, filename);
@@ -57,7 +58,7 @@ function inspectTreeNodeSync(path, options, parent) {
                 return treeSubBranch;
             });
             if (options.checksum) {
-                treeBranch[options.checksum] = checksumOfDir(treeBranch.children, options.checksum);
+                treeBranch.checksum = checksumOfDir(treeBranch.children, options.checksum);
             }
         }
     }
@@ -84,7 +85,7 @@ function inspectTreeNodeAsync(path, options, parent) {
                         if (index === children.length) {
                             if (options.checksum) {
                                 // We are done, but still have to calculate checksum of whole directory.
-                                treeBranch[options.checksum] = checksumOfDir(treeBranch.children, options.checksum);
+                                treeBranch.checksum = checksumOfDir(treeBranch.children, options.checksum);
                             }
                             resolve();
                         }
@@ -115,7 +116,7 @@ function inspectTreeNodeAsync(path, options, parent) {
                 if (options.relativePath) {
                     treeBranch.relativePath = generateTreeNodeRelativePath(parent, path);
                 }
-                if (treeBranch.type !== interfaces_1.EInspectItemType.DIR) {
+                if (treeBranch.type !== interfaces_1.ENodeType.DIR) {
                     resolve(treeBranch);
                 }
                 else {

@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const fs = require("fs");
-const Q = require("q");
+const Q = require('q');
 const mode_1 = require("./utils/mode");
 const validate_1 = require("./utils/validate");
 const write_1 = require("./write");
@@ -112,7 +112,7 @@ function isFileAsync(path) {
                 reject(ErrNotFile(path));
             }
         })
-            .catch(err => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
+            .catch((err) => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
     });
 }
 ;

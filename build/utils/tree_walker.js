@@ -16,7 +16,7 @@ function sync(path, options, callback, currentLevel) {
         currentLevel = 0;
     }
     let children = [];
-    const hasChildren = item && item.type === interfaces_1.EInspectItemType.DIR && currentLevel < options.maxLevelsDeep;
+    const hasChildren = item && item.type === interfaces_1.ENodeType.DIR && currentLevel < options.maxLevelsDeep;
     if (hasChildren) {
         children = list_1.sync(path);
     }
@@ -71,7 +71,7 @@ function stream(path, options) {
             .then((inspected) => {
             theNode.inspected = inspected;
             if (inspected &&
-                (inspected).type === interfaces_1.EInspectItemType.DIR &&
+                (inspected).type === interfaces_1.ENodeType.DIR &&
                 theNode.level < options.maxLevelsDeep) {
                 list_1.async(theNode.path)
                     .then((childrenNames) => {

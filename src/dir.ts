@@ -3,12 +3,13 @@ import { Stats, stat, statSync, chmod, chmodSync, readdirSync, readdir } from 'f
 import * as rimraf from 'rimraf';
 import { normalizeFileMode as modeUtil } from './utils/mode';
 import { validateArgument, validateOptions } from './utils/validate';
-import * as  Q from 'q';
+const Q = require('q');
 const mkdirp = require('mkdirp');
 export interface Options {
   empty?: boolean;
   mode?: number | string;
 }
+
 export const validateInput = function (methodName: string, path: string, criteria?: Options) {
   let methodSignature = methodName + '(path, [criteria])';
   validateArgument(methodSignature, 'path', path, ['string']);
@@ -111,7 +112,7 @@ async function checkWhatAlreadyOccupiesPathAsync(path: string): Promise<Stats> {
           reject(ErrNoDirectory(path));
         }
       })
-      .catch(function (err) {
+      .catch(function (err:any) {
         if (err.code === 'ENOENT') {
           // Path doesn't exist
           resolve(undefined);
@@ -129,7 +130,7 @@ function emptyAsync(path: string) {
   return new Promise((resolve, reject) => {
     promisedReaddir(path)
       .then(function (list: any[]) {
-        const doOne = function (index) {
+        const doOne = function (index: number) {
           let subPath: string;
           if (index === list.length) {
             resolve();
@@ -145,7 +146,7 @@ function emptyAsync(path: string) {
       .catch(reject);
   });
 };
-const checkMode = function (criteria, stat, path) {
+const checkMode = function (criteria: Options, stat: Stats, path: string): Promise<null> {
   const mode = modeUtil(stat.mode);
   if (criteria.mode !== undefined && criteria.mode !== mode) {
     return promisedChmod(path, criteria.mode);

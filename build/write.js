@@ -2,7 +2,7 @@
 const pathUtil = require("path");
 const fs = require("fs");
 const fs_1 = require("fs");
-const Q = require("q");
+const Q = require('q');
 const mkdirp = require("mkdirp");
 const imports_1 = require("./imports");
 const validate_1 = require("./utils/validate");
@@ -67,7 +67,7 @@ function writeFileAsync(path, data, options) {
     return new Promise((resolve, reject) => {
         promisedWriteFile(path, data, options)
             .then(resolve)
-            .catch(err => {
+            .catch((err) => {
             // First attempt to write a file ended with error.
             // Check if this is not due to nonexistent parent directory.
             if (err.code === 'ENOENT') {

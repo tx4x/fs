@@ -1,4 +1,4 @@
-import * as Q from 'q';
+const Q = require('q');
 import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
 import * as  pathUtil from "path";
@@ -6,7 +6,7 @@ import { validateArgument } from './utils/validate';
 const promisedSymlink = Q.denodeify(fs.symlink);
 const promisedMkdirp = Q.denodeify(mkdirp);
 
-export function validateInput(methodName, symlinkValue, path) {
+export function validateInput(methodName: string, symlinkValue: string, path: string) {
   const methodSignature = methodName + '(symlinkValue, path)';
   validateArgument(methodSignature, 'symlinkValue', symlinkValue, ['string']);
   validateArgument(methodSignature, 'path', path, ['string']);
@@ -15,7 +15,7 @@ export function validateInput(methodName, symlinkValue, path) {
 // Sync
 // ---------------------------------------------------------
 
-export function sync(symlinkValue, path): void {
+export function sync(symlinkValue: string, path: string): void {
   try {
     fs.symlinkSync(symlinkValue, path);
   } catch (err) {
@@ -32,11 +32,11 @@ export function sync(symlinkValue, path): void {
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-export function async(symlinkValue, path) {
+export function async(symlinkValue: string, path: string) {
   return new Promise((resolve, reject) => {
     promisedSymlink(symlinkValue, path)
       .then(resolve)
-      .catch(err => {
+      .catch((err: any) => {
         if (err.code === 'ENOENT') {
           // Parent directories don't exist. Just create them and rety.
           promisedMkdirp(pathUtil.dirname(path))

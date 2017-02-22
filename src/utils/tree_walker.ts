@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 import * as  pathUtil from "path";
 import { sync as inspectSync, async as inspectASync } from '../inspect';
-import { EInspectItemType, IInspectOptions, IInspectItem } from '../interfaces';
+import { ENodeType, IInspectOptions, INode } from '../interfaces';
 import { sync as listSync, async as listASync } from '../list';
 
 
@@ -12,7 +12,7 @@ export interface Options {
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-export function sync(path: string, options: Options, callback: (path: string, item: IInspectItem) => void, currentLevel?: number) {
+export function sync(path: string, options: Options, callback: (path: string, item: INode) => void, currentLevel?: number) {
   const item = inspectSync(path, options.inspectOptions);
   if (options.maxLevelsDeep === undefined) {
     options.maxLevelsDeep = Infinity;
@@ -22,7 +22,7 @@ export function sync(path: string, options: Options, callback: (path: string, it
   }
 
   let children: string[] = [];
-  const hasChildren: boolean = item && item.type === EInspectItemType.DIR && currentLevel < options.maxLevelsDeep;
+  const hasChildren: boolean = item && item.type === ENodeType.DIR && currentLevel < options.maxLevelsDeep;
   if (hasChildren) {
     children = listSync(path);
   };
@@ -36,17 +36,17 @@ export function sync(path: string, options: Options, callback: (path: string, it
 // STREAM
 // ---------------------------------------------------------
 
-export function stream(path: string, options) {
+export function stream(path: string, options: Options) {
   const rs = new Readable({ objectMode: true });
   let nextTreeNode = {
     path: path,
     parent: undefined,
     level: 0
-  };
+  } as any;
   let running: boolean = false;
-  let readSome;
-  const error = (err) => { rs.emit('error', err); };
-  const findNextUnprocessedNode = (node) => {
+  let readSome: any;
+  const error = (err: Error) => { rs.emit('error', err); };
+  const findNextUnprocessedNode = (node: any): void => {
     if (node.nextSibling) {
       return node.nextSibling;
     } else if (node.parent) {
@@ -55,7 +55,7 @@ export function stream(path: string, options) {
     return undefined;
   };
 
-  const pushAndContinueMaybe = (data: { path: string, item: IInspectItem }) => {
+  const pushAndContinueMaybe = (data: { path: string, item: INode }) => {
     let theyWantMore = rs.push(data);
     running = false;
     if (!nextTreeNode) {
@@ -70,14 +70,14 @@ export function stream(path: string, options) {
     options.maxLevelsDeep = Infinity;
   }
 
-  readSome = () => {
+  readSome = (): void => {
     const theNode: any = nextTreeNode;
     running = true;
     inspectASync(theNode.path, options.inspectOptions)
-      .then((inspected: IInspectItem) => {
+      .then((inspected: INode) => {
         theNode.inspected = inspected;
         if (inspected &&
-          (inspected).type === EInspectItemType.DIR &&
+          (inspected).type === ENodeType.DIR &&
           theNode.level < options.maxLevelsDeep) {
           listASync(theNode.path)
             .then((childrenNames: string[]) => {

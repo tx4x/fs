@@ -3,6 +3,7 @@ import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree
 import { sync as inspectSync, async as inspectASync } from './inspect';
 import { create as matcher } from './utils/matcher';
 import { validateArgument, validateOptions } from './utils/validate';
+import { INode, ENodeType } from './interfaces';
 export interface Options {
   matching?: string[];
   files?: boolean;
@@ -36,21 +37,21 @@ function normalizeOptions(options?: Options) {
   return opts;
 };
 
-function processFoundObjects(foundObjects: any, cwd: string):string[] {
-  return foundObjects.map(inspectObj => {
+function processFoundObjects(foundObjects: any, cwd: string): string[] {
+  return foundObjects.map((inspectObj: INode) => {
     return pathUtil.relative(cwd, inspectObj.absolutePath);
   });
 };
 
-function generatePathDoesntExistError(path: string):Error {
+function generatePathDoesntExistError(path: string): Error {
   const err = new Error("Path you want to find stuff in doesn't exist " + path);
-  err['code'] = 'ENOENT';
+  (err as any)['code'] = 'ENOENT';
   return err;
 };
 
-function generatePathNotDirectoryError(path: string):Error {
+function generatePathNotDirectoryError(path: string): Error {
   const err = new Error('Path you want to find stuff in must be a directory ' + path);
-  err['code'] = 'ENOTDIR';
+  (err as any)['code'] = 'ENOTDIR';
   return err;
 };
 
@@ -58,7 +59,7 @@ function generatePathNotDirectoryError(path: string):Error {
 // Sync
 // ---------------------------------------------------------
 function findSync(path: string, options: Options): string[] {
-  const foundInspectObjects = [];
+  const foundInspectObjects: INode[] = [];
   const matchesAnyOfGlobs = matcher(path, options.matching);
   treeWalkerSync(path, {
     maxLevelsDeep: options.recursive ? Infinity : 1,
@@ -92,7 +93,7 @@ export function sync(path: string, options: Options): string[] {
 
 function findAsync(path: string, options: Options): Promise<string[]> {
   return new Promise<string[]>((resolve, reject) => {
-    const foundInspectObjects = [];
+    const foundInspectObjects: INode[] = [];
     const matchesAnyOfGlobs = matcher(path, options.matching);
     const walker = treeWalkerStream(path, {
       maxLevelsDeep: options.recursive ? Infinity : 1,

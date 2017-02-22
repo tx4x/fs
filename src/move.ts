@@ -4,24 +4,18 @@ import * as denodeify from 'denodeify';
 import * as mkdirp from 'mkdirp';
 import { async as existsAsync, sync as existsSync } from './exists';
 import { validateArgument } from './utils/validate';
+import { ErrDoesntExists} from './errors';
 
 export function validateInput(methodName: string, from: string, to: string) {
   const methodSignature: string = methodName + '(from, to)';
   validateArgument(methodSignature, 'from', from, ['string']);
   validateArgument(methodSignature, 'to', to, ['string']);
 };
-
-const ErrDoesntExists = (path: string): Error => {
-  const err = new Error("Path to move doesn't exist " + path);
-  err['code'] = 'ENOENT';
-  return err;
-};
-
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
 
-export function sync(from, to): void {
+export function sync(from:string, to:string): void {
   try {
     renameSync(from, to);
   } catch (err) {

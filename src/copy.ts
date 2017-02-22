@@ -1,7 +1,7 @@
 import * as  pathUtil from "path";
 import * as fs from 'fs';
 import { symlinkSync, readFileSync, createReadStream, createWriteStream } from 'fs';
-import * as Q from 'q';
+
 import * as mkdirp from 'mkdirp';
 import { sync as existsSync, async as existsASync } from './exists';
 import { create as matcher } from './utils/matcher';
@@ -10,18 +10,21 @@ import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree
 import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync } from './write';
 import { ErrDestinationExists, ErrDoesntExists } from './errors';
-import { IInspectItem, IInspectOptions, EInspectItemType, WriteOptions } from './interfaces';
-import { ECopyError } from './interfaces';
+import { INode, IInspectOptions, ENodeType, IWriteOptions } from './interfaces';
+import { EError } from './interfaces';
 import { createItem } from './inspect';
-import { ICopyOptions, ECopyResolveMode, ItemProgressCallback, WriteProgressCallback } from './interfaces';
+import { ICopyOptions, EResolveMode, ItemProgressCallback, WriteProgressCallback, IConflictSettings, EResolve } from './interfaces';
+const Q = require('q');
 const promisedSymlink = Q.denodeify(fs.symlink);
 const promisedReadlink = Q.denodeify(fs.readlink);
 const promisedUnlink = Q.denodeify(fs.unlink);
 const promisedMkdirp = Q.denodeify(mkdirp);
 const progress = require('progress-stream');
+
+
 interface ICopyTask {
   path: string;
-  item: IInspectItem;
+  item: INode;
   dst: string;
   done: boolean;
 }
@@ -34,7 +37,8 @@ export function validateInput(methodName: string, from: string, to: string, opti
     matching: ['string', 'array of string'],
     progress: ['function'],
     writeProgress: ['function'],
-    conflictCallback: ['function']
+    conflictCallback: ['function'],
+    conflictSettings: ['object']
   });
 };
 const parseOptions = (options: any | null, from: string): ICopyOptions => {
@@ -44,6 +48,7 @@ const parseOptions = (options: any | null, from: string): ICopyOptions => {
   parsedOptions.progress = opts.progress;
   parsedOptions.writeProgress = opts.writeProgress;
   parsedOptions.conflictCallback = opts.conflictCallback;
+  parsedOptions.conflictSettings = opts.conflictSettings;
   if (opts.matching) {
     parsedOptions.allowedToCopy = matcher(from, opts.matching);
   } else {
@@ -54,8 +59,7 @@ const parseOptions = (options: any | null, from: string): ICopyOptions => {
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-
-function checksBeforeCopyingSync(from: string, to: string, options?: ICopyOptions) {
+const checksBeforeCopyingSync = (from: string, to: string, options?: ICopyOptions) => {
   if (!existsSync(from)) {
     throw ErrDoesntExists(from);
   }
@@ -64,6 +68,7 @@ function checksBeforeCopyingSync(from: string, to: string, options?: ICopyOption
     throw ErrDestinationExists(to);
   }
 };
+
 async function copyFileSyncWithProgress(from: string, to: string, options?: ICopyOptions) {
   return new Promise((resolve, reject) => {
     const started = Date.now();
@@ -81,21 +86,22 @@ async function copyFileSyncWithProgress(from: string, to: string, options?: ICop
       length: fs.statSync(from).size,
       time: 100
     });
-    str.on('progress', e => {
+    str.on('progress', (e:any) => {
       elapsed = (Date.now() - started) / 1000;
       speed = e.transferred / elapsed;
       options.writeProgress(from, e.transferred, e.length);
     });
-    rd.on("error", err => done(err));
+    rd.on("error", (err:Error) => done(err));
     const wr = createWriteStream(to);
-    wr.on("error", err => done(err));
+    wr.on("error", (err:Error) => done(err));
     wr.on("close", done);
     rd.pipe(str).pipe(wr);
   });
 };
-async function copyFileSync(from: string, to: string, mode, options?: ICopyOptions) {
+
+async function copyFileSync(from: string, to: string, mode:string, options?: ICopyOptions) {
   const data = readFileSync(from);
-  const writeOptions: WriteOptions = {
+  const writeOptions: IWriteOptions = {
     mode: mode
   };
   if (options && options.writeProgress) {
@@ -121,25 +127,24 @@ const copySymlinkSync = (from: string, to: string) => {
   }
 };
 
-async function copyItemSync(from: string, inspectData: IInspectItem, to: string, options: ICopyOptions) {
+async function copyItemSync(from: string, inspectData: INode, to: string, options: ICopyOptions) {
   const mode: string = fileMode(inspectData.mode);
-  if (inspectData.type === EInspectItemType.DIR) {
+  if (inspectData.type === ENodeType.DIR) {
     mkdirp.sync(to, { mode: parseInt(mode, 8), fs: null });
-  } else if (inspectData.type === EInspectItemType.FILE) {
+  } else if (inspectData.type === ENodeType.FILE) {
     await copyFileSync(from, to, mode, options);
-  } else if (inspectData.type === EInspectItemType.SYMLINK) {
+  } else if (inspectData.type === ENodeType.SYMLINK) {
     copySymlinkSync(from, to);
   }
 };
-
-export function sync(from: string, to: string, options?: ICopyOptions) {
+export function sync(from: string, to: string, options?: ICopyOptions):void {
   const opts = parseOptions(options, from);
   checksBeforeCopyingSync(from, to, opts);
   let nodes: ICopyTask[] = [];
   let current: number = 0;
   let sizeTotal: number = 0;
 
-  const visitor = (path: string, inspectData: IInspectItem) => {
+  const visitor = (path: string, inspectData: INode) => {
     const rel = pathUtil.relative(from, path);
     const destPath = pathUtil.resolve(to, rel);
     if (opts.allowedToCopy(path)) {
@@ -171,7 +176,16 @@ export function sync(from: string, to: string, options?: ICopyOptions) {
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-const checkAsync = (from: string, to: string, opts: ICopyOptions): Promise<ECopyResolveMode | any> => {
+
+/**
+ *
+ *
+ * @param {string} from
+ * @param {string} to
+ * @param {ICopyOptions} opts
+ * @returns {(Promise<IConflictSettings | any>)}
+ */
+const checkAsync = (from: string, to: string, opts: ICopyOptions): Promise<IConflictSettings | any> => {
   return existsASync(from)
     .then(srcPathExists => {
       if (!srcPathExists) {
@@ -182,8 +196,11 @@ const checkAsync = (from: string, to: string, opts: ICopyOptions): Promise<ECopy
     })
     .then(destPathExists => {
       if (destPathExists) {
+        if (opts.conflictSettings) {
+          return Promise.resolve(opts.conflictSettings);
+        }
         if (opts.conflictCallback) {
-          return opts.conflictCallback(to, createItem(to), ECopyError.EXISTS);
+          return opts.conflictCallback(to, createItem(to), EError.EXISTS);
         }
         if (!opts.overwrite) {
           throw ErrDestinationExists(to);
@@ -192,12 +209,13 @@ const checkAsync = (from: string, to: string, opts: ICopyOptions): Promise<ECopy
     });
 };
 
+
 const copyFileAsync = (from: string, to: string, mode: any, retriedAttempt?: boolean) => {
   return new Promise((resolve, reject) => {
     const readStream = fs.createReadStream(from);
     const writeStream = fs.createWriteStream(to, { mode: mode });
     readStream.on('error', reject);
-    writeStream.on('error', (err) => {
+    writeStream.on('error', (err:any) => {
       const toDirPath = pathUtil.dirname(to);
       // Force read stream to close, since write stream errored
       // read stream serves us no purpose.
@@ -227,7 +245,7 @@ const copySymlinkAsync = (from: string, to: string) => {
       return new Promise((resolve, reject) => {
         promisedSymlink(symlinkPointsAt, to)
           .then(resolve)
-          .catch(err => {
+          .catch((err:any) => {
             if (err.code === 'EEXIST') {
               // There is already file/symlink with this name on destination location.
               // Must erase it manually, otherwise system won't allow us to place symlink there.
@@ -243,80 +261,134 @@ const copySymlinkAsync = (from: string, to: string) => {
     });
 };
 
-const copyItemAsync = (from: string, inspectData: any, to: string) => {
+const copyItemAsync = (from: string, inspectData: INode, to: string) => {
   const mode = fileMode(inspectData.mode);
-  if (inspectData.type === EInspectItemType.DIR) {
+
+  if (inspectData.type === ENodeType.DIR) {
     return promisedMkdirp(to, { mode: mode });
-  } else if (inspectData.type === EInspectItemType.FILE) {
+  } else if (inspectData.type === ENodeType.FILE) {
     return copyFileAsync(from, to, mode);
-  } else if (inspectData.type === EInspectItemType.SYMLINK) {
+  } else if (inspectData.type === ENodeType.SYMLINK) {
     return copySymlinkAsync(from, to);
   }
   //EInspectItemType.OTHER
   return new Q();
 };
-const resolveConflict = (from: string, to: string, options: ICopyOptions, mode: ECopyResolveMode): ECopyResolveMode => {
-  switch (mode) {
-    case ECopyResolveMode.THROW: {
+// handle user side setting "THROW" and non enum values (null)
+const onConflict = (from: string, to: string, options: ICopyOptions, settings: IConflictSettings): EResolveMode | undefined => {
+  switch (settings.overwrite) {
+    case EResolveMode.THROW: {
       throw ErrDestinationExists(to);
     }
+    case EResolveMode.OVERWRITE:
+    case EResolveMode.APPEND:
+    case EResolveMode.IF_NEWER:
+    case EResolveMode.ABORT:
+    case EResolveMode.IF_SIZE_DIFFERS:
+    case EResolveMode.SKIP: {
+      return settings.overwrite;
+    }
   }
-  return mode;
+  return undefined;
+};
+const resolveConflict = (from: string, to: string, options: ICopyOptions, resolveMode: EResolveMode): boolean => {
+  // New logic for overwriting
+  if (resolveMode !== undefined) {
+    const src = createItem(from);
+    const dst = createItem(to);
+    if (resolveMode === EResolveMode.SKIP) {
+      return false;
+    } else if (resolveMode === EResolveMode.IF_NEWER) {
+      if (dst.modifyTime.getTime() > src.modifyTime.getTime()) {
+        return false;
+      }
+    } else if (resolveMode === EResolveMode.IF_SIZE_DIFFERS) {
+      // @TODO : not implemented: copy EInspectItemType.DIR with ECopyResolveMode.IF_SIZE_DIFFERS
+      if (src.type === ENodeType.DIR && dst.type === ENodeType.DIR) {
+      } else if (src.type === ENodeType.FILE && dst.type === ENodeType.FILE) {
+        if (src.size === dst.size) {
+          return false;
+        }
+      }
+    } else if (resolveMode === EResolveMode.OVERWRITE) {
+      return true;
+    } else if (resolveMode === EResolveMode.ABORT) {
+      return false;
+    }
+  }
+  return true;
 };
 
-export function async(from: string, to: string, options?: ICopyOptions) {
+/**
+ * Copy
+ *
+ *
+ * @export
+ * @param {string} from
+ * @param {string} to
+ * @param {ICopyOptions} [options]
+ * @returns
+ */
+export function async(from: string, to: string, options?: ICopyOptions):Promise<void> {
   const opts = parseOptions(options, from);
-  return new Promise((resolve, reject) => {
-    checkAsync(from, to, opts).then((resolveMode: ECopyResolveMode) => {
-
-      if (resolveMode) {
-        resolveMode = resolveConflict(from, to, options, resolveMode);
-        const src = createItem(from);
-        const dst = createItem(to);
-        if (resolveMode === ECopyResolveMode.SKIP) {
-          return resolve();
-        } else if (resolveMode === ECopyResolveMode.IF_NEWER) {
-          if (dst.modifyTime.getTime() > src.modifyTime.getTime()) {
-            return resolve();
-          }
-        } else if (resolveMode === ECopyResolveMode.IF_SIZE_DIFFERS) {
-          // @TODO : not implemented: copy EInspectItemType.DIR with ECopyResolveMode.IF_SIZE_DIFFERS
-          if (src.type === EInspectItemType.DIR && dst.type === EInspectItemType.DIR) {
-            console.error('not implemented not implemented: copy EInspectItemType.DIR with ECopyResolveMode.IF_SIZE_DIFFERS');
-          } else if (src.type === EInspectItemType.FILE && dst.type === EInspectItemType.FILE) {
-
-          }
-        }
-
+  return new Promise<void>((resolve, reject) => {
+    checkAsync(from, to, opts).then((resolveSettings: IConflictSettings) => {
+      let overwriteMode = resolveSettings.overwrite;
+      overwriteMode = onConflict(from, to, options, resolveSettings);
+      if (!resolveConflict(from, to, options, overwriteMode)) {
+        return resolve();
       }
-
       let allFilesDelivered: boolean = false;
       let filesInProgress: number = 0;
 
+      let abort: boolean = false;
       const stream = treeWalkerStream(from, {
         inspectOptions: {
           mode: true,
           symlinks: true
         }
       }).on('readable', () => {
-        const item = stream.read();
+        if (abort) {
+          return resolve();
+        }
+        const item: { path: string, name: string, item: INode } = stream.read();
         let rel: string;
         let destPath: string;
-        if (item) {
-          rel = pathUtil.relative(from, item.path);
-          destPath = pathUtil.resolve(to, rel);
-          if (opts.allowedToCopy(item.path)) {
-            filesInProgress += 1;
-            copyItemAsync(item.path, item.item, destPath)
-              .then(() => {
-                filesInProgress -= 1;
-                if (allFilesDelivered && filesInProgress === 0) {
-                  resolve();
-                }
-              })
-              .catch(reject);
-          }
+        if (!item) {
+          return;
         }
+        rel = pathUtil.relative(from, item.path);
+        destPath = pathUtil.resolve(to, rel);
+        if (!opts.allowedToCopy(item.path)) {
+          return;
+        }
+        filesInProgress += 1;
+        checkAsync(item.path, destPath, opts).then((subResolveSettings: IConflictSettings) => {
+          // if the first resolve callback returned an individual resolve settings "THIS",
+          // ask the user again with the particular item
+          let proceed = resolveSettings.mode === EResolve.ALWAYS;
+          if (!proceed) {
+            let overwriteMode = subResolveSettings.overwrite;
+            overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
+            if (overwriteMode === EResolveMode.ABORT) {
+              abort = true;
+            }
+            if (abort) {
+              return;
+            }
+            if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
+              filesInProgress -= 1;
+              return;
+            }
+          }
+          console.log('cp ' + item.path + ' ' + overwriteMode);
+          copyItemAsync(item.path, item.item, destPath).then(() => {
+            filesInProgress -= 1;
+            if (allFilesDelivered && filesInProgress === 0) {
+              resolve();
+            }
+          }).catch(reject);
+        });
       }).on('error', reject)
         .on('end', () => {
           allFilesDelivered = true;

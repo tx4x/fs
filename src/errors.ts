@@ -4,7 +4,7 @@ export function ErrDoesntExists(path: string): Error {
   return err;
 };
 
-export function ErrDestinationExists(path): Error {
+export function ErrDestinationExists(path: string): Error {
   const err: any = new Error('Destination path already exists ' + path);
   err.code = 'EEXIST';
   return err;

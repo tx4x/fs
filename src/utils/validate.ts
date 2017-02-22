@@ -1,5 +1,5 @@
-let prettyPrintTypes = function (types) {
-  let addArticle = function (str) {
+let prettyPrintTypes = function (types: string[]) {
+  const addArticle = (str: string) => {
     let vowels = ['a', 'e', 'i', 'o', 'u'];
     if (vowels.indexOf(str[0]) !== -1) {
       return 'an ' + str;
@@ -10,16 +10,16 @@ let prettyPrintTypes = function (types) {
   return types.map(addArticle).join(' or ');
 };
 
-let isArrayOfNotation = function (typeDefinition) {
+let isArrayOfNotation = function (typeDefinition: string) {
   return /array of /.test(typeDefinition);
 };
 
-let extractTypeFromArrayOfNotation = function (typeDefinition) {
+let extractTypeFromArrayOfNotation = function (typeDefinition: string) {
   // The notation is e.g. 'array of string'
   return typeDefinition.split(' of ')[1];
 };
 
-let isValidTypeDefinition = function (typeStr) {
+let isValidTypeDefinition = (typeStr: string): boolean => {
   if (isArrayOfNotation(typeStr)) {
     return isValidTypeDefinition(extractTypeFromArrayOfNotation(typeStr));
   }
@@ -52,17 +52,17 @@ const detectType = function (value: any | null): string {
   return typeof value;
 };
 
-const onlyUniqueValuesInArrayFilter = function (value, index, self) {
+const onlyUniqueValuesInArrayFilter = function (value: string, index: number, self: any) {
   return self.indexOf(value) === index;
 };
 
-let detectTypeDeep = function (value) {
+let detectTypeDeep = function (value: any) {
   let type = detectType(value);
   let typesInArray;
 
   if (type === 'array') {
     typesInArray = value
-      .map(function (element) {
+      .map((element: any): string => {
         return detectType(element);
       })
       .filter(onlyUniqueValuesInArrayFilter);
@@ -72,21 +72,20 @@ let detectTypeDeep = function (value) {
   return type;
 };
 
-let validateArray = function (argumentValue, typeToCheck): boolean {
+let validateArray = function (argumentValue: any, typeToCheck: string): boolean {
   let allowedTypeInArray = extractTypeFromArrayOfNotation(typeToCheck);
 
   if (detectType(argumentValue) !== 'array') {
     return false;
   }
 
-  return argumentValue.every(function (element) {
+  return argumentValue.every(function (element: any) {
     return detectType(element) === allowedTypeInArray;
   });
 };
 
-export function validateArgument(methodName: string, argumentName: string, argumentValue: string, argumentMustBe): boolean {
-
-  let isOneOfAllowedTypes = argumentMustBe.some(function (type) {
+export function validateArgument(methodName: string, argumentName: string, argumentValue: string, argumentMustBe: any): boolean {
+  let isOneOfAllowedTypes = argumentMustBe.some(function (type: any) {
     if (!isValidTypeDefinition(type)) {
       throw new Error('Unknown type "' + type + '"');
     }
@@ -105,7 +104,7 @@ export function validateArgument(methodName: string, argumentName: string, argum
   return false;
 };
 
-export function validateOptions(methodName, optionsObjName, obj, allowedOptions) {
+export function validateOptions(methodName: string, optionsObjName: string, obj: any, allowedOptions: any) {
   if (obj !== undefined) {
     validateArgument(methodName, optionsObjName, obj, ['object']);
     Object.keys(obj).forEach(function (key) {

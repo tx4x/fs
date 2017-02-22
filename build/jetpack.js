@@ -1,7 +1,7 @@
 "use strict";
 const util = require("util");
 const pathUtil = require("path");
-const Q = require("q");
+const Q = require('q');
 const append = require("./append");
 const dir = require("./dir");
 const file = require("./file");
@@ -18,6 +18,7 @@ const symlink = require("./symlink");
 const streams = require("./streams");
 const write = require("./write");
 const read = require("./read");
+const playground_1 = require("./playground");
 // The Jetpack Context object.
 // It provides the public API, and resolves all paths regarding to
 // passed cwdPath, or default process.cwd() if cwdPath was not specified.
@@ -225,20 +226,6 @@ function jetpack(cwdPath) {
 }
 exports.jetpack = jetpack;
 ;
-/*
-
-process.on('unhandledRejection', (reason) => {
-  console.error('Unhandled rejection, reason: ', reason);
-});
-
-jetpack().copy('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
-  overwrite: true,
-  progress: (path: string, current: number, total: number, item: IInspectItem) => {
-    console.log('copied item ' + path + ' ' + current + ' from ' + total);
-  },
-  writeProgress: (path: string, current: number, total: number) => {
-    console.log('write ' + path + ' / ' + current + ' from ' + total);
-  }
-});
-*/
+playground_1.testCollisionDirectory();
+//testCollisionFile();
 //# sourceMappingURL=jetpack.js.map

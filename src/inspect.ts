@@ -2,14 +2,19 @@ import { Stats, readlinkSync, statSync, lstatSync, stat, lstat, readlink, create
 import * as  pathUtil from "path";
 import { validateArgument, validateOptions } from './utils/validate';
 import { createHash } from 'crypto';
-import { EInspectItemType, IInspectItem, IInspectOptions } from './interfaces';
-import * as Q from 'q';
+import { ENodeType, INode, IInspectOptions } from './interfaces';
+const Q = require('q');
 import * as denodeify from 'denodeify';
 export const supportedChecksumAlgorithms: string[] = ['md5', 'sha1', 'sha256', 'sha512'];
 const promisedStat = denodeify(stat);
 const promisedLstat = denodeify(lstat);
 const promisedReadlink = denodeify(readlink);
-
+export function DefaultInspectOptions(): IInspectOptions {
+  return {
+    times: true,
+    mode: true
+  };
+}
 export function validateInput(methodName: string, path: string, options?: IInspectOptions): void {
   const methodSignature: string = methodName + '(path, [options])';
   validateArgument(methodSignature, 'path', path, ['string']);
@@ -28,18 +33,18 @@ export function validateInput(methodName: string, path: string, options?: IInspe
   }
 };
 
-const createInspectObj = (path: string, options: IInspectOptions, stat: Stats): IInspectItem => {
-  let obj: IInspectItem = {} as IInspectItem;
+const createInspectObj = (path: string, options: IInspectOptions, stat: Stats): INode => {
+  let obj: INode = {} as INode;
   obj.name = pathUtil.basename(path);
   if (stat.isFile()) {
-    obj.type = EInspectItemType.FILE;
+    obj.type = ENodeType.FILE;
     obj.size = stat.size;
   } else if (stat.isDirectory()) {
-    obj.type = EInspectItemType.DIR;
+    obj.type = ENodeType.DIR;
   } else if (stat.isSymbolicLink()) {
-    obj.type = EInspectItemType.SYMLINK;
+    obj.type = ENodeType.SYMLINK;
   } else {
-    obj.type = EInspectItemType.OTHER;
+    obj.type = ENodeType.OTHER;
   }
 
   if (options.mode) {
@@ -55,17 +60,13 @@ const createInspectObj = (path: string, options: IInspectOptions, stat: Stats): 
   if (options.absolutePath) {
     obj.absolutePath = path;
   }
-  //obj.total = 1;
   return obj;
 };
-export function createItem(path: string, options?: IInspectOptions):IInspectItem {
-  options = options || {
-    times:true,
-    mode:true
-  } as IInspectOptions;
+export function createItem(path: string, options?: IInspectOptions): INode {
+  options = options || DefaultInspectOptions();
   const stat = (options.symlinks ? lstatSync : statSync)(path);
   return createInspectObj(path, options, stat);
-}
+};
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
@@ -76,18 +77,18 @@ const fileChecksum = (path: string, algo: string): string => {
   return hash.digest('hex');
 };
 
-const addExtraFieldsSync = (path: string, inspectObj: any, options: IInspectOptions): IInspectItem => {
-  if (inspectObj.type === EInspectItemType.FILE && options.checksum) {
+const addExtraFieldsSync = (path: string, inspectObj: any, options: IInspectOptions): INode => {
+  if (inspectObj.type === ENodeType.FILE && options.checksum) {
     inspectObj[options.checksum] = fileChecksum(path, options.checksum);
-  } else if (inspectObj.type === EInspectItemType.SYMLINK) {
+  } else if (inspectObj.type === ENodeType.SYMLINK) {
     inspectObj.pointsAt = readlinkSync(path);
   }
   return inspectObj;
 };
 
-export function sync(path: string, options?: IInspectOptions): IInspectItem {
+export function sync(path: string, options?: IInspectOptions): INode {
   let stat: Stats;
-  let inspectObj: IInspectItem;
+  let inspectObj: INode;
   options = options || {} as IInspectOptions;
   try {
     stat = (options.symlinks ? lstatSync : statSync)(path);
@@ -109,20 +110,20 @@ async function fileChecksumAsync(path: string, algo: string): Promise<string> {
   const deferred = Q.defer();
   const hash = createHash(algo);
   const s = createReadStream(path);
-  s.on('data', data => hash.update(data));
+  s.on('data', (data: any) => hash.update(data));
   s.on('end', () => deferred.resolve(hash.digest('hex')));
-  s.on('error', e => deferred.reject(e));
+  s.on('error', (e: Error) => deferred.reject(e));
   return deferred.promise;
 };
 
-const addExtraFieldsAsync = (path: string, inspectObj: IInspectItem, options: IInspectOptions) => {
-  if (inspectObj.type === EInspectItemType.FILE && options.checksum) {
+const addExtraFieldsAsync = (path: string, inspectObj: INode, options: IInspectOptions) => {
+  if (inspectObj.type === ENodeType.FILE && options.checksum) {
     return fileChecksumAsync(path, options.checksum)
       .then(checksum => {
-        inspectObj[options.checksum] = checksum;
+        inspectObj.checksum = checksum;
         return inspectObj;
       });
-  } else if (inspectObj.type === EInspectItemType.SYMLINK) {
+  } else if (inspectObj.type === ENodeType.SYMLINK) {
     return promisedReadlink(path)
       .then(linkPath => {
         inspectObj.pointsAt = linkPath;
@@ -132,7 +133,7 @@ const addExtraFieldsAsync = (path: string, inspectObj: IInspectItem, options: II
   return new Q(inspectObj);
 };
 
-export function async(path: string, options?: IInspectOptions) {
+export function async(path: string, options?: IInspectOptions): Promise<INode> {
   return new Promise((resolve, reject) => {
     options = options || {} as IInspectOptions;
     (options.symlinks ? promisedLstat : promisedStat)(path)

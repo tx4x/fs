@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import * as Q from 'q';
+const Q = require('q');
 import { sync as writeSync, async as writeASync } from './write';
 import { validateArgument, validateOptions } from './utils/validate';
 export interface Options {
@@ -40,7 +40,7 @@ export function async(path: string, data: string | Buffer | Object, options?: Op
   return new Promise((resolve, reject) => {
     promisedAppendFile(path, data, options)
       .then(resolve)
-      .catch(err => {
+      .catch((err:any) => {
         if (err.code === 'ENOENT') {
           // Parent directory doesn't exist, so just pass the task to `write`,
           // which will create the folder and file.

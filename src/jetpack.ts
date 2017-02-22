@@ -1,6 +1,6 @@
 import * as util from 'util';
 import * as  pathUtil from "path";
-import * as Q from 'q';
+const Q = require('q');
 import * as append from './append';
 import { Options as AppendOptions } from './append';
 import * as dir from './dir';
@@ -22,19 +22,20 @@ import * as remove from './remove';
 import * as rename from './rename';
 import * as symlink from './symlink';
 import * as streams from './streams';
-import { WriteOptions } from './interfaces';
+import { IWriteOptions } from './interfaces';
 import * as write from './write';
 import * as read from './read';
-import { ECopyOverwriteMode, ICopyOptions, IInspectItem, IInspectOptions } from './interfaces';
-import { testCollision } from './playground';
-
+import { EResolveMode, ICopyOptions, INode, IInspectOptions } from './interfaces';
+import { ReadWriteDataType } from './interfaces';
+import { testCollisionDirectory, testCollisionFile } from './playground';
+//import {WriteStream,ReadStream} from 'node';
 export interface IJetpack {
   cwd(w?: any): IJetpack | string;
   path(): string;
   append(path: string, data: string | Buffer | Object, options?: AppendOptions): void;
   appendAsync(path: string, data: string | Buffer | Object, options?: AppendOptions): Promise<null>;
-  copy(from: string, to: string, options?: ICopyOptions);
-  copyAsync(from: string, to: string, options?: ICopyOptions);
+  copy(from: string, to: string, options?: ICopyOptions): void;
+  copyAsync(from: string, to: string, options?: ICopyOptions): Promise<void>;
   createWriteStream(path: string, options?: {
     flags?: string;
     encoding?: string;
@@ -42,7 +43,7 @@ export interface IJetpack {
     mode?: number;
     autoClose?: boolean;
     start?: number;
-  });
+  }): any;
   createReadStream(path: string, options?: {
     flags?: string;
     encoding?: string;
@@ -51,33 +52,33 @@ export interface IJetpack {
     autoClose?: boolean;
     start?: number;
     end?: number;
-  });
+  }): any;
   dir(path: string, criteria?: DirOptions): IJetpack;
   dirAsync(path: string, criteria?: DirOptions): Promise<IJetpack>;
   exists(path: string): boolean | string;
   existsAsync(path: string): Promise<boolean | string>;
-  file(path: string, criteria?: FileOptions);
-  fileAsync(path: string, criteria?: FileOptions);
+  file(path: string, criteria?: FileOptions): void;
+  fileAsync(path: string, criteria?: FileOptions): Promise<null>;
   find(startPath: string, options: FindOptions): string[];
   findAsync(startPath: string, options: FindOptions): Promise<string[]>;
-  inspect(path: string, fieldsToInclude: IInspectOptions);
-  inspectAsync(path: string, fieldsToInclude: IInspectOptions);
-  inspectTree(path: string, options?: InspectTreeOptions);
-  inspectTreeAsync(path: string, options?: InspectTreeOptions);
+  inspect(path: string, fieldsToInclude: IInspectOptions): INode;
+  inspectAsync(path: string, fieldsToInclude: IInspectOptions): Promise<INode>;
+  inspectTree(path: string, options?: InspectTreeOptions): INode;
+  inspectTreeAsync(path: string, options?: InspectTreeOptions): Promise<INode>;
   list(path: string): string[];
   listAsync(path: string): Promise<string[]>;
   move(from: string, to: string): void;
   moveAsync(from: string, to: string): Promise<null>;
-  read(path: string, returnAs?: string);
-  readAsync(path: string, returnAs?: string): Promise<string>;
+  read(path: string, returnAs?: string): ReadWriteDataType;
+  readAsync(path: string, returnAs?: string): Promise<ReadWriteDataType>;
   remove(path: string): void;
   removeAsync(path: string): Promise<null>;
   rename(path: string, newName: string): void;
   renameAsync(path: string, newName: string): Promise<null>;
   symlink(symlinkValue: string, path: string): void;
   symlinkAsync(symlinkValue: string, path: string): Promise<null>;
-  write(path: string, data: string | Buffer | Object, options?: WriteOptions): void;
-  writeAsync(path: string, data: string | Buffer | Object, options?: WriteOptions);
+  write(path: string, data: string | Buffer | Object, options?: IWriteOptions): void;
+  writeAsync(path: string, data: string | Buffer | Object, options?: IWriteOptions): Promise<null>;
 }
 // The Jetpack Context object.
 // It provides the public API, and resolves all paths regarding to
@@ -300,20 +301,20 @@ export function jetpack(cwdPath?: string): IJetpack {
       return symlink.async(symlinkValue, resolvePath(path));
     },
 
-    write: function (path: string, data: string | Buffer | Object, options?: WriteOptions): void {
+    write: function (path: string, data: string | Buffer | Object, options?: IWriteOptions): void {
       write.validateInput('write', path, data, options);
       write.sync(resolvePath(path), data, options);
     },
-    writeAsync: function (path: string, data: string | Buffer | Object, options?: WriteOptions) {
+    writeAsync: function (path: string, data: string | Buffer | Object, options?: IWriteOptions) {
       write.validateInput('writeAsync', path, data, options);
       return write.async(resolvePath(path), data, options);
     }
   };
-  if (util.inspect['custom'] !== undefined) {
+  if ((util.inspect as any)['custom'] !== undefined) {
     // Without this console.log(jetpack) throws obscure error. Details:
     // https://github.com/szwacz/fs-jetpack/issues/29
     // https://nodejs.org/api/util.html#util_custom_inspection_functions_on_objects
-    api[util.inspect['custom']] = function () {
+    (api as any)[(util.inspect as any)['custom']] = function () {
       return getCwdPath();
     };
   }
@@ -322,4 +323,5 @@ export function jetpack(cwdPath?: string): IJetpack {
 };
 
 
-testCollision();
+testCollisionDirectory();
+//testCollisionFile();

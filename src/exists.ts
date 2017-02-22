@@ -1,6 +1,7 @@
 import { Stats, statSync, stat } from 'fs';
 import { validateArgument } from './utils/validate';
-import { EInspectItemType } from './interfaces';
+import { ENodeType } from './interfaces';
+
 export function validateInput(methodName: string, path: string) {
   const methodSignature = methodName + '(path)';
   validateArgument(methodSignature, 'path', path, ['string']);
@@ -9,7 +10,6 @@ export function validateInput(methodName: string, path: string) {
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-
 export function sync(path: string): boolean | string {
   let stat: Stats;
   try {
@@ -31,8 +31,7 @@ export function sync(path: string): boolean | string {
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-
-export function async(path): Promise<boolean | string> {
+export function async(path: string): Promise<boolean | string> {
   return new Promise((resolve, reject) => {
     stat(path, (err, stat: Stats) => {
       if (err) {
@@ -42,11 +41,11 @@ export function async(path): Promise<boolean | string> {
           reject(err);
         }
       } else if (stat.isDirectory()) {
-        resolve(EInspectItemType.DIR);
+        resolve(ENodeType.DIR);
       } else if (stat.isFile()) {
-        resolve(EInspectItemType.FILE);
+        resolve(ENodeType.FILE);
       } else {
-        resolve(EInspectItemType.OTHER);
+        resolve(ENodeType.OTHER);
       }
     });
   });

@@ -1,20 +1,21 @@
 import * as pathUtil from "path";
 import * as fs from 'fs';
 import { writeFileSync } from 'fs';
-import * as Q from 'q';
+const Q = require('q');
 import * as mkdirp from 'mkdirp';
 import { json, file } from './imports';
-import { WriteOptions } from './interfaces';
+import { IWriteOptions } from './interfaces';
 import { validateArgument, validateOptions } from './utils/validate';
 
 export type Data = string | Buffer | Object;
+import { ReadWriteDataType } from './interfaces';
 
 // Temporary file extensions used for atomic file overwriting.
 const newExt: string = '.__new__';
-export function validateInput(methodName: string, path: string, data, options: WriteOptions): void {
+export function validateInput(methodName: string, path: string, data: ReadWriteDataType, options: IWriteOptions): void {
   const methodSignature = methodName + '(path, data, [options])';
   validateArgument(methodSignature, 'path', path, ['string']);
-  validateArgument(methodSignature, 'data', data, ['string', 'buffer', 'object', 'array']);
+  validateArgument(methodSignature, 'data', data as any, ['string', 'buffer', 'object', 'array']);
   validateOptions(methodSignature, 'options', options, {
     atomic: ['boolean'],
     jsonIndent: ['number'],
@@ -34,7 +35,7 @@ const toJson = (data: string | Buffer | Object, jsonIndent: number): string => {
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-const _writeFileSync = (path: string, data: any | string, options?: WriteOptions): void => {
+const _writeFileSync = (path: string, data: any | string, options?: IWriteOptions): void => {
   try {
     writeFileSync(path, data, options);
   } catch (err) {
@@ -48,11 +49,11 @@ const _writeFileSync = (path: string, data: any | string, options?: WriteOptions
   }
 };
 
-const writeAtomicSync = (path: string, data: string, options?: WriteOptions): void => {
+const writeAtomicSync = (path: string, data: string, options?: IWriteOptions): void => {
   return file.write_atomic(path + newExt, data, options);
 };
 
-export function sync(path: string, data: Data, options?: WriteOptions) {
+export function sync(path: string, data: Data, options?: IWriteOptions): void {
   const opts: any = options || {};
   const processedData = toJson(data, opts.jsonIndent);
   const writeStrategy = opts.atomic ? writeAtomicSync : _writeFileSync;
@@ -65,11 +66,11 @@ export function sync(path: string, data: Data, options?: WriteOptions) {
 const promisedRename = Q.denodeify(fs.rename);
 const promisedWriteFile = Q.denodeify(fs.writeFile);
 const promisedMkdirp = Q.denodeify(mkdirp);
-function writeFileAsync(path: string, data: string, options?: WriteOptions): Promise<null> {
+function writeFileAsync(path: string, data: string, options?: IWriteOptions): Promise<null> {
   return new Promise<null>((resolve, reject) => {
     promisedWriteFile(path, data, options)
       .then(resolve)
-      .catch(err => {
+      .catch((err: any) => {
         // First attempt to write a file ended with error.
         // Check if this is not due to nonexistent parent directory.
         if (err.code === 'ENOENT') {
@@ -85,7 +86,7 @@ function writeFileAsync(path: string, data: string, options?: WriteOptions): Pro
   });
 };
 
-function writeAtomicAsync(path: string, data: string, options?: WriteOptions): Promise<null> {
+function writeAtomicAsync(path: string, data: string, options?: IWriteOptions): Promise<null> {
   return new Promise((resolve, reject) => {
     // We are assuming there is file on given path, and we don't want
     // to touch it until we are sure our data has been saved correctly,
@@ -97,7 +98,7 @@ function writeAtomicAsync(path: string, data: string, options?: WriteOptions): P
   });
 };
 
-export function async(path: string, data: Data, options?: WriteOptions): Promise<null> {
+export function async(path: string, data: Data, options?: IWriteOptions): Promise<null> {
   const opts: any = options || {};
   const processedData: string = toJson(data, opts.jsonIndent);
   return (opts.atomic ? writeAtomicAsync : writeFileAsync)(path, processedData, { mode: opts.mode });

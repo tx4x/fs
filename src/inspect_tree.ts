@@ -1,11 +1,10 @@
 import { createHash } from 'crypto';
 import * as  pathUtil from "path";
-import * as Q from 'q';
 import { sync as inspectSync, async as inspectASync, supportedChecksumAlgorithms } from './inspect';
-import { EInspectItemType, IInspectItem, IInspectOptions } from './interfaces';
+import { ENodeType, INode, IInspectOptions } from './interfaces';
 import { sync as listSync, async as listASync } from './list';
 import { validateArgument, validateOptions } from './utils/validate';
-
+const Q = require('q');
 export interface Options {
   checksum: string;
   relativePath: boolean;
@@ -46,13 +45,13 @@ function checksumOfDir(inspectList: any[], algo: string): string {
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-function inspectTreeNodeSync(path: string, options: Options, parent: any): IInspectItem {
+function inspectTreeNodeSync(path: string, options: Options, parent: any): INode {
   const treeBranch = inspectSync(path, { checksum: options.checksum, symlinks: options.symlinks });
   if (treeBranch) {
     if (options.relativePath) {
       treeBranch.relativePath = generateTreeNodeRelativePath(parent, path);
     }
-    if (treeBranch.type === EInspectItemType.DIR /*|| (options.symlinks && treeBranch.type === 'symlink')*/) {
+    if (treeBranch.type === ENodeType.DIR /*|| (options.symlinks && treeBranch.type === 'symlink')*/) {
       treeBranch.size = 0;
       treeBranch.children = (listSync(path) || []).map(function (filename) {
         let subBranchPath = pathUtil.join(path, filename);
@@ -63,7 +62,7 @@ function inspectTreeNodeSync(path: string, options: Options, parent: any): IInsp
         return treeSubBranch;
       });
       if (options.checksum) {
-        treeBranch[options.checksum] = checksumOfDir(treeBranch.children, options.checksum);
+        treeBranch.checksum = checksumOfDir(treeBranch.children, options.checksum);
       }
     }
   }
@@ -79,23 +78,23 @@ export function sync(path: string, options?: any): any | undefined {
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-function inspectTreeNodeAsync(path: string, options: Options, parent?: any): Promise<IInspectItem> {
+function inspectTreeNodeAsync(path: string, options: Options, parent?: any): Promise<INode> {
   return new Promise((resolve, reject) => {
-    const inspectAllChildren = (treeBranch: IInspectItem) => {
+    const inspectAllChildren = (treeBranch: INode) => {
       return new Promise((resolve, reject) => {
-        listASync(path).then((children: any) => {          
+        listASync(path).then((children: any) => {
           const doNext = (index: number) => {
             let subPath: string;
             if (index === children.length) {
               if (options.checksum) {
                 // We are done, but still have to calculate checksum of whole directory.
-                treeBranch[options.checksum] = checksumOfDir(treeBranch.children, options.checksum);
+                treeBranch.checksum = checksumOfDir(treeBranch.children, options.checksum);
               }
               resolve();
             } else {
               subPath = pathUtil.join(path, children[index]);
               inspectTreeNodeAsync(subPath, options, treeBranch)
-                .then((treeSubBranch: IInspectItem) => {
+                .then((treeSubBranch: INode) => {
                   children[index] = treeSubBranch;
                   treeBranch.size += treeSubBranch.size || 0;
                   doNext(index + 1);
@@ -111,7 +110,7 @@ function inspectTreeNodeAsync(path: string, options: Options, parent?: any): Pro
     };
 
     inspectASync(path, options)
-      .then((treeBranch: IInspectItem) => {
+      .then((treeBranch: INode) => {
         if (!treeBranch) {
           // Given path doesn't exist. We are done.
           resolve(treeBranch);
@@ -119,7 +118,7 @@ function inspectTreeNodeAsync(path: string, options: Options, parent?: any): Pro
           if (options.relativePath) {
             treeBranch.relativePath = generateTreeNodeRelativePath(parent, path);
           }
-          if (treeBranch.type !== EInspectItemType.DIR) {
+          if (treeBranch.type !== ENodeType.DIR) {
             resolve(treeBranch);
           } else {
             inspectAllChildren(treeBranch)
@@ -132,7 +131,7 @@ function inspectTreeNodeAsync(path: string, options: Options, parent?: any): Pro
   });
 };
 
-export function async(path: string, options?: Options): Promise<IInspectItem> {
+export function async(path: string, options?: Options): Promise<INode> {
   options = options || {} as Options;
   options.symlinks = true;
   return inspectTreeNodeAsync(path, options);

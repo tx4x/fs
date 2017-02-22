@@ -32,7 +32,7 @@ function normalizeOptions(options) {
 }
 ;
 function processFoundObjects(foundObjects, cwd) {
-    return foundObjects.map(inspectObj => {
+    return foundObjects.map((inspectObj) => {
         return pathUtil.relative(cwd, inspectObj.absolutePath);
     });
 }

@@ -1,6 +1,6 @@
 "use strict";
 const fs = require("fs");
-const Q = require("q");
+const Q = require('q');
 const write_1 = require("./write");
 const validate_1 = require("./utils/validate");
 function validateInput(methodName, path, data, options) {
@@ -41,7 +41,7 @@ function async(path, data, options) {
     return new Promise((resolve, reject) => {
         promisedAppendFile(path, data, options)
             .then(resolve)
-            .catch(err => {
+            .catch((err) => {
             if (err.code === 'ENOENT') {
                 // Parent directory doesn't exist, so just pass the task to `write`,
                 // which will create the folder and file.

@@ -47,13 +47,13 @@ function async(path) {
                 }
             }
             else if (stat.isDirectory()) {
-                resolve(interfaces_1.EInspectItemType.DIR);
+                resolve(interfaces_1.ENodeType.DIR);
             }
             else if (stat.isFile()) {
-                resolve(interfaces_1.EInspectItemType.FILE);
+                resolve(interfaces_1.ENodeType.FILE);
             }
             else {
-                resolve(interfaces_1.EInspectItemType.OTHER);
+                resolve(interfaces_1.ENodeType.OTHER);
             }
         });
     });

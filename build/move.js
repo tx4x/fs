@@ -5,6 +5,7 @@ const denodeify = require("denodeify");
 const mkdirp = require("mkdirp");
 const exists_1 = require("./exists");
 const validate_1 = require("./utils/validate");
+const errors_1 = require("./errors");
 function validateInput(methodName, from, to) {
     const methodSignature = methodName + '(from, to)';
     validate_1.validateArgument(methodSignature, 'from', from, ['string']);
@@ -12,11 +13,6 @@ function validateInput(methodName, from, to) {
 }
 exports.validateInput = validateInput;
 ;
-const ErrDoesntExists = (path) => {
-    const err = new Error("Path to move doesn't exist " + path);
-    err['code'] = 'ENOENT';
-    return err;
-};
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
@@ -33,7 +29,7 @@ function sync(from, to) {
             // Ok, source or destination path doesn't exist.
             // Must do more investigation.
             if (!exists_1.sync(from)) {
-                throw ErrDoesntExists(from);
+                throw errors_1.ErrDoesntExists(from);
             }
             if (!exists_1.sync(to)) {
                 // Some parent directory doesn't exist. Create it.
@@ -84,7 +80,7 @@ function async(from, to) {
                 exists_1.async(from)
                     .then(srcExists => {
                     if (!srcExists) {
-                        reject(ErrDoesntExists(from));
+                        reject(errors_1.ErrDoesntExists(from));
                     }
                     else {
                         ensureDestinationPathExistsAsync(to)

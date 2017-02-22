@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { Stats } from 'fs';
-import * as Q from 'q';
+const Q = require('q');
 import * as denodeify from 'denodeify';
 import { normalizeFileMode } from './utils/mode';
 import { validateArgument, validateOptions } from './utils/validate';
@@ -14,7 +14,7 @@ export interface Options {
   mode: string;
 }
 
-export function validateInput(methodName: string, path, criteria?: Options) {
+export function validateInput(methodName: string, path:string, criteria?: Options) {
   const methodSignature = methodName + '(path, [criteria])';
   validateArgument(methodSignature, 'path', path, ['string']);
   validateOptions(methodSignature, 'criteria', criteria, {
@@ -115,7 +115,7 @@ function isFileAsync(path: string): Promise<Stats> {
           reject(ErrNotFile(path));
         }
       })
-      .catch(err => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
+      .catch((err:any) => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
   });
 };
 const checkModeAsync = (path: string, mode: string, options: Options) => {

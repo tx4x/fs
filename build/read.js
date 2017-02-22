@@ -1,8 +1,8 @@
 "use strict";
 const fs_1 = require("fs");
-const Q = require("q");
 const imports_1 = require("./imports");
 const validate_1 = require("./utils/validate");
+const Q = require('q');
 const supportedReturnAs = ['utf8', 'buffer', 'json', 'jsonWithDates'];
 const promisedReadFile = Q.denodeify(fs_1.readFile);
 function validateInput(methodName, path, returnAs) {
@@ -72,7 +72,7 @@ function async(path, returnAs) {
     return new Promise((resolve, reject) => {
         const retAs = returnAs || 'utf8';
         promisedReadFile(path, { encoding: retAs === 'buffer' ? null : 'utf8' })
-            .then(data => {
+            .then((data) => {
             // Make final parsing of the data before returning.
             try {
                 if (retAs === 'json') {
@@ -89,7 +89,7 @@ function async(path, returnAs) {
                 reject(ErrJson(path, err));
             }
         })
-            .catch(err => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
+            .catch((err) => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
     });
 }
 exports.async = async;

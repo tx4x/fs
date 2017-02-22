@@ -13,7 +13,7 @@ export let EError: any = {
   NONE: 'None',
   EXISTS: 'EEXIST',
   PERMISSION: 'EACCES',
-  NOEXISTS: 'EACCES'
+  NOEXISTS: 'ENOENT'
 };
 
 /////////////////////////////////////////////////////////

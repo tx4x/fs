@@ -27,9 +27,12 @@ function testCollisionDirectory() {
         matching: ['**/*.ts'],
         overwrite: false,
         conflictCallback: (path, item, err) => {
-            if (~path.indexOf('remove.ts')) {
+            if (path.indexOf('write.ts') !== -1) {
                 if (err === 'EACCES') {
-                    return Promise.resolve({ overwrite: interfaces_1.EResolveMode.ABORT, mode: interfaces_1.EResolve.THIS });
+                    return Promise.resolve({ overwrite: interfaces_1.EResolveMode.SKIP, mode: interfaces_1.EResolve.THIS });
+                }
+                if (err === 'ENOENT') {
+                    return Promise.resolve({ overwrite: interfaces_1.EResolveMode.THROW, mode: interfaces_1.EResolve.THIS });
                 }
             }
             return Promise.resolve({ overwrite: interfaces_1.EResolveMode.OVERWRITE, mode: interfaces_1.EResolve.THIS });

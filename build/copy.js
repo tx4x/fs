@@ -199,6 +199,7 @@ const checkAsync = (from, to, opts) => {
     return exists_1.async(from)
         .then(srcPathExists => {
         if (!srcPathExists) {
+            console.error('doesn ', new Error().stack);
             throw errors_1.ErrDoesntExists(from);
         }
         else {
@@ -321,6 +322,7 @@ function onError(from, to, options, settings) {
 }
 ;
 const resolveConflict = (from, to, options, resolveMode) => {
+    console.log('resolve conf');
     // New logic for overwriting
     if (resolveMode !== undefined) {
         const src = inspect_1.createItem(from);
@@ -352,6 +354,9 @@ const resolveConflict = (from, to, options, resolveMode) => {
     }
     return true;
 };
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled rejection, reason: ', reason);
+});
 /**
  * Copy
  *
@@ -366,9 +371,15 @@ function async(from, to, options) {
     const opts = parseOptions(options, from);
     return new Promise((resolve, reject) => {
         checkAsync(from, to, opts).then((resolveSettings) => {
+            if (!resolveSettings) {
+                resolveSettings = opts.conflictSettings || {
+                    mode: interfaces_3.EResolve.THIS,
+                    overwrite: interfaces_3.EResolveMode.OVERWRITE
+                };
+            }
             let overwriteMode = resolveSettings.overwrite;
             overwriteMode = onConflict(from, to, options, resolveSettings);
-            if (!resolveConflict(from, to, options, overwriteMode)) {
+            if (opts.conflictSettings || opts.conflictCallback && !resolveConflict(from, to, options, overwriteMode)) {
                 return resolve();
             }
             let allFilesDelivered = false;
@@ -394,9 +405,6 @@ function async(from, to, options) {
                 }
                 filesInProgress += 1;
                 checkAsync(item.path, destPath, opts).then((subResolveSettings) => {
-                    if (!subResolveSettings) {
-                        console.log('have no resolver settings for ' + item.path, new Error().stack);
-                    }
                     // if the first resolve callback returned an individual resolve settings "THIS",
                     // ask the user again with the particular item
                     let proceed = resolveSettings.mode === interfaces_3.EResolve.ALWAYS;
@@ -416,10 +424,9 @@ function async(from, to, options) {
                             }
                         }
                     }
-                    console.log('cp ' + item.path + ' ' + overwriteMode);
-                    //console.log('had error : ' + hadError);
-                    // try copy operation
-                    //try {
+                    if (item.path.indexOf('write.ts') !== -1) {
+                    }
+                    console.log('cp ' + item.path + ' to ' + destPath);
                     copyItemAsync(item.path, item.item, destPath).then(() => {
                         filesInProgress -= 1;
                         if (allFilesDelivered && filesInProgress === 0) {
@@ -427,8 +434,8 @@ function async(from, to, options) {
                         }
                     }).catch((err) => {
                         if (options.conflictCallback) {
-                            if (err.code === interfaces_2.EError.PERMISSION) {
-                                options.conflictCallback(item.path, inspect_1.createItem(destPath), interfaces_2.EError.PERMISSION).then((errorResolveSettings) => {
+                            if (err.code === interfaces_2.EError.PERMISSION || err.code === interfaces_2.EError.NOEXISTS) {
+                                options.conflictCallback(item.path, inspect_1.createItem(destPath), err.code).then((errorResolveSettings) => {
                                     // the user has set the error resolver to always, so we use the last one
                                     if (onCopyErrorResolveSettings) {
                                         errorResolveSettings = onCopyErrorResolveSettings;
@@ -447,7 +454,6 @@ function async(from, to, options) {
                                     }
                                     if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.SKIP) {
                                         filesInProgress -= 1;
-                                        console.log('skip!');
                                     }
                                     // catch modes which make no sense:
                                     if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.IF_NEWER ||
@@ -458,6 +464,7 @@ function async(from, to, options) {
                                 });
                             }
                         }
+                        reject(err);
                     });
                 });
             }

@@ -189,6 +189,7 @@ const checkAsync = (from: string, to: string, opts: ICopyOptions): Promise<IConf
   return existsASync(from)
     .then(srcPathExists => {
       if (!srcPathExists) {
+        console.error('doesn ',new Error().stack);
         throw ErrDoesntExists(from);
       } else {
         return existsASync(to);
@@ -338,6 +339,10 @@ const resolveConflict = (from: string, to: string, options: ICopyOptions, resolv
   return true;
 };
 
+//process.on('unhandledRejection', (reason: string) => {
+//  console.error('Unhandled rejection, reason: ', reason);
+//});
+
 /**
  * Copy
  *
@@ -352,9 +357,20 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
   const opts = parseOptions(options, from);
   return new Promise<void>((resolve, reject) => {
     checkAsync(from, to, opts).then((resolveSettings: IConflictSettings) => {
+
+      if (!resolveSettings) {
+        resolveSettings = opts.conflictSettings || {
+          mode: EResolve.THIS,
+          overwrite: EResolveMode.OVERWRITE
+        };
+      }
+
+
+
       let overwriteMode = resolveSettings.overwrite;
       overwriteMode = onConflict(from, to, options, resolveSettings);
-      if (!resolveConflict(from, to, options, overwriteMode)) {
+
+      if (opts.conflictSettings || opts.conflictCallback && !resolveConflict(from, to, options, overwriteMode)) {
         return resolve();
       }
       let allFilesDelivered: boolean = false;
@@ -381,9 +397,6 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
         filesInProgress += 1;
 
         checkAsync(item.path, destPath, opts).then((subResolveSettings: IConflictSettings) => {
-          if (!subResolveSettings) {
-            console.log('have no resolver settings for ' + item.path, new Error().stack);
-          }
           // if the first resolve callback returned an individual resolve settings "THIS",
           // ask the user again with the particular item
           let proceed = resolveSettings.mode === EResolve.ALWAYS;
@@ -404,12 +417,10 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
             }
           }
 
-          console.log('cp ' + item.path + ' ' + overwriteMode);
-          //console.log('had error : ' + hadError);
-
-          // try copy operation
-
-          //try {
+          if (item.path.indexOf('write.ts') !== -1) {
+            //item.path = item.path.replace('write.ts', 'write.ts2');
+          }
+          //console.log('cp ' + item.path + ' to ' + destPath);
           copyItemAsync(item.path, item.item, destPath).then(() => {
             filesInProgress -= 1;
             if (allFilesDelivered && filesInProgress === 0) {
@@ -417,8 +428,8 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
             }
           }).catch((err: ErrnoException) => {
             if (options.conflictCallback) {
-              if (err.code === EError.PERMISSION) {
-                options.conflictCallback(item.path, createItem(destPath), EError.PERMISSION).then((errorResolveSettings: IConflictSettings) => {
+              if (err.code === EError.PERMISSION || err.code === EError.NOEXISTS) {
+                options.conflictCallback(item.path, createItem(destPath), err.code).then((errorResolveSettings: IConflictSettings) => {
                   // the user has set the error resolver to always, so we use the last one
                   if (onCopyErrorResolveSettings) {
                     errorResolveSettings = onCopyErrorResolveSettings;
@@ -438,19 +449,17 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
                   }
                   if (errorResolveSettings.overwrite === EResolveMode.SKIP) {
                     filesInProgress -= 1;
-                    console.log('skip!');
                   }
-
                   // catch modes which make no sense:
                   if (errorResolveSettings.overwrite === EResolveMode.IF_NEWER ||
                     errorResolveSettings.overwrite === EResolveMode.IF_SIZE_DIFFERS ||
                     errorResolveSettings.overwrite === EResolveMode.OVERWRITE) {
                     reject(new ErrnoException('settings make no sense'));
                   }
-
                 });
               }
             }
+            reject(err);
           });
         });
       }

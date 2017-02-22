@@ -39,7 +39,7 @@ function async(path) {
     return new Promise((resolve, reject) => {
         fs_1.stat(path, (err, stat) => {
             if (err) {
-                if (err.code === 'ENOENT') {
+                if (err.code === 'ENOENT' || err.code === 'ENOTDIR') {
                     resolve(false);
                 }
                 else {

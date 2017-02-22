@@ -35,7 +35,7 @@ export function async(path: string): Promise<boolean | string> {
   return new Promise((resolve, reject) => {
     stat(path, (err: ErrnoException, stat: Stats) => {
       if (err) {
-        if (err.code === 'ENOENT') {
+        if (err.code === 'ENOENT' || err.code === 'ENOTDIR') {
           resolve(false);
         } else {
           reject(err);

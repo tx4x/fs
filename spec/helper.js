@@ -11,7 +11,7 @@ process.on('exit', function () {
   // In case something went wrong and some temp
   // directories are still on the disk.
   createdDirectories.forEach(function (path) {
-    fse.removeSync(path);
+    //fse.removeSync(path);
   });
 });
 

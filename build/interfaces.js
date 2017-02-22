@@ -14,7 +14,7 @@ exports.EError = {
     NONE: 'None',
     EXISTS: 'EEXIST',
     PERMISSION: 'EACCES',
-    NOEXISTS: 'EACCES'
+    NOEXISTS: 'ENOENT'
 };
 class ErrnoException extends Error {
 }

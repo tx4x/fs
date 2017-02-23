@@ -92,7 +92,6 @@ const fileChecksum = (path, algo) => {
 const addExtraFieldsSync = (path, inspectObj, options) => {
     if (inspectObj.type === interfaces_1.ENodeType.FILE && options.checksum) {
         inspectObj[options.checksum] = fileChecksum(path, options.checksum);
-        console.log('0000000000 ' + path + '   ' + options.checksum, inspectObj[options.checksum]);
     }
     else if (inspectObj.type === interfaces_1.ENodeType.SYMLINK) {
         inspectObj.pointsAt = fs_1.readlinkSync(path);

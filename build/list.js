@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
 const denodeify = require("denodeify");
 const validate_1 = require("./utils/validate");

@@ -44,7 +44,7 @@ export function async(path: string, data: string | Buffer | Object, options?: Op
         if (err.code === 'ENOENT') {
           // Parent directory doesn't exist, so just pass the task to `write`,
           // which will create the folder and file.
-          writeASync(path, data, { mode: options.mode as string }).then(resolve, reject);
+          writeASync(path, data, options).then(resolve, reject);
         } else {
           reject(err);
         }

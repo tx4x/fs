@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const rm = require("rimraf");
 const denodeify = require("denodeify");
 const validate_1 = require("./utils/validate");

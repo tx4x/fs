@@ -357,16 +357,12 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
   const opts = parseOptions(options, from);
   return new Promise<void>((resolve, reject) => {
     checkAsync(from, to, opts).then((resolveSettings: IConflictSettings) => {
-
       if (!resolveSettings) {
         resolveSettings = opts.conflictSettings || {
           mode: EResolve.THIS,
           overwrite: EResolveMode.OVERWRITE
         };
       }
-
-
-
       let overwriteMode = resolveSettings.overwrite;
       overwriteMode = onConflict(from, to, options, resolveSettings);
 

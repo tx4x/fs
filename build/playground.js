@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const jetpack_1 = require("./jetpack");
 const interfaces_1 = require("./interfaces");
 function testBig() {
@@ -41,6 +42,10 @@ function testCollisionDirectory() {
             //console.log('copieing : ' + path + ' ' + item.size);
             console.log('copy item ' + current + ' from ' + total);
         }
+        /*_writeProgress: (path: string, current: number, total: number) => {
+          //console.log('copieing : ' + path + ' ' + item.size);
+          console.log('write ' + current + ' from ' + total);
+        }*/
     }).then(() => {
         console.log('done');
     }).catch(e => {
@@ -62,6 +67,10 @@ function testCollisionFile() {
             //console.log('copieing : ' + path + ' ' + item.size);
             console.log('copy item ' + current + ' from ' + total);
         }
+        /*_writeProgress: (path: string, current: number, total: number) => {
+          //console.log('copieing : ' + path + ' ' + item.size);
+          console.log('write ' + current + ' from ' + total);
+        }*/
     }).then(() => {
         console.log('done');
     }).catch(e => {
@@ -69,4 +78,52 @@ function testCollisionFile() {
     });
 }
 exports.testCollisionFile = testCollisionFile;
+function testCopySymlink() {
+    process.on('unhandledRejection', (reason) => {
+        console.error('Unhandled rejection, reason: ', reason);
+    });
+    const jp = jetpack_1.jetpack('./');
+    /*
+      lstat('to_copy/symlink',function(err,stat){
+        console.log('err',err);
+        console.log('stat',stat);
+      });
+      if (jp) {
+        return;
+      }
+      */
+    jp.copyAsync('./to_copy', './copied', {
+        overwrite: true
+        /*
+        conflictCallback: (path: string, item: INode) => {
+          return Promise.resolve({ overwrite: EResolveMode.OVERWRITE, mode: EResolve.THIS });
+        },
+        progress: (path: string, current: number, total: number, item: INode) => {
+          //console.log('copieing : ' + path + ' ' + item.size);
+          console.log('copy item ' + current + ' from ' + total);
+        }
+        */
+        /*_writeProgress: (path: string, current: number, total: number) => {
+          //console.log('copieing : ' + path + ' ' + item.size);
+          console.log('write ' + current + ' from ' + total);
+        }*/
+    }).then(() => {
+        console.log('done');
+    }).catch(e => {
+        console.error('error ', e);
+    });
+}
+exports.testCopySymlink = testCopySymlink;
+function prepareSymlink() {
+    var fse = require('fs-extra');
+    try {
+        fse.mkdirsSync('./to_copy');
+    }
+    catch (e) { }
+    try {
+        fse.symlinkSync('../packag.json', 'to_copy/symlink');
+    }
+    catch (e) { }
+}
+exports.prepareSymlink = prepareSymlink;
 //# sourceMappingURL=playground.js.map

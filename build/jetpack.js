@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const util = require("util");
 const pathUtil = require("path");
 const Q = require('q');
@@ -18,6 +19,7 @@ const symlink = require("./symlink");
 const streams = require("./streams");
 const write = require("./write");
 const read = require("./read");
+const playground_1 = require("./playground");
 // The Jetpack Context object.
 // It provides the public API, and resolves all paths regarding to
 // passed cwdPath, or default process.cwd() if cwdPath was not specified.
@@ -227,4 +229,6 @@ exports.jetpack = jetpack;
 ;
 //testCollisionDirectory();
 //testCollisionFile();
+playground_1.prepareSymlink();
+playground_1.testCopySymlink();
 //# sourceMappingURL=jetpack.js.map

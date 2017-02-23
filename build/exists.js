@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
 const validate_1 = require("./utils/validate");
 const interfaces_1 = require("./interfaces");
@@ -37,7 +38,7 @@ exports.sync = sync;
 // ---------------------------------------------------------
 function async(path) {
     return new Promise((resolve, reject) => {
-        fs_1.stat(path, (err, stat) => {
+        fs_1.lstat(path, (err, stat) => {
             if (err) {
                 if (err.code === 'ENOENT' || err.code === 'ENOTDIR') {
                     resolve(false);

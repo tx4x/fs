@@ -7,6 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 const pathUtil = require("path");
 const fs = require("fs");
 const fs_1 = require("fs");
@@ -322,7 +323,6 @@ function onError(from, to, options, settings) {
 }
 ;
 const resolveConflict = (from, to, options, resolveMode) => {
-    console.log('resolve conf');
     // New logic for overwriting
     if (resolveMode !== undefined) {
         const src = inspect_1.createItem(from);
@@ -354,9 +354,9 @@ const resolveConflict = (from, to, options, resolveMode) => {
     }
     return true;
 };
-process.on('unhandledRejection', (reason) => {
-    console.error('Unhandled rejection, reason: ', reason);
-});
+//process.on('unhandledRejection', (reason: string) => {
+//  console.error('Unhandled rejection, reason: ', reason);
+//});
 /**
  * Copy
  *
@@ -425,8 +425,9 @@ function async(from, to, options) {
                         }
                     }
                     if (item.path.indexOf('write.ts') !== -1) {
+                        //item.path = item.path.replace('write.ts', 'write.ts2');
                     }
-                    console.log('cp ' + item.path + ' to ' + destPath);
+                    //console.log('cp ' + item.path + ' to ' + destPath);
                     copyItemAsync(item.path, item.item, destPath).then(() => {
                         filesInProgress -= 1;
                         if (allFilesDelivered && filesInProgress === 0) {

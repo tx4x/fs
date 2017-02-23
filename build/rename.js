@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const pathUtil = require("path");
 const move_1 = require("./move");
 const validate_1 = require("./utils/validate");

@@ -27,7 +27,7 @@ import * as write from './write';
 import * as read from './read';
 import { EResolveMode, ICopyOptions, INode, IInspectOptions } from './interfaces';
 import { ReadWriteDataType } from './interfaces';
-import { testCollisionDirectory, testCollisionFile } from './playground';
+import { testCollisionDirectory, testCollisionFile,prepareSymlink,testCopySymlink } from './playground';
 //import {WriteStream,ReadStream} from 'node';
 export interface IJetpack {
   cwd(w?: any): IJetpack | string;
@@ -324,3 +324,5 @@ export function jetpack(cwdPath?: string): IJetpack {
 
 //testCollisionDirectory();
 //testCollisionFile();
+prepareSymlink();
+testCopySymlink();

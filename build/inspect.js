@@ -7,6 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
 const pathUtil = require("path");
 const validate_1 = require("./utils/validate");
@@ -91,6 +92,7 @@ const fileChecksum = (path, algo) => {
 const addExtraFieldsSync = (path, inspectObj, options) => {
     if (inspectObj.type === interfaces_1.ENodeType.FILE && options.checksum) {
         inspectObj[options.checksum] = fileChecksum(path, options.checksum);
+        console.log('0000000000 ' + path + '   ' + options.checksum, inspectObj[options.checksum]);
     }
     else if (inspectObj.type === interfaces_1.ENodeType.SYMLINK) {
         inspectObj.pointsAt = fs_1.readlinkSync(path);
@@ -135,7 +137,7 @@ const addExtraFieldsAsync = (path, inspectObj, options) => {
     if (inspectObj.type === interfaces_1.ENodeType.FILE && options.checksum) {
         return fileChecksumAsync(path, options.checksum)
             .then(checksum => {
-            inspectObj.checksum = checksum;
+            inspectObj[options['checksum']] = checksum;
             return inspectObj;
         });
     }

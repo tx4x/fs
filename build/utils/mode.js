@@ -1,5 +1,6 @@
 // Logic for unix file mode operations.
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 // Converts mode to string 3 characters long.
 function normalizeFileMode(mode) {
     let modeAsString;

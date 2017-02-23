@@ -1,4 +1,4 @@
-import { Stats, statSync, stat } from 'fs';
+import { Stats, statSync, stat,lstat } from 'fs';
 import { validateArgument } from './utils/validate';
 import { ENodeType, ErrnoException } from './interfaces';
 
@@ -33,7 +33,7 @@ export function sync(path: string): boolean | string {
 // ---------------------------------------------------------
 export function async(path: string): Promise<boolean | string> {
   return new Promise((resolve, reject) => {
-    stat(path, (err: ErrnoException, stat: Stats) => {
+    lstat(path, (err: ErrnoException, stat: Stats) => {
       if (err) {
         if (err.code === 'ENOENT' || err.code === 'ENOTDIR') {
           resolve(false);

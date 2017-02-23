@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const pathUtil = require("path");
 const tree_walker_1 = require("./utils/tree_walker");
 const inspect_1 = require("./inspect");

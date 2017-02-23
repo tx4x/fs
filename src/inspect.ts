@@ -80,6 +80,7 @@ const fileChecksum = (path: string, algo: string): string => {
 const addExtraFieldsSync = (path: string, inspectObj: any, options: IInspectOptions): INode => {
   if (inspectObj.type === ENodeType.FILE && options.checksum) {
     inspectObj[options.checksum] = fileChecksum(path, options.checksum);
+    console.log('0000000000 ' + path + '   ' + options.checksum, inspectObj[options.checksum]);
   } else if (inspectObj.type === ENodeType.SYMLINK) {
     inspectObj.pointsAt = readlinkSync(path);
   }
@@ -120,7 +121,7 @@ const addExtraFieldsAsync = (path: string, inspectObj: INode, options: IInspectO
   if (inspectObj.type === ENodeType.FILE && options.checksum) {
     return fileChecksumAsync(path, options.checksum)
       .then(checksum => {
-        inspectObj.checksum = checksum;
+        (inspectObj as any)[options['checksum']] = checksum;
         return inspectObj;
       });
   } else if (inspectObj.type === ENodeType.SYMLINK) {

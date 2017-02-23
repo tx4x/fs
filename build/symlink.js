@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const Q = require('q');
 const fs = require("fs");
 const mkdirp = require("mkdirp");

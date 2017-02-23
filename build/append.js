@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const Q = require('q');
 const write_1 = require("./write");
@@ -45,7 +46,7 @@ function async(path, data, options) {
             if (err.code === 'ENOENT') {
                 // Parent directory doesn't exist, so just pass the task to `write`,
                 // which will create the folder and file.
-                write_1.async(path, data, { mode: options.mode }).then(resolve, reject);
+                write_1.async(path, data, options).then(resolve, reject);
             }
             else {
                 reject(err);

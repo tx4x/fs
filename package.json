@@ -32,11 +32,11 @@
     "release-assist": "^1.0.1",
     "ts-node": "^2.1.0",
     "tslint": "^4.4.2",
-    "typescript": "^2.1.6"
+    "typescript": "^2.2.1"
   },
   "scripts": {
     "test": "mocha \"spec/**/*.spec.js\"",
-    "testcp": "mocha \"spec/copy.spec.js\"",
+    "testcp": "mocha \"spec/inspect.spec.js\"",
     "test-with-coverage": "istanbul cover node_modules/.bin/_mocha -- 'spec/**/*.spec.js'",
     "lint": "tslint --project=./tsconfig.json",
     "release-start": "release-assist --start",

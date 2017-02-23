@@ -77,4 +77,52 @@ export function testCollisionFile() {
     console.error('error ', e);
   });
 }
+import { Stats, readlinkSync, statSync, lstatSync, stat, lstat, readlink, createReadStream, readFileSync } from 'fs';
+export function testCopySymlink() {
 
+  process.on('unhandledRejection', (reason: string) => {
+    console.error('Unhandled rejection, reason: ', reason);
+  });
+  const jp = jetpack('./');
+
+/*
+  lstat('to_copy/symlink',function(err,stat){
+    console.log('err',err);
+    console.log('stat',stat);
+  });
+  if (jp) {
+    return;
+  }
+  */
+
+  jp.copyAsync('./to_copy', './copied', {
+    overwrite: true
+    /*
+    conflictCallback: (path: string, item: INode) => {
+      return Promise.resolve({ overwrite: EResolveMode.OVERWRITE, mode: EResolve.THIS });
+    },
+    progress: (path: string, current: number, total: number, item: INode) => {
+      //console.log('copieing : ' + path + ' ' + item.size);
+      console.log('copy item ' + current + ' from ' + total);
+    }
+    */
+    /*_writeProgress: (path: string, current: number, total: number) => {
+      //console.log('copieing : ' + path + ' ' + item.size);
+      console.log('write ' + current + ' from ' + total);
+    }*/
+  }).then(() => {
+    console.log('done');
+  }).catch(e => {
+    console.error('error ', e);
+  });
+}
+
+export function prepareSymlink() {
+  var fse = require('fs-extra');
+  try {
+    fse.mkdirsSync('./to_copy');
+  } catch (e) { }
+  try {
+    fse.symlinkSync('../packag.json', 'to_copy/symlink');
+  } catch (e) { }
+}

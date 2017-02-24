@@ -2,6 +2,8 @@ fs-jetpack [![Build Status](https://travis-ci.org/xblox/fs.svg?branch=master)](h
 
 Check out [EXAMPLES](EXAMPLES.md) to see few snippets what it can do.
 
+[API Documentation](http://rawgit.com/xblox/fs/master/docs/interfaces/_jetpack_.ijetpack.html)
+
 ## Installation
 ```
 npm install @gbaumgart/fs

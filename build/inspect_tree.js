@@ -31,14 +31,13 @@ function generateTreeNodeRelativePath(parent, path) {
 ;
 // Creates checksum of a directory by using
 // checksums and names of all its children inside.
-function checksumOfDir(inspectList, algo) {
+const checksumOfDir = (inspectList, algo) => {
     const hash = crypto_1.createHash(algo);
     inspectList.forEach(function (inspectObj) {
         hash.update(inspectObj.name + inspectObj[algo]);
     });
     return hash.digest('hex');
-}
-;
+};
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
@@ -59,7 +58,7 @@ function inspectTreeNodeSync(path, options, parent) {
                 return treeSubBranch;
             });
             if (options.checksum) {
-                treeBranch.checksum = checksumOfDir(treeBranch.children, options.checksum);
+                treeBranch[options.checksum] = checksumOfDir(treeBranch.children, options.checksum);
             }
         }
     }
@@ -86,7 +85,7 @@ function inspectTreeNodeAsync(path, options, parent) {
                         if (index === children.length) {
                             if (options.checksum) {
                                 // We are done, but still have to calculate checksum of whole directory.
-                                treeBranch.checksum = checksumOfDir(treeBranch.children, options.checksum);
+                                treeBranch[options.checksum] = checksumOfDir(treeBranch.children, options.checksum);
                             }
                             resolve();
                         }

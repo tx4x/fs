@@ -85,15 +85,15 @@ export function testCopySymlink() {
   });
   const jp = jetpack('./');
 
-/*
-  lstat('to_copy/symlink',function(err,stat){
-    console.log('err',err);
-    console.log('stat',stat);
-  });
-  if (jp) {
-    return;
-  }
-  */
+  /*
+    lstat('to_copy/symlink',function(err,stat){
+      console.log('err',err);
+      console.log('stat',stat);
+    });
+    if (jp) {
+      return;
+    }
+    */
 
   jp.copyAsync('./to_copy', './copied', {
     overwrite: true
@@ -125,4 +125,16 @@ export function prepareSymlink() {
   try {
     fse.symlinkSync('../packag.json', 'to_copy/symlink');
   } catch (e) { }
+}
+export function inspectTreeTest() {
+  var fse = require('fs-extra');
+
+  try {
+    fse.outputFileSync('./dir/a.txt', 'abc');
+  } catch (e) { }
+  try {
+    fse.outputFileSync('./dir/b.txt', 'defg');
+  } catch (e) { }
+  const jp = jetpack('./');
+  console.log(jp.inspectTree('dir'));
 }

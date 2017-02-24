@@ -5,11 +5,13 @@ import { ENodeType, INode, IInspectOptions } from './interfaces';
 import { sync as listSync, async as listASync } from './list';
 import { validateArgument, validateOptions } from './utils/validate';
 const Q = require('q');
+
 export interface Options {
   checksum: string;
   relativePath: boolean;
   symlinks: boolean;
 }
+
 export function validateInput(methodName: string, path: string, options: Options): void {
   const methodSignature = methodName + '(path, options)';
   validateArgument(methodSignature, 'path', path, ['string']);
@@ -34,7 +36,7 @@ function generateTreeNodeRelativePath(parent: any, path: string): string {
 
 // Creates checksum of a directory by using
 // checksums and names of all its children inside.
-function checksumOfDir(inspectList: any[], algo: string): string {
+const checksumOfDir = (inspectList: any[], algo: string): string => {
   const hash = createHash(algo);
   inspectList.forEach(function (inspectObj) {
     hash.update(inspectObj.name + inspectObj[algo]);
@@ -62,7 +64,7 @@ function inspectTreeNodeSync(path: string, options: Options, parent: any): INode
         return treeSubBranch;
       });
       if (options.checksum) {
-        treeBranch.checksum = checksumOfDir(treeBranch.children, options.checksum);
+        (treeBranch as any)[options.checksum] = checksumOfDir(treeBranch.children, options.checksum);
       }
     }
   }
@@ -70,7 +72,8 @@ function inspectTreeNodeSync(path: string, options: Options, parent: any): INode
 };
 
 export function sync(path: string, options?: any): any | undefined {
-  options = options || {};
+  options = options || {
+  };
   options.symlinks = true;
   return inspectTreeNodeSync(path, options, undefined);
 };
@@ -88,7 +91,7 @@ function inspectTreeNodeAsync(path: string, options: Options, parent?: any): Pro
             if (index === children.length) {
               if (options.checksum) {
                 // We are done, but still have to calculate checksum of whole directory.
-                treeBranch.checksum = checksumOfDir(treeBranch.children, options.checksum);
+                (treeBranch as any)[options.checksum] = checksumOfDir(treeBranch.children, options.checksum);
               }
               resolve();
             } else {

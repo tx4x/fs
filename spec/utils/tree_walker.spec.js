@@ -4,7 +4,7 @@ var fse = require('fs-extra');
 var pathUtil = require('path');
 var expect = require('chai').expect;
 var helper = require('../helper');
-var walker = require('../../lib/utils/tree_walker');
+var walker = require('../../build/utils/tree_walker');
 
 describe('tree walker', function () {
   beforeEach(helper.setCleanTestCwd);

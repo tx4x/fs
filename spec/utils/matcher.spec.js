@@ -1,5 +1,5 @@
 var expect = require('chai').expect;
-var matcher = require('../../lib/utils/matcher');
+var matcher = require('../../build/utils/matcher');
 
 describe('matcher', function () {
   it('can test against one pattern passed as a string', function () {

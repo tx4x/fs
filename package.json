@@ -32,8 +32,8 @@
     "typescript": "^2.2.1"
   },
   "scripts": {
-    "test": "mocha \"spec/**/*.spec.js\"",
-    "testcp": "mocha \"spec/inspect.spec.js\"",
+    "test": "mocha --full-trace mocha \"spec/**/*.spec.js\"",
+    "testcp": "mocha \"spec/inspect_tree.spec.js\"",
     "test-with-coverage": "istanbul cover node_modules/.bin/_mocha -- 'spec/**/*.spec.js'",
     "lint": "tslint --project=./tsconfig.json",
     "release-start": "release-assist --start",

@@ -1,5 +1,5 @@
 var expect = require('chai').expect;
-var validate = require('../../lib/utils/validate');
+var validate = require('../../build/utils/validate');
 
 describe('util validate', function () {
   describe('validates arguments passed to methods', function () {

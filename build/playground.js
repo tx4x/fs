@@ -126,4 +126,18 @@ function prepareSymlink() {
     catch (e) { }
 }
 exports.prepareSymlink = prepareSymlink;
+function inspectTreeTest() {
+    var fse = require('fs-extra');
+    try {
+        fse.outputFileSync('./dir/a.txt', 'abc');
+    }
+    catch (e) { }
+    try {
+        fse.outputFileSync('./dir/b.txt', 'defg');
+    }
+    catch (e) { }
+    const jp = jetpack_1.jetpack('./');
+    console.log(jp.inspectTree('dir'));
+}
+exports.inspectTreeTest = inspectTreeTest;
 //# sourceMappingURL=playground.js.map

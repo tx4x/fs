@@ -4,9 +4,6 @@
   "version": "0.11.9",
   "contributors": [
     {
-      "name": "Jakub Szwacz"
-    },
-    {
       "name": "xblox"
     }
   ],
@@ -53,7 +50,7 @@
   "engines": {
     "node": ">= 6.0.0"
   },
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "keywords": [
     "fs",
     "file system",

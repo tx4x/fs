@@ -90,7 +90,7 @@ describe('move', function () {
   describe("generates nice error when source path doesn't exist", function () {
     var expectations = function (err) {
       expect(err.code).to.equal('ENOENT');
-      expect(err.message).to.have.string("Path to move doesn't exist");
+      expect(err.message).to.have.string("Path to copy doesn't exist");
     };
 
     it('sync', function () {

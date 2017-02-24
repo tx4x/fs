@@ -320,7 +320,7 @@ export function jetpack(cwdPath?: string): IJetpack {
 
   return api;
 };
-inspectTreeTest();
+//inspectTreeTest();
 //testCollisionDirectory();
 //testCollisionFile();
 //prepareSymlink();

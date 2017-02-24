@@ -1,3 +1,7 @@
+# 0.12.1 (2017-02-24)
+- Typescript port complete
+- all tests passing
+
 # 0.11.0 (2017-02-09)
 - Added input validation for the whole API
 - **(breaking change)** Removed already deprecated option `buf` for `read()` method

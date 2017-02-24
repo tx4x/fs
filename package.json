@@ -1,7 +1,7 @@
 {
   "name": "@gbaumgart/fs",
   "description": "Simplified file system API in Typescript",
-  "version": "0.11.8",
+  "version": "0.11.9",
   "contributors": [
     {
       "name": "Jakub Szwacz"
@@ -45,10 +45,10 @@
     "build": "tsc"
   },
   "main": "main.js",
-  "homepage": "https://github.com/xblox/fs-jetpack",
+  "homepage": "https://github.com/xblox/fs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/xblox/fs-jetpack.git"
+    "url": "https://github.com/xblox/fs.git"
   },
   "engines": {
     "node": ">= 6.0.0"

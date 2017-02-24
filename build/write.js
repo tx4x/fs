@@ -48,7 +48,7 @@ const _writeFileSync = (path, data, options) => {
     }
 };
 const writeAtomicSync = (path, data, options) => {
-    return imports_1.file.write_atomic(path + newExt, data, options);
+    return imports_1.file.write_atomic(path + newExt, data, options, function () { });
 };
 function sync(path, data, options) {
     const opts = options || {};

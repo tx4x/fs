@@ -19,6 +19,7 @@ declare module '@gbaumgart/fs/interfaces' {
 	    SYMLINK,
 	    OTHER,
 	}
+	export let EError: any;
 	export interface INode {
 	    name: string;
 	    type: ENodeType | string;
@@ -50,7 +51,7 @@ declare module '@gbaumgart/fs/interfaces' {
 	    stack?: string;
 	}
 	export type ItemProgressCallback = (path: string, current: number, total: number, item?: INode) => void;
-	export type ResolveConflictCallback = (path: string, item: INode, err: EError) => Promise<IConflictSettings>;
+	export type ResolveConflictCallback = (path: string, item: INode, err: string) => Promise<IConflictSettings>;
 	export type WriteProgressCallback = (path: string, current: number, total: number) => void;
 	export enum EResolveMode {
 	    SKIP = 0,
@@ -60,12 +61,6 @@ declare module '@gbaumgart/fs/interfaces' {
 	    APPEND = 4,
 	    THROW = 5,
 	    ABORT = 6,
-	}
-	export enum EError {
-	    NONE,
-	    EXISTS,
-	    PERMISSION,
-	    NOEXISTS,
 	}
 	/**
 	 * Copy options
@@ -136,7 +131,7 @@ declare module '@gbaumgart/fs/interfaces' {
 
 }
 declare module '@gbaumgart/fs/utils/validate' {
-	export function validateArgument(methodName: string, argumentName: string, argumentValue: string, argumentMustBe: any): boolean;
+	export function validateArgument(methodName: string, argumentName: string, argumentValue: string | any, argumentMustBe: any): boolean;
 	export function validateOptions(methodName: string, optionsObjName: string, obj: any, allowedOptions: any): void;
 
 }
@@ -314,6 +309,10 @@ declare module '@gbaumgart/fs/playground' {
 	export function testBig(): void;
 	export function testCollisionDirectory(): void;
 	export function testCollisionFile(): void;
+	export function testCopySymlink(): void;
+	export function prepareSymlink(): void;
+	export function inspectTreeTest(): void;
+	export function validateTest(): void;
 
 }
 declare module '@gbaumgart/fs/jetpack' {

@@ -50,7 +50,7 @@ const _writeFileSync = (path: string, data: any | string, options?: IWriteOption
 };
 
 const writeAtomicSync = (path: string, data: string, options?: IWriteOptions): void => {
-  return file.write_atomic(path + newExt, data, options);
+  return file.write_atomic(path + newExt, data, options,function(){});
 };
 
 export function sync(path: string, data: Data, options?: IWriteOptions): void {

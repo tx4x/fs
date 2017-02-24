@@ -324,5 +324,5 @@ export function jetpack(cwdPath?: string): IJetpack {
 
 //testCollisionDirectory();
 //testCollisionFile();
-prepareSymlink();
-testCopySymlink();
+//prepareSymlink();
+//testCopySymlink();

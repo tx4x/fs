@@ -374,6 +374,7 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
       let abort: boolean = false;
       let onCopyErrorResolveSettings: IConflictSettings = null;
       let hadError = false;
+      
       function visitor() {
         if (abort) {
           return resolve();

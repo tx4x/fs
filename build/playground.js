@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const jetpack_1 = require("./jetpack");
+const validate_1 = require("./utils/validate");
 const interfaces_1 = require("./interfaces");
 function testBig() {
     process.on('unhandledRejection', (reason) => {
@@ -140,4 +141,8 @@ function inspectTreeTest() {
     console.log(jp.inspectTree('dir'));
 }
 exports.inspectTreeTest = inspectTreeTest;
+function validateTest() {
+    validate_1.validateArgument('foo(thing)', 'thing', 123, ['foo']);
+}
+exports.validateTest = validateTest;
 //# sourceMappingURL=playground.js.map

@@ -1,4 +1,5 @@
 import { IJetpack, jetpack } from './jetpack';
+import {validateArgument} from './utils/validate';
 import { IInspectOptions as InspectOptions, INode, EResolveMode, EResolve, EError } from './interfaces';
 export function testBig() {
   process.on('unhandledRejection', (reason: string) => {
@@ -137,4 +138,7 @@ export function inspectTreeTest() {
   } catch (e) { }
   const jp = jetpack('./');
   console.log(jp.inspectTree('dir'));
+}
+export function validateTest() {
+  validateArgument('foo(thing)', 'thing', 123, ['foo']);
 }

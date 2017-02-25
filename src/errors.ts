@@ -1,4 +1,5 @@
 import {ErrnoException } from './interfaces';
+
 export function ErrDoesntExists(path: string): Error {
   const err: any = new Error("Path to copy doesn't exist " + path);
   err.code = 'ENOENT';

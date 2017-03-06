@@ -21,6 +21,27 @@ function testBig() {
     });
 }
 exports.testBig = testBig;
+function testManyWithProgress() {
+    process.on('unhandledRejection', (reason) => {
+        console.error('Unhandled rejection, reason: ', reason);
+    });
+    jetpack_1.jetpack().remove('/tmp/fs_jetpack2');
+    jetpack_1.jetpack().copyAsync('./', '/tmp/fs_jetpack2', {
+        overwrite: true,
+        progress: (path, current, total, item) => {
+            if (path.indexOf('.exe') !== -1) {
+                console.log('copieing : ' + path + ' ' + item.size);
+            }
+            //console.log('copy item ' + current + ' from ' + total);
+            return true;
+        },
+        writeProgress: (path, current, total) => {
+            //console.log('copieing : ' + path + ' ' + item.size);
+            console.log('write ' + path + " : " + current + ' from ' + total);
+        }
+    });
+}
+exports.testManyWithProgress = testManyWithProgress;
 function testCollisionDirectory() {
     process.on('unhandledRejection', (reason) => {
         console.error('Unhandled rejection, reason: ', reason);

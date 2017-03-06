@@ -231,4 +231,6 @@ exports.jetpack = jetpack;
 //testCollisionFile();
 //prepareSymlink();
 //testCopySymlink();
+//testBig();
+//testManyWithProgress();
 //# sourceMappingURL=jetpack.js.map

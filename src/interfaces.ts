@@ -3,10 +3,11 @@
 //  Enums
 //
 export enum ENodeType {
-	FILE = <any>'file',
-	DIR = <any>'dir',
-	SYMLINK = <any>'symlink',
-	OTHER = <any>'other'
+	FILE = <any> 'file',
+	DIR = <any> 'dir',
+	SYMLINK = <any> 'symlink',
+	OTHER = <any> 'other',
+	BLOCK = <any> 'block'
 }
 
 export let EError: any = {
@@ -123,6 +124,14 @@ export interface ICopyOptions {
 	 * @memberOf ICopyOptions
 	 */
 	conflictSettings?: IConflictSettings;
+
+	/**
+	 * Throttel copy for larger files. This will be only used when writeProgress is set and the file is at least 5MB.
+	 *
+	 * @type {number}
+	 * @memberOf ICopyOptions
+	 */
+	throttel?: number;
 }
 export enum EResolve {
 	ALWAYS,

@@ -10,6 +10,7 @@ var ENodeType;
     ENodeType[ENodeType["DIR"] = 'dir'] = "DIR";
     ENodeType[ENodeType["SYMLINK"] = 'symlink'] = "SYMLINK";
     ENodeType[ENodeType["OTHER"] = 'other'] = "OTHER";
+    ENodeType[ENodeType["BLOCK"] = 'block'] = "BLOCK";
 })(ENodeType = exports.ENodeType || (exports.ENodeType = {}));
 exports.EError = {
     NONE: 'None',

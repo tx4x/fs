@@ -29,6 +29,8 @@ const promisedReadlink = Q.denodeify(fs.readlink);
 const promisedUnlink = Q.denodeify(fs.unlink);
 const promisedMkdirp = Q.denodeify(mkdirp);
 const progress = require('progress-stream');
+const throttle = require('throttle');
+const USE_PROGRESS = 1048576 * 5; // minimum file size threshold to use write progress = 5MB
 function validateInput(methodName, from, to, options) {
     const methodSignature = methodName + '(from, to, [options])';
     validate_1.validateArgument(methodSignature, 'from', from, ['string']);
@@ -39,7 +41,8 @@ function validateInput(methodName, from, to, options) {
         progress: ['function'],
         writeProgress: ['function'],
         conflictCallback: ['function'],
-        conflictSettings: ['object']
+        conflictSettings: ['object'],
+        throttel: ['number']
     });
 }
 exports.validateInput = validateInput;
@@ -215,17 +218,13 @@ const checkAsync = (from, to, opts) => {
             if (opts.conflictCallback) {
                 return opts.conflictCallback(to, inspect_1.createItem(to), interfaces_2.EError.EXISTS);
             }
-            else {
-                console.error('-------no ccb');
-            }
             if (!opts.overwrite) {
-                console.error('------------------');
                 throw errors_1.ErrDestinationExists(to);
             }
         }
     });
 };
-const copyFileAsync = (from, to, mode, retriedAttempt) => {
+const copyFileAsync = (from, to, mode, options, retriedAttempt) => {
     return new Promise((resolve, reject) => {
         const readStream = fs.createReadStream(from);
         const writeStream = fs.createWriteStream(to, { mode: mode });
@@ -251,7 +250,31 @@ const copyFileAsync = (from, to, mode, retriedAttempt) => {
             }
         });
         writeStream.on('finish', resolve);
-        readStream.pipe(writeStream);
+        const size = fs.statSync(from).size;
+        let progressStream = null;
+        if (options && options.writeProgress && size > USE_PROGRESS) {
+            progressStream = progress({
+                length: fs.statSync(from).size,
+                time: 100
+            });
+            let elapsed = Date.now();
+            let speed = 0;
+            const started = Date.now();
+            progressStream.on('progress', (e) => {
+                elapsed = (Date.now() - started) / 1000;
+                speed = e.transferred / elapsed;
+                options.writeProgress(from, e.transferred, e.length);
+            });
+            if (options.throttel) {
+                readStream.pipe(progressStream).pipe(new throttle(options.throttel)).pipe(writeStream);
+            }
+            else {
+                readStream.pipe(progressStream).pipe(writeStream);
+            }
+        }
+        else {
+            readStream.pipe(writeStream);
+        }
     });
 };
 const copySymlinkAsync = (from, to) => {
@@ -275,13 +298,13 @@ const copySymlinkAsync = (from, to) => {
         });
     });
 };
-const copyItemAsync = (from, inspectData, to) => {
+const copyItemAsync = (from, inspectData, to, options) => {
     const mode = mode_1.normalizeFileMode(inspectData.mode);
     if (inspectData.type === interfaces_1.ENodeType.DIR) {
         return promisedMkdirp(to, { mode: mode });
     }
     else if (inspectData.type === interfaces_1.ENodeType.FILE) {
-        return copyFileAsync(from, to, mode);
+        return copyFileAsync(from, to, mode, options);
     }
     else if (inspectData.type === interfaces_1.ENodeType.SYMLINK) {
         return copySymlinkAsync(from, to);
@@ -358,15 +381,8 @@ const resolveConflict = (from, to, options, resolveMode) => {
     }
     return true;
 };
-/*
-process.on('unhandledRejection', (reason: string, pomise) => {
-    console.error('Unhandled rejection, reason: ', reason, pomise);
-});
-*/
 /**
  * Copy
- *
- *
  * @export
  * @param {string} from
  * @param {string} to
@@ -429,7 +445,7 @@ function async(from, to, options) {
                             }
                         }
                     }
-                    copyItemAsync(item.path, item.item, destPath).then(() => {
+                    copyItemAsync(item.path, item.item, destPath, options).then(() => {
                         filesInProgress -= 1;
                         if (opts.progress) {
                             if (opts.progress(item.path, filesInProgress, -1, item.item) === false) {
@@ -441,7 +457,7 @@ function async(from, to, options) {
                             resolve();
                         }
                     }).catch((err) => {
-                        if (options.conflictCallback) {
+                        if (options && options.conflictCallback) {
                             if (err.code === interfaces_2.EError.PERMISSION || err.code === interfaces_2.EError.NOEXISTS) {
                                 options.conflictCallback(item.path, inspect_1.createItem(destPath), err.code).then((errorResolveSettings) => {
                                     // the user has set the error resolver to always, so we use the last one
@@ -476,7 +492,7 @@ function async(from, to, options) {
                     });
                 });
             }
-            const stream = tree_walker_1.stream(from, {
+            tree_walker_1.stream(from, {
                 inspectOptions: {
                     mode: true,
                     symlinks: true

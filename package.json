@@ -8,6 +8,7 @@
     }
   ],
   "dependencies": {
+    "@xblox/core": "0.0.4",
     "denodeify": "^1.2.1",
     "minimatch": "^3.0.3",
     "mkdirp": "^0.5.1",
@@ -36,8 +37,6 @@
     "testcp": "mocha \"spec/write_atomic.spec.js\"",
     "test-with-coverage": "istanbul cover node_modules/.bin/_mocha -- 'spec/**/*.spec.js'",
     "lint": "tslint --project=./tsconfig.json",
-    "release-start": "release-assist --start",
-    "release-finish": "release-assist --finish",
     "dev": "nodemon -w src -x ts-node src/jetpack.ts",
     "build": "tsc"
   },

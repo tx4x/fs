@@ -215,7 +215,11 @@ const checkAsync = (from, to, opts) => {
             if (opts.conflictCallback) {
                 return opts.conflictCallback(to, inspect_1.createItem(to), interfaces_2.EError.EXISTS);
             }
+            else {
+                console.error('-------no ccb');
+            }
             if (!opts.overwrite) {
+                console.error('------------------');
                 throw errors_1.ErrDestinationExists(to);
             }
         }
@@ -257,7 +261,7 @@ const copySymlinkAsync = (from, to) => {
             promisedSymlink(symlinkPointsAt, to)
                 .then(resolve)
                 .catch((err) => {
-                if (err.code === 'EEXIST') {
+                if (err.code === interfaces_2.EError.EXISTS) {
                     // There is already file/symlink with this name on destination location.
                     // Must erase it manually, otherwise system won't allow us to place symlink there.
                     promisedUnlink(to)
@@ -282,7 +286,7 @@ const copyItemAsync = (from, inspectData, to) => {
     else if (inspectData.type === interfaces_1.ENodeType.SYMLINK) {
         return copySymlinkAsync(from, to);
     }
-    //EInspectItemType.OTHER
+    // EInspectItemType.OTHER
     return new Q();
 };
 // handle user side setting "THROW" and non enum values (null)
@@ -319,7 +323,7 @@ function onError(from, to, options, settings) {
     }
     return undefined;
     */
-    //return new Promise<void>;
+    // return new Promise<void>;
 }
 ;
 const resolveConflict = (from, to, options, resolveMode) => {
@@ -354,9 +358,11 @@ const resolveConflict = (from, to, options, resolveMode) => {
     }
     return true;
 };
-//process.on('unhandledRejection', (reason: string) => {
-//  console.error('Unhandled rejection, reason: ', reason);
-//});
+/*
+process.on('unhandledRejection', (reason: string, pomise) => {
+    console.error('Unhandled rejection, reason: ', reason, pomise);
+});
+*/
 /**
  * Copy
  *
@@ -386,7 +392,6 @@ function async(from, to, options) {
             let filesInProgress = 0;
             let abort = false;
             let onCopyErrorResolveSettings = null;
-            let hadError = false;
             function visitor() {
                 if (abort) {
                     return resolve();
@@ -424,12 +429,14 @@ function async(from, to, options) {
                             }
                         }
                     }
-                    if (item.path.indexOf('write.ts') !== -1) {
-                        //item.path = item.path.replace('write.ts', 'write.ts2');
-                    }
-                    //console.log('cp ' + item.path + ' to ' + destPath);
                     copyItemAsync(item.path, item.item, destPath).then(() => {
                         filesInProgress -= 1;
+                        if (opts.progress) {
+                            if (opts.progress(item.path, filesInProgress, -1, item.item) === false) {
+                                abort = true;
+                                return resolve();
+                            }
+                        }
                         if (allFilesDelivered && filesInProgress === 0) {
                             resolve();
                         }

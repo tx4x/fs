@@ -6,5 +6,7 @@
     "mkdirp": "registry:npm/mkdirp#0.5.0+20160723033700",
     "rimraf": "registry:npm/rimraf#2.5.0+20160723033700"
   },
-  "globalDependencies": {}
+  "globalDependencies": {
+    "@xblox/fs": "github:xblox/core/index.d.ts#9d4ac2555128d4f5e28ce00d72d76df0d800778a"
+  }
 }

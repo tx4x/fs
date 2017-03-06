@@ -9,7 +9,8 @@
     "rootDir": "./src",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "pretty": true
+    "pretty": true,
+    "moduleResolution": "node"
   },
   "compileOnSave": false,
   "filesGlob": [

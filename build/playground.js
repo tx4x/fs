@@ -12,6 +12,7 @@ function testBig() {
         progress: (path, current, total, item) => {
             //console.log('copieing : ' + path + ' ' + item.size);
             console.log('copy item ' + current + ' from ' + total);
+            return true;
         },
         writeProgress: (path, current, total) => {
             //console.log('copieing : ' + path + ' ' + item.size);
@@ -42,6 +43,7 @@ function testCollisionDirectory() {
         progress: (path, current, total, item) => {
             //console.log('copieing : ' + path + ' ' + item.size);
             console.log('copy item ' + current + ' from ' + total);
+            return true;
         }
         /*_writeProgress: (path: string, current: number, total: number) => {
           //console.log('copieing : ' + path + ' ' + item.size);
@@ -67,6 +69,7 @@ function testCollisionFile() {
         progress: (path, current, total, item) => {
             //console.log('copieing : ' + path + ' ' + item.size);
             console.log('copy item ' + current + ' from ' + total);
+            return true;
         }
         /*_writeProgress: (path: string, current: number, total: number) => {
           //console.log('copieing : ' + path + ' ' + item.size);

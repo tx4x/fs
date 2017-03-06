@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>@gbaumgart/fs</title>
+	<title>@xblox/fs</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">@gbaumgart/fs</a>
+					<a href="index.html" class="title">@xblox/fs</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -56,7 +56,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1> @gbaumgart/fs</h1>
+			<h1> @xblox/fs</h1>
 		</div>
 	</div>
 </header>
@@ -64,6 +64,357 @@
 	<div class="row">
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
+				<p>fs-jetpack <a href="https://travis-ci.org/xblox/fs"><img src="https://travis-ci.org/xblox/fs.svg?branch=master" alt="Build Status"></a> <a href="https://ci.appveyor.com/project/xblox/fs"><img src="https://ci.appveyor.com/api/projects/status/7gjgoxnxi3t9dc29?svg=true" alt="Build status"></a> <a href="https://codecov.io/gh/xblox/fs"><img src="https://codecov.io/gh/xblox/fs/branch/master/graph/badge.svg" alt="codecov"></a></p>
+				<p>Check out <a href="EXAMPLES.md">EXAMPLES</a> to see few snippets what it can do.</p>
+				<p><a href="http://rawgit.com/xblox/fs/master/docs/interfaces/_jetpack_.ijetpack.html">API Documentation</a></p>
+				<h2 id="installation">Installation</h2>
+				<pre><code><span class="hljs-built_in">npm</span> install @gbaumgart/fs
+</code></pre><h2 id="usage">Usage</h2>
+				<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> jetpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@gbaumgart/fs'</span>);
+</code></pre>
+				<h1 id="sync-async">Sync &amp; Async</h1>
+				<p>API has the same set of synchronous and asynchronous methods. All async methods are promise based (no callbacks).</p>
+				<p>Commonly used naming convention in Node world is reversed in this library (no &#39;method&#39; and &#39;methodSync&#39; naming). Asynchronous methods are those with &#39;Async&#39; suffix, all methods without &#39;Async&#39; in the name are synchronous. Reason behind this is that it gives very nice look to blocking API. And promise-based, non-blocking code is verbose anyway, so one more word is not much of a difference.</p>
+				<p>Also it&#39;s just convenient...</p>
+				<p>If you don&#39;t see the word &quot;Async&quot; in method name it returns value immediately.</p>
+				<pre><code class="lang-js"><span class="hljs-keyword">var</span> data = jetpack.read(<span class="hljs-string">'file.txt'</span>);
+<span class="hljs-built_in">console</span>.log(data);
+</code></pre>
+				<p>When you see &quot;Async&quot; that method returns promise which when resolved returns value.</p>
+				<pre><code class="lang-js">jetpack.readAsync(<span class="hljs-string">'file.txt'</span>)
+.then(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
+  <span class="hljs-built_in">console</span>.log(data);
+});
+</code></pre>
+				<h1 id="api">API</h1>
+				<ul>
+					<li><a href="#appendpath-data-options">append</a></li>
+					<li><a href="#copyfrom-to-options">copy</a></li>
+					<li><a href="#createreadstreampath-options">createReadStream</a></li>
+					<li><a href="#createwritestreampath-options">createWriteStream</a></li>
+					<li><a href="#cwdpath">cwd</a></li>
+					<li><a href="#dirpath-criteria">dir</a></li>
+					<li><a href="#existspath">exists</a></li>
+					<li><a href="#filepath-criteria">file</a></li>
+					<li><a href="#findpath-searchoptions">find</a></li>
+					<li><a href="#inspectpath-options">inspect</a></li>
+					<li><a href="#inspecttreepath-options">inspectTree</a></li>
+					<li><a href="#listpath">list</a></li>
+					<li><a href="#movefrom-to">move</a></li>
+					<li><a href="#pathparts">path</a></li>
+					<li><a href="#readpath-returnas">read</a></li>
+					<li><a href="#removepath">remove</a></li>
+					<li><a href="#renamepath-newname">rename</a></li>
+					<li><a href="#symlinksymlinkvalue-path">symlink</a></li>
+					<li><a href="#writepath-data-options">write</a></li>
+				</ul>
+				<h2 id="append-path-data-options-">append(path, data, [options])</h2>
+				<p>asynchronous: <strong>appendAsync(path, data, [options])</strong></p>
+				<p>Appends given data to the end of file. If file or any parent directory doesn&#39;t exist it will be created.</p>
+				<p><strong>arguments:</strong><br><code>path</code> the path to file.<br><code>data</code> data to append (can be <code>String</code> or <code>Buffer</code>).<br><code>options</code> (optional) <code>Object</code> with possible fields:</p>
+				<ul>
+					<li><code>mode</code> if the file doesn&#39;t exist yet, will be created with given mode. Value could be number (eg. <code>0700</code>) or string (eg. <code>&#39;700&#39;</code>).</li>
+				</ul>
+				<p><strong>returns:</strong><br>Nothing.</p>
+				<h2 id="copy-from-to-options-">copy(from, to, [options])</h2>
+				<p>asynchronous: <strong>copyAsync(from, to, [options])</strong>  </p>
+				<p>Copies given file or directory (with everything inside).</p>
+				<p><strong>arguments:</strong><br><code>from</code> path to location you want to copy.<br><code>to</code> path to destination location, where the copy should be placed.<br><code>options</code> (optional) additional options for customization. Is an <code>Object</code> with possible fields:  </p>
+				<ul>
+					<li><code>overwrite</code> (default: <code>false</code>) Whether to overwrite destination path if arready exists. For directories, source directory is merged with destination directory, so files in destination which are not present in the source, will remain intact.</li>
+					<li><code>matching</code> if defined will actually copy <strong>only</strong> items matching any of specified glob patterns and omit everything else (<a href="#matching-patterns">all possible globs are described further in this readme</a>).</li>
+				</ul>
+				<p><strong>returns:</strong><br>Nothing.</p>
+				<p><strong>examples:</strong></p>
+				<pre><code class="lang-javascript"><span class="hljs-comment">// Copies a file (and replaces it if one already exists in 'foo' directory)</span>
+jetpack.copy(<span class="hljs-string">'file.txt'</span>, <span class="hljs-string">'foo/file.txt'</span>, { <span class="hljs-attr">overwrite</span>: <span class="hljs-literal">true</span> });
+
+<span class="hljs-comment">// Copies only '.md' files from 'foo' (and subdirectories of 'foo') to 'bar'.</span>
+jetpack.copy(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'bar'</span>, { <span class="hljs-attr">matching</span>: <span class="hljs-string">'*.md'</span> });
+<span class="hljs-comment">// Copies only '.md' and '.txt' files from 'foo' (and subdirectories of 'foo') to 'bar'.</span>
+jetpack.copy(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'bar'</span>, { <span class="hljs-attr">matching</span>: [<span class="hljs-string">'*.md'</span>, <span class="hljs-string">'*.txt'</span>] });
+
+<span class="hljs-comment">// You can filter previous matches by defining negated pattern further in the order:</span>
+<span class="hljs-comment">// Copies only '.md' files from 'foo' (and subdirectories of 'foo') to 'bar'</span>
+<span class="hljs-comment">// but will skip file '!top-secret.md'.</span>
+jetpack.copy(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'bar'</span>, { <span class="hljs-attr">matching</span>: [<span class="hljs-string">'*.md'</span>, <span class="hljs-string">'!top-secret.md'</span>] });
+<span class="hljs-comment">// Copies only '.md' files from 'foo' (and subdirectories of 'foo') to 'bar'</span>
+<span class="hljs-comment">// but will skip all files in 'foo/top-secret' directory.</span>
+jetpack.copy(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'bar'</span>, { <span class="hljs-attr">matching</span>: [<span class="hljs-string">'*.md'</span>, <span class="hljs-string">'!top-secret/**/*'</span>] });
+
+<span class="hljs-comment">// All patterns are anchored to directory you want to copy, not to CWD.</span>
+<span class="hljs-comment">// So in this example directory 'dir1/dir2/images' will be copied</span>
+<span class="hljs-comment">// to 'copied-dir2/images'</span>
+jetpack.copy(<span class="hljs-string">'dir1/dir2'</span>, <span class="hljs-string">'copied-dir2'</span>, {
+    <span class="hljs-attr">matching</span>: <span class="hljs-string">'images/**'</span>
+});
+</code></pre>
+				<h2 id="createreadstream-path-options-">createReadStream(path, [options])</h2>
+				<p>Just an alias to vanilla <a href="http://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options">fs.createReadStream</a>.</p>
+				<h2 id="createwritestream-path-options-">createWriteStream(path, [options])</h2>
+				<p>Just an alias to vanilla <a href="http://nodejs.org/api/fs.html#fs_fs_createwritestream_path_options">fs.createWriteStream</a>.</p>
+				<h2 id="cwd-path-">cwd([path...])</h2>
+				<p>Returns Current Working Directory (CWD) for this instance of jetpack, or creates new jetpack object with given path as its internal CWD.</p>
+				<p><strong>Note:</strong> fs never changes value of <code>process.cwd()</code>, the CWD we are talking about here is internal value inside every jetpack instance.</p>
+				<p><strong>arguments:</strong><br><code>path...</code> (optional) path (or many path parts) to become new CWD. Could be absolute, or relative. If relative path given new CWD will be resolved basing on current CWD of this jetpack instance.</p>
+				<p><strong>returns:</strong><br>If <code>path</code> not specified, returns CWD path of this jetpack object. For main instance of fs-jetpack it is always <code>process.cwd()</code>.<br>If <code>path</code> specified, returns new jetpack object (totally the same thing as main jetpack). The new object resolves paths according to its internal CWD, not the global one (<code>process.cwd()</code>).</p>
+				<p><strong>examples:</strong></p>
+				<pre><code class="lang-javascript"><span class="hljs-comment">// Let's assume that process.cwd() outputs...</span>
+<span class="hljs-built_in">console</span>.log(process.cwd()); <span class="hljs-comment">// '/one/two/three'</span>
+<span class="hljs-comment">// jetpack.cwd() will always return the same value as process.cwd()</span>
+<span class="hljs-built_in">console</span>.log(jetpack.cwd()); <span class="hljs-comment">// '/one/two/three'</span>
+
+<span class="hljs-comment">// Now let's create new CWD context...</span>
+<span class="hljs-keyword">var</span> jetParent = jetpack.cwd(<span class="hljs-string">'..'</span>);
+<span class="hljs-built_in">console</span>.log(jetParent.cwd()); <span class="hljs-comment">// '/one/two'</span>
+<span class="hljs-comment">// ...and use this new context.</span>
+jetParent.dir(<span class="hljs-string">'four'</span>); <span class="hljs-comment">// we just created directory '/one/two/four'</span>
+
+<span class="hljs-comment">// One CWD context can be used to create next CWD context.</span>
+<span class="hljs-keyword">var</span> jetParentParent = jetParent.cwd(<span class="hljs-string">'..'</span>);
+<span class="hljs-built_in">console</span>.log(jetParentParent.cwd()); <span class="hljs-comment">// '/one'</span>
+
+<span class="hljs-comment">// When many parameters specified they are treated as parts of path to resolve</span>
+<span class="hljs-keyword">var</span> sillyCwd = jetpack.cwd(<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>);
+<span class="hljs-built_in">console</span>.log(sillyCwd.cwd()); <span class="hljs-comment">// '/one/two/three/a/b/c'</span>
+</code></pre>
+				<h2 id="dir-path-criteria-">dir(path, [criteria])</h2>
+				<p>asynchronous: <strong>dirAsync(path, [criteria])</strong>  </p>
+				<p>Ensures that directory on given path exists and meets given criteria. If any criterium is not met it will be after this call. If any parent directory in <code>path</code> doesn&#39;t exist it will be created (like <code>mkdir -p</code>).</p>
+				<p><strong>arguments:</strong><br><code>path</code> path to directory to examine.<br><code>criteria</code> (optional) criteria to be met by the directory. Is an <code>Object</code> with possible fields:</p>
+				<ul>
+					<li><code>empty</code> (default: <code>false</code>) whether directory should be empty (no other files or directories inside). If set to <code>true</code> and directory contains any files or subdirectories all of them will be deleted.</li>
+					<li><code>mode</code> ensures directory has specified mode. If not set and directory already exists, current mode will be preserved. Value could be number (eg. <code>0700</code>) or string (eg. <code>&#39;700&#39;</code>).</li>
+				</ul>
+				<p><strong>returns:</strong><br>New CWD context with directory specified in <code>path</code> as CWD (see docs of <code>cwd()</code> method for explanation).  </p>
+				<p><strong>examples:</strong></p>
+				<pre><code class="lang-javascript"><span class="hljs-comment">// Creates directory if doesn't exist</span>
+jetpack.dir(<span class="hljs-string">'new-dir'</span>);
+
+<span class="hljs-comment">// Makes sure directory mode is 0700 and that it's empty</span>
+jetpack.dir(<span class="hljs-string">'empty-dir'</span>, { <span class="hljs-attr">empty</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">mode</span>: <span class="hljs-string">'700'</span> });
+
+<span class="hljs-comment">// Because dir returns new CWD context pointing to just</span>
+<span class="hljs-comment">// created directory you can create dir chains.</span>
+jetpack
+.dir(<span class="hljs-string">'main-dir'</span>) <span class="hljs-comment">// creates 'main-dir'</span>
+.dir(<span class="hljs-string">'sub-dir'</span>); <span class="hljs-comment">// creates 'main-dir/sub-dir'</span>
+</code></pre>
+				<h2 id="exists-path-">exists(path)</h2>
+				<p>asynchronous: <strong>existsAsync(path)</strong>  </p>
+				<p>Checks whether something exists on given <code>path</code>. This method returns values more specific than <code>true/false</code> to protect from errors like &quot;I was expecting directory, but it was a file&quot;.</p>
+				<p><strong>returns:</strong>  </p>
+				<ul>
+					<li><code>false</code> if path doesn&#39;t exist.</li>
+					<li><code>&quot;dir&quot;</code> if path is a directory.</li>
+					<li><code>&quot;file&quot;</code> if path is a file.</li>
+					<li><code>&quot;other&quot;</code> if none of the above.</li>
+				</ul>
+				<h2 id="file-path-criteria-">file(path, [criteria])</h2>
+				<p>asynchronous: <strong>fileAsync(path, [criteria])</strong>  </p>
+				<p>Ensures that file exists and meets given criteria. If any criterium is not met it will be after this call. If any parent directory in <code>path</code> doesn&#39;t exist it will be created (like <code>mkdir -p</code>).</p>
+				<p><strong>arguments:</strong><br><code>path</code> path to file to examine.<br><code>criteria</code> (optional) criteria to be met by the file. Is an <code>Object</code> with possible fields:</p>
+				<ul>
+					<li><code>content</code> sets file content. Can be <code>String</code>, <code>Buffer</code>, <code>Object</code> or <code>Array</code>. If <code>Object</code> or <code>Array</code> given to this parameter data will be written as JSON.</li>
+					<li><code>jsonIndent</code> (defaults to 2) if writing JSON data this tells how many spaces should one indentation have.</li>
+					<li><code>mode</code> ensures file has specified mode. If not set and file already exists, current mode will be preserved. Value could be number (eg. <code>0700</code>) or string (eg. <code>&#39;700&#39;</code>).</li>
+				</ul>
+				<p><strong>returns:</strong><br>Jetpack object you called this method on (self).</p>
+				<p><strong>examples:</strong></p>
+				<pre><code class="lang-javascript"><span class="hljs-comment">// Creates file if doesn't exist</span>
+jetpack.file(<span class="hljs-string">'something.txt'</span>);
+
+<span class="hljs-comment">// Creates file with mode '777' and content 'Hello World!'</span>
+jetpack.file(<span class="hljs-string">'hello.txt'</span>, { <span class="hljs-attr">mode</span>: <span class="hljs-string">'777'</span>, <span class="hljs-attr">content</span>: <span class="hljs-string">'Hello World!'</span> });
+</code></pre>
+				<h2 id="find-path-searchoptions-">find([path], searchOptions)</h2>
+				<p>asynchronous: <strong>findAsync([path], searchOptions)</strong></p>
+				<p>Finds in directory specified by <code>path</code> all files fulfilling <code>searchOptions</code>. Returned paths are relative to current CWD of jetpack instance.</p>
+				<p><strong>arguments:</strong><br><code>path</code> (optional, defaults to <code>&#39;.&#39;</code>) path to start search in (all subdirectories will be searched).<br><code>searchOptions</code> is an <code>Object</code> with possible fields:</p>
+				<ul>
+					<li><code>matching</code> glob patterns of files you want to find (<a href="#matching-patterns">all possible globs are described further in this readme</a>).</li>
+					<li><code>files</code> (default <code>true</code>) whether or not should search for files.</li>
+					<li><code>directories</code> (default <code>false</code>) whether or not should search for directories.</li>
+					<li><code>recursive</code> (default <code>true</code>) whether the whole directory tree should be searched recursively, or only one-level of given directory (excluding it&#39;s subdirectories).</li>
+				</ul>
+				<p><strong>returns:</strong><br><code>Array</code> of found paths.</p>
+				<p><strong>examples:</strong></p>
+				<pre><code class="lang-javascript"><span class="hljs-comment">// Finds all files which has 2015 in the name</span>
+jetpack.find(<span class="hljs-string">'my-work'</span>, { <span class="hljs-attr">matching</span>: <span class="hljs-string">'*2015*'</span> });
+
+<span class="hljs-comment">// Finds all '.txt' files inside 'foo/bar' directory and its subdirectories</span>
+jetpack.find(<span class="hljs-string">'foo'</span>, { <span class="hljs-attr">matching</span>: <span class="hljs-string">'bar/**/*.txt'</span> });
+<span class="hljs-comment">// Finds all '.txt' files inside 'foo/bar' directory WITHOUT subdirectories  </span>
+jetpack.find(<span class="hljs-string">'foo'</span>, { <span class="hljs-attr">matching</span>: <span class="hljs-string">'bar/*.txt'</span> });
+
+<span class="hljs-comment">// Finds all '.js' files inside 'my-project' but excluding those in 'vendor' subtree.</span>
+jetpack.find(<span class="hljs-string">'my-project'</span>, { <span class="hljs-attr">matching</span>: [<span class="hljs-string">'*.js'</span>, <span class="hljs-string">'!vendor/**/*'</span>] });
+
+<span class="hljs-comment">// Looks for all directories named 'foo' (and will omit all files named 'foo').</span>
+jetpack.find(<span class="hljs-string">'my-work'</span>, { <span class="hljs-attr">matching</span>: [<span class="hljs-string">'foo'</span>], <span class="hljs-attr">files</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">directories</span>: <span class="hljs-literal">true</span> });
+
+<span class="hljs-comment">// Finds all '.txt' files inside 'foo' directory WITHOUT subdirectories  </span>
+jetpack.find(<span class="hljs-string">'foo'</span>, { <span class="hljs-attr">matching</span>: <span class="hljs-string">'./*.txt'</span> });
+<span class="hljs-comment">// This line does the same as the above, but has better performance</span>
+<span class="hljs-comment">// (skips looking in subdirectories)</span>
+jetpack.find(<span class="hljs-string">'foo'</span>, { <span class="hljs-attr">matching</span>: <span class="hljs-string">'*.txt'</span>, <span class="hljs-attr">recursive</span>: <span class="hljs-literal">false</span> });
+
+<span class="hljs-comment">// Path parameter might be omitted and CWD is used as path in that case.</span>
+<span class="hljs-keyword">var</span> myStuffDir = jetpack.cwd(<span class="hljs-string">'my-stuff'</span>);
+myStuffDir.find({ <span class="hljs-attr">matching</span>: [<span class="hljs-string">'*.md'</span>] });
+</code></pre>
+				<h2 id="inspect-path-options-">inspect(path, [options])</h2>
+				<p>asynchronous: <strong>inspectAsync(path, [options])</strong>  </p>
+				<p>Inspects given path (replacement for <code>fs.stat</code>). Returned object by default contains only very basic, not platform-dependent properties (so you have something e.g. your unit tests can rely on), you can enable more properties through options object.</p>
+				<p><strong>arguments:</strong><br><code>path</code> path to inspect.<br><code>options</code> (optional). Possible values:</p>
+				<ul>
+					<li><code>checksum</code> if specified will return checksum of inspected file. Possible values are strings <code>&#39;md5&#39;</code>, <code>&#39;sha1&#39;</code>, <code>&#39;sha256&#39;</code> or <code>&#39;sha512&#39;</code>. If given path is directory this field is ignored.</li>
+					<li><code>mode</code> (default <code>false</code>) if set to <code>true</code> will add file mode (unix file permissions) value.</li>
+					<li><code>times</code> (default <code>false</code>) if set to <code>true</code> will add atime, mtime and ctime fields (here called <code>accessTime</code>, <code>modifyTime</code> and <code>changeTime</code>).</li>
+					<li><code>absolutePath</code> (default <code>false</code>) if set to <code>true</code> will add absolute path to this resource.</li>
+					<li><code>symlinks</code> (default <code>&#39;report&#39;</code>) if a given path is a symlink by default <code>inspect</code> will report that symlink (not follow it). You can flip this behaviour by setting this option to <code>&#39;follow&#39;</code>.</li>
+				</ul>
+				<p><strong>returns:</strong>
+				<code>undefined</code> if given path doens&#39;t exist.<br>Otherwise <code>Object</code> of structure:</p>
+				<pre><code class="lang-javascript">{
+  <span class="hljs-attr">name</span>: <span class="hljs-string">"my_dir"</span>,
+  <span class="hljs-attr">type</span>: <span class="hljs-string">"file"</span>, <span class="hljs-comment">// possible values: "file", "dir", "symlink"</span>
+  size: <span class="hljs-number">123</span>, <span class="hljs-comment">// size in bytes, this is returned only for files</span>
+  <span class="hljs-comment">// if checksum option was specified:</span>
+  md5: <span class="hljs-string">'900150983cd24fb0d6963f7d28e17f72'</span>,
+  <span class="hljs-comment">// if mode option was set to true:</span>
+  mode: <span class="hljs-number">33204</span>,
+  <span class="hljs-comment">// if times option was set to true:</span>
+  accessTime: [object <span class="hljs-built_in">Date</span>],
+  <span class="hljs-attr">modifyTime</span>: [object <span class="hljs-built_in">Date</span>],
+  <span class="hljs-attr">changeTime</span>: [object <span class="hljs-built_in">Date</span>]
+}
+</code></pre>
+				<h2 id="inspecttree-path-options-">inspectTree(path, [options])</h2>
+				<p>asynchronous: <strong>inspectTreeAsync(path, [options])</strong>  </p>
+				<p>Calls <a href="#inspect">inspect</a> recursively on given path so it creates tree of all directories and sub-directories inside it.</p>
+				<p><strong>arguments:</strong><br><code>path</code> the starting path to inspect.<br><code>options</code> (optional). Possible values:</p>
+				<ul>
+					<li><code>checksum</code> if specified will also calculate checksum of every item in the tree. Possible values are strings <code>&#39;md5&#39;</code>, <code>&#39;sha1&#39;</code>, <code>&#39;sha256&#39;</code> or <code>&#39;sha512&#39;</code>. Checksums for directories are calculated as checksum of all children&#39; checksums plus their filenames (see example below).</li>
+					<li><code>relativePath</code> if set to <code>true</code> every tree node will have relative path anchored to root inspected folder.</li>
+					<li><code>symlinks</code> (default <code>&#39;report&#39;</code>) if a given path is a symlink by default <code>inspectTree</code> will report that symlink (not follow it). You can flip this behaviour by setting this option to <code>&#39;follow&#39;</code>.</li>
+				</ul>
+				<p><strong>returns:</strong><br><code>undefined</code> if given path doesn&#39;t exist.
+				Otherwise tree of inspect objects like:</p>
+				<pre><code class="lang-javascript">{
+    <span class="hljs-attr">name</span>: <span class="hljs-string">'my_dir'</span>,
+    <span class="hljs-attr">type</span>: <span class="hljs-string">'dir'</span>,
+    <span class="hljs-attr">size</span>: <span class="hljs-number">123</span>, <span class="hljs-comment">// this is combined size of all items in this directory</span>
+    relativePath: <span class="hljs-string">'.'</span>,
+    <span class="hljs-attr">md5</span>: <span class="hljs-string">'11c68d9ad988ff4d98768193ab66a646'</span>,
+    <span class="hljs-comment">// checksum of this directory was calculated as:</span>
+    <span class="hljs-comment">// md5(child[0].name + child[0].md5 + child[1].name + child[1].md5)</span>
+    children: [
+        {
+            <span class="hljs-attr">name</span>: <span class="hljs-string">'empty'</span>,
+            <span class="hljs-attr">type</span>: <span class="hljs-string">'dir'</span>,
+            <span class="hljs-attr">size</span>: <span class="hljs-number">0</span>,
+            <span class="hljs-attr">relativePath</span>: <span class="hljs-string">'./dir'</span>,
+            <span class="hljs-attr">md5</span>: <span class="hljs-string">'d41d8cd98f00b204e9800998ecf8427e'</span>,
+            <span class="hljs-attr">children</span>: []
+        },{
+            <span class="hljs-attr">name</span>: <span class="hljs-string">'file.txt'</span>,
+            <span class="hljs-attr">type</span>: <span class="hljs-string">'file'</span>,
+            <span class="hljs-attr">size</span>: <span class="hljs-number">123</span>,
+            <span class="hljs-attr">relativePath</span>: <span class="hljs-string">'./file.txt'</span>,
+            <span class="hljs-attr">md5</span>: <span class="hljs-string">'900150983cd24fb0d6963f7d28e17f72'</span>
+        }
+    ]
+}
+</code></pre>
+				<h2 id="list-path-">list([path])</h2>
+				<p>asynchronous: <strong>listAsync(path)</strong>  </p>
+				<p>Lists the contents of directory. Equivalent of <code>fs.readdir</code>.</p>
+				<p><strong>arguments:</strong><br><code>path</code> (optional) path to directory you would like to list. If not specified defaults to CWD.</p>
+				<p><strong>returns:</strong><br>Array of file names inside given path, or <code>undefined</code> if given path doesn&#39;t exist.</p>
+				<h2 id="move-from-to-">move(from, to)</h2>
+				<p>asynchronous: <strong>moveAsync(from, to)</strong>  </p>
+				<p>Moves given path to new location.</p>
+				<p><strong>arguments:</strong><br><code>from</code> path to directory or file you want to move.<br><code>to</code> path where the thing should be moved.</p>
+				<p><strong>returns:</strong><br>Nothing.</p>
+				<h2 id="path-parts-">path(parts...)</h2>
+				<p>Returns path resolved to internal CWD of this jetpack object.</p>
+				<p><strong>arguments:</strong><br><code>parts</code> strings to join and resolve as path (as many as you like).</p>
+				<p><strong>returns:</strong><br>Resolved path as string.</p>
+				<p><strong>examples:</strong></p>
+				<pre><code class="lang-javascript">jetpack.cwd(); <span class="hljs-comment">// if it returns '/one/two'</span>
+jetpack.path(); <span class="hljs-comment">// this will return the same '/one/two'</span>
+jetpack.path(<span class="hljs-string">'three'</span>); <span class="hljs-comment">// this will return '/one/two/three'</span>
+jetpack.path(<span class="hljs-string">'..'</span>, <span class="hljs-string">'four'</span>); <span class="hljs-comment">// this will return '/one/four'</span>
+</code></pre>
+				<h2 id="read-path-returnas-">read(path, [returnAs])</h2>
+				<p>asynchronous: <strong>readAsync(path, [returnAs])</strong>  </p>
+				<p>Reads content of file.</p>
+				<p><strong>arguments:</strong><br><code>path</code> path to file.<br><code>returnAs</code> (optional) how the content of file should be returned. Is a string with possible values:</p>
+				<ul>
+					<li><code>&#39;utf8&#39;</code> (default) content will be returned as UTF-8 String.</li>
+					<li><code>&#39;buffer&#39;</code> content will be returned as a Buffer.</li>
+					<li><code>&#39;json&#39;</code> content will be returned as parsed JSON object.</li>
+					<li><code>&#39;jsonWithDates&#39;</code> content will be returned as parsed JSON object, and date strings in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString">ISO format</a> will be automatically turned into Date objects.</li>
+				</ul>
+				<p><strong>returns:</strong><br>File content in specified format, or <code>undefined</code> if file doesn&#39;t exist.</p>
+				<h2 id="remove-path-">remove([path])</h2>
+				<p>asynchronous: <strong>removeAsync([path])</strong>  </p>
+				<p>Deletes given path, no matter what it is (file, directory or non-empty directory). If path already doesn&#39;t exist terminates gracefully without throwing, so you can use it as &#39;ensure path doesn&#39;t exist&#39;.</p>
+				<p><strong>arguments:</strong><br><code>path</code> (optional) path to file or directory you want to remove. If not specified the remove action will be performed on current working directory (CWD).</p>
+				<p><strong>returns:</strong><br>Nothing.</p>
+				<p><strong>examples:</strong></p>
+				<pre><code class="lang-javascript"><span class="hljs-comment">// Deletes file</span>
+jetpack.remove(<span class="hljs-string">'my_work/notes.txt'</span>);
+
+<span class="hljs-comment">// Deletes directory "important_stuff" and everything inside</span>
+jetpack.remove(<span class="hljs-string">'my_work/important_stuff'</span>);
+
+<span class="hljs-comment">// Remove can be called with no parameters and will default to CWD then.</span>
+<span class="hljs-comment">// In this example folder 'my_work' will cease to exist.</span>
+<span class="hljs-keyword">var</span> myStuffDir = jetpack.cwd(<span class="hljs-string">'my_stuff'</span>);
+myStuffDir.remove();
+</code></pre>
+				<h2 id="rename-path-newname-">rename(path, newName)</h2>
+				<p>asynchronous: <strong>renameAsync(path, newName)</strong>  </p>
+				<p>Renames given file or directory.</p>
+				<p><strong>arguments:</strong><br><code>path</code> path to thing you want to change name of.<br><code>newName</code> new name for this thing (not full path, just a name).</p>
+				<p><strong>returns:</strong><br>Nothing.</p>
+				<p><strong>examples:</strong></p>
+				<pre><code class="lang-javascript"><span class="hljs-comment">// The file "my_work/important.md" will be renamed to "my_work/very_important.md"</span>
+jetpack.rename(<span class="hljs-string">'my_work/important.txt'</span>, <span class="hljs-string">'very_important.md'</span>);
+</code></pre>
+				<h2 id="symlink-symlinkvalue-path-">symlink(symlinkValue, path)</h2>
+				<p>asynchronous: <strong>symlinkAsync(symlinkValue, path)</strong>  </p>
+				<p>Creates symbolic link.</p>
+				<p><strong>arguments:</strong><br><code>symlinkValue</code> path where symbolic link should point.<br><code>path</code> path where symbolic link should be put.  </p>
+				<p><strong>returns:</strong><br>Nothing.</p>
+				<h2 id="write-path-data-options-">write(path, data, [options])</h2>
+				<p>asynchronous: <strong>writeAsync(path, data, [options])</strong>  </p>
+				<p>Writes data to file. If any parent directory in <code>path</code> doesn&#39;t exist it will be created (like <code>mkdir -p</code>).</p>
+				<p><strong>arguments:</strong><br><code>path</code> path to file.<br><code>data</code> data to be written. This could be <code>String</code>, <code>Buffer</code>, <code>Object</code> or <code>Array</code> (if last two used, the data will be outputted into file as JSON).<br><code>options</code> (optional) <code>Object</code> with possible fields:</p>
+				<ul>
+					<li><code>atomic</code> (default <code>false</code>) if set to <code>true</code> the file will be written using strategy which is much more resistant to data loss. The trick is very simple, <a href="http://stackoverflow.com/questions/17047994/transactionally-writing-files-in-node-js">read this to get the concept</a>.</li>
+					<li><code>jsonIndent</code> (defaults to 2) if writing JSON data this tells how many spaces should one indentation have.</li>
+				</ul>
+				<p><strong>returns:</strong><br>Nothing.</p>
+				<h1 id="matching-patterns">Matching patterns</h1>
+				<p>API methods <a href="#copyfrom-to-options">copy</a> and <a href="#findpath-searchoptions">find</a> have <code>matching</code> option. Those are all the possible tokens to use there:</p>
+				<ul>
+					<li><code>*</code> - Matches 0 or more characters in a single path portion.</li>
+					<li><code>?</code> - Matches 1 character.</li>
+					<li><code>!</code> - Used as the first character in pattern will invert the matching logic (match everything what <strong>is not</strong> matched by tokens further in this pattern).</li>
+					<li><code>[...]</code> - Matches a range of characters, similar to a RegExp range. If the first character of the range is <code>!</code> or <code>^</code> then it matches any character not in the range.</li>
+					<li><code>@(pattern|pat*|pat?ern)</code> - Matches exactly one of the patterns provided.</li>
+					<li><code>+(pattern|pat*|pat?ern)</code> - Matches one or more occurrences of the patterns provided.</li>
+					<li><code>?(pattern|pat*|pat?ern)</code> - Matches zero or one occurrence of the patterns provided.</li>
+					<li><code>*(pattern|pat*|pat?ern)</code> - Matches zero or more occurrences of the patterns provided.</li>
+					<li><code>!(pattern|pat*|pat?ern)</code> - Matches anything that does not match any of the patterns provided.</li>
+					<li><code>**</code> - If a &quot;globstar&quot; is alone in a path portion, then it matches zero or more directories and subdirectories.</li>
+				</ul>
+				<p><em>(explanation borrowed from <a href="https://github.com/isaacs/node-glob">glob</a> which is using <a href="https://github.com/isaacs/minimatch">the same matching library</a> as this project)</em></p>
+				<h1 id="license">License</h1>
+				<p>Released under the MIT license.</p>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">

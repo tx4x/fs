@@ -50,7 +50,7 @@ declare module '@gbaumgart/fs/interfaces' {
 	    syscall?: string;
 	    stack?: string;
 	}
-	export type ItemProgressCallback = (path: string, current: number, total: number, item?: INode) => void;
+	export type ItemProgressCallback = (path: string, current: number, total: number, item?: INode) => boolean;
 	export type ResolveConflictCallback = (path: string, item: INode, err: string) => Promise<IConflictSettings>;
 	export type WriteProgressCallback = (path: string, current: number, total: number) => void;
 	export enum EResolveMode {

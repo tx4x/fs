@@ -11,6 +11,14 @@ Object.keys(errno.code).forEach(function (code) {
 		return err;
 	};
 });
+export function ErrNotFile(path: string): Error {
+	return new Error('Path ' + path + ' exists but is not a file.' +
+		' Halting jetpack.file() call for safety reasons.');
+};
+export function ErrNoDirectory(path: string): Error {
+	return new Error('Path ' + path + ' exists but is not a directory.' +
+		' Halting jetpack.dir() call for safety reasons.');
+};
 
 export function ErrDoesntExists(path: string): Error {
 	const err: any = new Error("Path to copy doesn't exist " + path);

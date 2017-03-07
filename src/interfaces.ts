@@ -43,6 +43,7 @@ export interface IInspectOptions {
 	times?: boolean;
 	absolutePath?: boolean;
 	symlinks?: boolean;
+	size?: boolean;
 }
 
 export type ReadWriteDataType = string | Buffer | Object;

@@ -1,4 +1,4 @@
-import { Stats, readlinkSync, statSync, lstatSync, stat, lstat, readlink, createReadStream, readFileSync } from 'fs';
+import { Stats, readlinkSync, statSync, lstatSync, stat, lstat, readlink, createReadStream, readFileSync, readdir, readdirSync } from 'fs';
 import * as  pathUtil from "path";
 import { validateArgument, validateOptions } from './utils/validate';
 import { createHash } from 'crypto';
@@ -9,6 +9,93 @@ export const supportedChecksumAlgorithms: string[] = ['md5', 'sha1', 'sha256', '
 const promisedStat = denodeify(stat);
 const promisedLstat = denodeify(lstat);
 const promisedReadlink = denodeify(readlink);
+/*
+const _async = require('async');
+export async function size(item, ignoreRegEx?: boolean, callback?: any) {
+	return new Promise((resolve, reject) => {
+		let cb;
+		let ignoreRegExp;
+		if (!callback) {
+			cb = ignoreRegEx;
+			ignoreRegExp = null;
+		} else {
+			cb = callback;
+			ignoreRegExp = ignoreRegEx;
+		}
+
+		lstat(item, function lstat(e, stats) {
+			let total = !e ? (stats.size || 0) : 0;
+			if (!e && stats.isDirectory()) {
+				readdir(item, function readdir(err, list) {
+					if (err) { reject(err); }
+					_async.forEach(
+						list,
+						function iterate(dirItem, next) {
+							size(
+								pathUtil.join(item, dirItem),
+								ignoreRegExp,
+								function readSize(error, size) {
+									if (!error) { total += size; }
+									next(error);
+								}
+							);
+						},
+						function done(finalErr) {
+							resolve({ error: finalErr, total: total });
+						}
+					);
+				});
+			} else {
+				if (ignoreRegExp && ignoreRegExp.test(item)) {
+					total = 0;
+				}
+				resolve({ error: e, total: total });
+			}
+		});
+	});
+}
+export async function sizea(item, ignoreRegEx?: boolean, callback?: any) {
+	return new Promise((resolve, reject) => {
+		let cb;
+		let ignoreRegExp;
+		if (!callback) {
+			cb = ignoreRegEx;
+			ignoreRegExp = null;
+		} else {
+			cb = callback;
+			ignoreRegExp = ignoreRegEx;
+		}
+
+		const stats = lstatSync(item);
+		let total = (stats.size || 0);
+		if (stats.isDirectory()) {
+			const list = readdirSync(item);
+			_async.forEach(
+				list,
+				function iterate(dirItem, next) {
+					size(
+						pathUtil.join(item, dirItem),
+						ignoreRegExp,
+						function readSize(error, size) {
+							if (!error) { total += size; }
+							next(error);
+						}
+					);
+				},
+				function done(finalErr) {
+					resolve({ error: finalErr, total: total });
+				}
+			);
+		} else {
+			if (ignoreRegExp && ignoreRegExp.test(item)) {
+				total = 0;
+			}
+			return { total: total };
+		}
+	});
+}
+
+*/
 export function DefaultInspectOptions(): IInspectOptions {
 	return {
 		times: true,
@@ -23,7 +110,8 @@ export function validateInput(methodName: string, path: string, options?: IInspe
 		mode: ['boolean'],
 		times: ['boolean'],
 		absolutePath: ['boolean'],
-		symlinks: ['boolean']
+		symlinks: ['boolean'],
+		size: 'number'
 	});
 
 	if (options && options.checksum !== undefined
@@ -89,7 +177,6 @@ const addExtraFieldsSync = (path: string, inspectObj: any, options: IInspectOpti
 
 export function sync(path: string, options?: IInspectOptions): INode {
 	let stat: Stats;
-	let inspectObj: INode;
 	options = options || {} as IInspectOptions;
 	try {
 		stat = (options.symlinks ? lstatSync : statSync)(path);

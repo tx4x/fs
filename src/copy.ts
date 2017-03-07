@@ -9,8 +9,9 @@ import { normalizeFileMode as fileMode } from './utils/mode';
 import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
 import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync } from './write';
+import { sync as dirSync } from './dir';
 import { ErrDestinationExists, ErrDoesntExists } from './errors';
-import { INode, ENodeType, IWriteOptions } from './interfaces';
+import { INode, ENodeType, IWriteOptions, ECopyFlags } from './interfaces';
 import { EError, ErrnoException } from './interfaces';
 import { createItem } from './inspect';
 import { ICopyOptions, EResolveMode, IConflictSettings, EResolve } from './interfaces';
@@ -21,7 +22,8 @@ const promisedUnlink = Q.denodeify(fs.unlink);
 const promisedMkdirp = Q.denodeify(mkdirp);
 const progress = require('progress-stream');
 const throttle = require('throttle');
-const USE_PROGRESS = 1048576 * 5; // minimum file size threshold to use write progress = 5MB
+const USE_PROGRESS_THRESHOLD = 1048576 * 5; // minimum file size threshold to use write progress = 5MB
+
 interface ICopyTask {
 	path: string;
 	item: INode;
@@ -40,7 +42,9 @@ export function validateInput(methodName: string, from: string, to: string, opti
 		writeProgress: ['function'],
 		conflictCallback: ['function'],
 		conflictSettings: ['object'],
-		throttel: ['number']
+		throttel: ['number'],
+		debug: ['boolean'],
+		flags: ['number']
 	});
 };
 const parseOptions = (options: any | null, from: string): ICopyOptions => {
@@ -51,6 +55,9 @@ const parseOptions = (options: any | null, from: string): ICopyOptions => {
 	parsedOptions.writeProgress = opts.writeProgress;
 	parsedOptions.conflictCallback = opts.conflictCallback;
 	parsedOptions.conflictSettings = opts.conflictSettings;
+	parsedOptions.debug = opts.debug;
+	parsedOptions.throttel = opts.throttel;
+	parsedOptions.flags = opts.flags || 0;
 	if (opts.matching) {
 		parsedOptions.allowedToCopy = matcher(from, opts.matching);
 	} else {
@@ -147,8 +154,16 @@ export function sync(from: string, to: string, options?: ICopyOptions): void {
 	const opts = parseOptions(options, from);
 	checksBeforeCopyingSync(from, to, opts);
 	let nodes: ICopyTask[] = [];
-	let current: number = 0;
-	let sizeTotal: number = 0;
+	let current = 0;
+	let sizeTotal = 0;
+	if (options && options.flags && ECopyFlags.EMPTY) {
+		const dstStat = fs.statSync(to);
+		if (dstStat.isDirectory()) {
+			dirSync(to, {
+				empty: true
+			});
+		}
+	}
 
 	const visitor = (path: string, inspectData: INode) => {
 		const rel = pathUtil.relative(from, path);
@@ -244,11 +259,28 @@ const copyFileAsync = (from: string, to: string, mode: any, options: ICopyOption
 			}
 		});
 
-		writeStream.on('finish', resolve);
+		writeStream.on('finish', () => {
+			if (options && options.flags & ECopyFlags.PRESERVE_TIMES) {
+				const sourceStat = fs.statSync(from);
+				fs.open(to, 'w', function (err: ErrnoException, fd: number) {
+					if (err) { throw err; };
+					fs.futimes(fd, sourceStat.atime, sourceStat.mtime, function (err) {
+						if (err) {
+							throw err;
+						};
+						fs.close(fd);
+						resolve();
+					});
+				});
+
+			} else {
+				resolve();
+			}
+		});
 
 		const size = fs.statSync(from).size;
 		let progressStream = null;
-		if (options && options.writeProgress && size > USE_PROGRESS) {
+		if (options && options.writeProgress && size > USE_PROGRESS_THRESHOLD) {
 			progressStream = progress({
 				length: fs.statSync(from).size,
 				time: 100
@@ -260,6 +292,9 @@ const copyFileAsync = (from: string, to: string, mode: any, options: ICopyOption
 				elapsed = (Date.now() - started) / 1000;
 				speed = e.transferred / elapsed;
 				options.writeProgress(from, e.transferred, e.length);
+				if (options.debug) {
+					console.log('write ' + from + ' (' + e.transferred + ' of ' + e.length);
+				}
 			});
 			if (options.throttel) {
 				readStream.pipe(progressStream).pipe(new throttle(options.throttel)).pipe(writeStream);
@@ -267,12 +302,16 @@ const copyFileAsync = (from: string, to: string, mode: any, options: ICopyOption
 				readStream.pipe(progressStream).pipe(writeStream);
 			}
 		} else {
+			if (options && options.debug) {
+				console.log('write ' + from + ' to ' + to);
+			}
 			readStream.pipe(writeStream);
 		}
 	});
 };
 
 const copySymlinkAsync = (from: string, to: string) => {
+	console.log('copy symlink! ' + from + ' to ' + to);
 	return promisedReadlink(from)
 		.then((symlinkPointsAt: string) => {
 			return new Promise((resolve, reject) => {
@@ -324,25 +363,7 @@ const onConflict = (from: string, to: string, options: ICopyOptions, settings: I
 	}
 	return undefined;
 };
-function onError(from: string, to: string, options: ICopyOptions, settings: IConflictSettings) {
-	/*
-	switch (settings.overwrite) {
-	  case EResolveMode.THROW: {
-		throw ErrDestinationExists(to);
-	  }
-	  case EResolveMode.OVERWRITE:
-	  case EResolveMode.APPEND:
-	  case EResolveMode.IF_NEWER:
-	  case EResolveMode.ABORT:
-	  case EResolveMode.IF_SIZE_DIFFERS:
-	  case EResolveMode.SKIP: {
-		return settings.overwrite;
-	  }
-	}
-	return undefined;
-	*/
-	// return new Promise<void>;
-};
+
 const resolveConflict = (from: string, to: string, options: ICopyOptions, resolveMode: EResolveMode): boolean => {
 	// New logic for overwriting
 	if (resolveMode !== undefined) {
@@ -399,6 +420,15 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 			let abort = false;
 			let onCopyErrorResolveSettings: IConflictSettings = null;
 
+			if (options && options.flags && ECopyFlags.EMPTY) {
+				const dstStat = fs.statSync(to);
+				if (dstStat.isDirectory()) {
+					dirSync(to, {
+						empty: true
+					});
+				}
+			}
+
 			function visitor() {
 				if (abort) {
 					return resolve();
@@ -437,6 +467,7 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 							}
 						}
 					}
+
 					copyItemAsync(item.path, item.item, destPath, options).then(() => {
 						filesInProgress -= 1;
 						if (opts.progress) {
@@ -488,7 +519,7 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 			treeWalkerStream(from, {
 				inspectOptions: {
 					mode: true,
-					symlinks: true
+					symlinks: options ? options.flags & ECopyFlags.FOLLOW_SYMLINKS ? false : true : true
 				}
 			}).on('readable', visitor)
 				.on('error', reject)

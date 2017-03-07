@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Options | @xblox/fs</title>
+	<title>ECopyFlags | @xblox/fs</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,73 +56,94 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_file_.html">&quot;file&quot;</a>
+					<a href="../modules/_interfaces_.html">&quot;interfaces&quot;</a>
 				</li>
 				<li>
-					<a href="_file_.options.html">Options</a>
+					<a href="_interfaces_.ecopyflags.html">ECopyFlags</a>
 				</li>
 			</ul>
-			<h1>Interface Options</h1>
+			<h1>Enumeration ECopyFlags</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-hierarchy">
-				<h3>Hierarchy</h3>
-				<ul class="tsd-hierarchy">
-					<li>
-						<span class="target">Options</span>
-					</li>
-				</ul>
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Additional flags for copy</p>
+					</div>
+					<dl class="tsd-comment-tags">
+						<dt>export</dt>
+						<dd></dd>
+						<dt>enum</dt>
+						<dd><p>{number}</p>
+						</dd>
+					</dl>
+				</div>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section tsd-is-external">
-							<h3>Properties</h3>
+							<h3>Enumeration members</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_file_.options.html#content" class="tsd-kind-icon">content</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_file_.options.html#jsonindent" class="tsd-kind-icon">json<wbr>Indent</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_file_.options.html#mode" class="tsd-kind-icon">mode</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum tsd-is-external"><a href="_interfaces_.ecopyflags.html#empty" class="tsd-kind-icon">EMPTY</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum tsd-is-external"><a href="_interfaces_.ecopyflags.html#follow_symlinks" class="tsd-kind-icon">FOLLOW_<wbr>SYMLINKS</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum tsd-is-external"><a href="_interfaces_.ecopyflags.html#preserve_times" class="tsd-kind-icon">PRESERVE_<wbr>TIMES</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group tsd-is-external">
-				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="content" class="tsd-anchor"></a>
-					<h3>content</h3>
-					<div class="tsd-signature tsd-kind-icon">content<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<h2>Enumeration members</h2>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum tsd-is-external">
+					<a name="empty" class="tsd-anchor"></a>
+					<h3>EMPTY</h3>
+					<div class="tsd-signature tsd-kind-icon">EMPTY<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;4</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/file.ts#L12">file.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/interfaces.ts#L91">interfaces.ts:91</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Empty the target folder</p>
+						</div>
+					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="jsonindent" class="tsd-anchor"></a>
-					<h3>json<wbr>Indent</h3>
-					<div class="tsd-signature tsd-kind-icon">json<wbr>Indent<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum tsd-is-external">
+					<a name="follow_symlinks" class="tsd-anchor"></a>
+					<h3>FOLLOW_<wbr>SYMLINKS</h3>
+					<div class="tsd-signature tsd-kind-icon">FOLLOW_<wbr>SYMLINKS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;8</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/file.ts#L13">file.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/interfaces.ts#L95">interfaces.ts:95</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>When copying, don&#39;t copy symlinks but resolve them instead.</p>
+						</div>
+					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="mode" class="tsd-anchor"></a>
-					<h3>mode</h3>
-					<div class="tsd-signature tsd-kind-icon">mode<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum tsd-is-external">
+					<a name="preserve_times" class="tsd-anchor"></a>
+					<h3>PRESERVE_<wbr>TIMES</h3>
+					<div class="tsd-signature tsd-kind-icon">PRESERVE_<wbr>TIMES<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;2</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/file.ts#L14">file.ts:14</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/interfaces.ts#L87">interfaces.ts:87</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Transfer atime and mtime of source to target</p>
+						</div>
+					</div>
 				</section>
 			</section>
 		</div>
@@ -133,7 +154,7 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class="current tsd-kind-external-module tsd-is-external">
-						<a href="../modules/_file_.html">"file"</a>
+						<a href="../modules/_interfaces_.html">"interfaces"</a>
 					</li>
 				</ul>
 			</nav>
@@ -141,75 +162,63 @@
 				<ul class="before-current">
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
-						<a href="_file_.options.html" class="tsd-kind-icon">Options</a>
+					<li class="current tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
+						<a href="_interfaces_.ecopyflags.html" class="tsd-kind-icon">ECopy<wbr>Flags</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_file_.options.html#content" class="tsd-kind-icon">content</a>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum tsd-is-external">
+								<a href="_interfaces_.ecopyflags.html#empty" class="tsd-kind-icon">EMPTY</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_file_.options.html#jsonindent" class="tsd-kind-icon">json<wbr>Indent</a>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum tsd-is-external">
+								<a href="_interfaces_.ecopyflags.html#follow_symlinks" class="tsd-kind-icon">FOLLOW_<wbr>SYMLINKS</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_file_.options.html#mode" class="tsd-kind-icon">mode</a>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum tsd-is-external">
+								<a href="_interfaces_.ecopyflags.html#preserve_times" class="tsd-kind-icon">PRESERVE_<wbr>TIMES</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#q" class="tsd-kind-icon">Q</a>
+					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
+						<a href="_interfaces_.enodetype.html" class="tsd-kind-icon">ENode<wbr>Type</a>
 					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#promisedchmod" class="tsd-kind-icon">promised<wbr>Chmod</a>
+					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
+						<a href="_interfaces_.eresolve.html" class="tsd-kind-icon">EResolve</a>
 					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#promisedstat" class="tsd-kind-icon">promised<wbr>Stat</a>
+					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
+						<a href="_interfaces_.eresolvemode.html" class="tsd-kind-icon">EResolve<wbr>Mode</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#errnotfile" class="tsd-kind-icon">Err<wbr>Not<wbr>File</a>
+					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-is-external">
+						<a href="../classes/_interfaces_.errnoexception.html" class="tsd-kind-icon">Errno<wbr>Exception</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#accept" class="tsd-kind-icon">accept</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
+						<a href="../interfaces/_interfaces_.iconflictsettings.html" class="tsd-kind-icon">IConflict<wbr>Settings</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external">
-						<a href="../modules/_file_.html#async" class="tsd-kind-icon">async</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
+						<a href="../interfaces/_interfaces_.icopyoptions.html" class="tsd-kind-icon">ICopy<wbr>Options</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#checkcontent" class="tsd-kind-icon">check<wbr>Content</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
+						<a href="../interfaces/_interfaces_.iinspectoptions.html" class="tsd-kind-icon">IInspect<wbr>Options</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#checkcontentasync" class="tsd-kind-icon">check<wbr>Content<wbr>Async</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
+						<a href="../interfaces/_interfaces_.inode.html" class="tsd-kind-icon">INode</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#checkmode" class="tsd-kind-icon">check<wbr>Mode</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
+						<a href="../interfaces/_interfaces_.iwriteoptions.html" class="tsd-kind-icon">IWrite<wbr>Options</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#checkmodeasync" class="tsd-kind-icon">check<wbr>Mode<wbr>Async</a>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
+						<a href="../modules/_interfaces_.html#itemprogresscallback" class="tsd-kind-icon">Item<wbr>Progress<wbr>Callback</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#defaults" class="tsd-kind-icon">defaults</a>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
+						<a href="../modules/_interfaces_.html#readwritedatatype" class="tsd-kind-icon">Read<wbr>Write<wbr>Data<wbr>Type</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#isfile" class="tsd-kind-icon">is<wbr>File</a>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
+						<a href="../modules/_interfaces_.html#resolveconflictcallback" class="tsd-kind-icon">Resolve<wbr>Conflict<wbr>Callback</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#isfileasync" class="tsd-kind-icon">is<wbr>File<wbr>Async</a>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
+						<a href="../modules/_interfaces_.html#writeprogresscallback" class="tsd-kind-icon">Write<wbr>Progress<wbr>Callback</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external">
-						<a href="../modules/_file_.html#sync" class="tsd-kind-icon">sync</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#touch" class="tsd-kind-icon">touch</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#touchasync" class="tsd-kind-icon">touch<wbr>Async</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external">
-						<a href="../modules/_file_.html#validateinput" class="tsd-kind-icon">validate<wbr>Input</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#writeasync" class="tsd-kind-icon">write<wbr>Async</a>
+					<li class=" tsd-kind-object-literal tsd-parent-kind-external-module tsd-is-external">
+						<a href="../modules/_interfaces_.html#eerror" class="tsd-kind-icon">EError</a>
 					</li>
 				</ul>
 			</nav>

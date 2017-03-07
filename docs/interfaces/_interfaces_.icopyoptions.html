@@ -101,9 +101,12 @@
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#allowedtocopy" class="tsd-kind-icon">allowed<wbr>ToCopy</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#conflictcallback" class="tsd-kind-icon">conflict<wbr>Callback</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#conflictsettings" class="tsd-kind-icon">conflict<wbr>Settings</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#debug" class="tsd-kind-icon">debug</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#flags" class="tsd-kind-icon">flags</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#matching" class="tsd-kind-icon">matching</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#overwrite" class="tsd-kind-icon">overwrite</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#progress" class="tsd-kind-icon">progress</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#throttel" class="tsd-kind-icon">throttel</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#writeprogress" class="tsd-kind-icon">write<wbr>Progress</a></li>
 							</ul>
 						</section>
@@ -118,7 +121,7 @@
 					<div class="tsd-signature tsd-kind-icon">allowed<wbr>ToCopy<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/interfaces.ts#L99">interfaces.ts:99</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/interfaces.ts#L123">interfaces.ts:123</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -160,7 +163,7 @@
 					<div class="tsd-signature tsd-kind-icon">conflict<wbr>Callback<span class="tsd-signature-symbol">:</span> <a href="../modules/_interfaces_.html#resolveconflictcallback" class="tsd-signature-type">ResolveConflictCallback</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/interfaces.ts#L118">interfaces.ts:118</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/interfaces.ts#L142">interfaces.ts:142</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -184,7 +187,7 @@
 					<div class="tsd-signature tsd-kind-icon">conflict<wbr>Settings<span class="tsd-signature-symbol">:</span> <a href="_interfaces_.iconflictsettings.html" class="tsd-signature-type">IConflictSettings</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/interfaces.ts#L125">interfaces.ts:125</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/interfaces.ts#L149">interfaces.ts:149</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -202,12 +205,58 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+					<a name="debug" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> debug</h3>
+					<div class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/interfaces.ts#L165">interfaces.ts:165</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Print console messages.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>type</dt>
+							<dd><p>{boolean}</p>
+							</dd>
+							<dt>memberof</dt>
+							<dd><p>ICopyOptions</p>
+							</dd>
+						</dl>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+					<a name="flags" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> flags</h3>
+					<div class="tsd-signature tsd-kind-icon">flags<span class="tsd-signature-symbol">:</span> <a href="../enums/_interfaces_.ecopyflags.html" class="tsd-signature-type">ECopyFlags</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/interfaces.ts#L173">interfaces.ts:173</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The copy flags</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>type</dt>
+							<dd><p>{ECopyFlags}</p>
+							</dd>
+							<dt>memberof</dt>
+							<dd><p>ICopyOptions</p>
+							</dd>
+						</dl>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
 					<a name="matching" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> matching</h3>
 					<div class="tsd-signature tsd-kind-icon">matching<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/interfaces.ts#L93">interfaces.ts:93</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/interfaces.ts#L117">interfaces.ts:117</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -230,7 +279,7 @@
 					<div class="tsd-signature tsd-kind-icon">overwrite<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/interfaces.ts#L86">interfaces.ts:86</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/interfaces.ts#L110">interfaces.ts:110</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -253,7 +302,7 @@
 					<div class="tsd-signature tsd-kind-icon">progress<span class="tsd-signature-symbol">:</span> <a href="../modules/_interfaces_.html#itemprogresscallback" class="tsd-signature-type">ItemProgressCallback</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/interfaces.ts#L103">interfaces.ts:103</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/interfaces.ts#L127">interfaces.ts:127</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -263,12 +312,35 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+					<a name="throttel" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> throttel</h3>
+					<div class="tsd-signature tsd-kind-icon">throttel<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/interfaces.ts#L157">interfaces.ts:157</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Throttel copy for larger files. This will be only used when writeProgress is set and the file is at least 5MB.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>type</dt>
+							<dd><p>{number}</p>
+							</dd>
+							<dt>memberof</dt>
+							<dd><p>ICopyOptions</p>
+							</dd>
+						</dl>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
 					<a name="writeprogress" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> write<wbr>Progress</h3>
 					<div class="tsd-signature tsd-kind-icon">write<wbr>Progress<span class="tsd-signature-symbol">:</span> <a href="../modules/_interfaces_.html#writeprogresscallback" class="tsd-signature-type">WriteProgressCallback</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/interfaces.ts#L110">interfaces.ts:110</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/interfaces.ts#L134">interfaces.ts:134</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -301,6 +373,9 @@
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
+						<a href="../enums/_interfaces_.ecopyflags.html" class="tsd-kind-icon">ECopy<wbr>Flags</a>
+					</li>
+					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
 						<a href="../enums/_interfaces_.enodetype.html" class="tsd-kind-icon">ENode<wbr>Type</a>
 					</li>
 					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
@@ -330,6 +405,12 @@
 								<a href="_interfaces_.icopyoptions.html#conflictsettings" class="tsd-kind-icon">conflict<wbr>Settings</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+								<a href="_interfaces_.icopyoptions.html#debug" class="tsd-kind-icon">debug</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+								<a href="_interfaces_.icopyoptions.html#flags" class="tsd-kind-icon">flags</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
 								<a href="_interfaces_.icopyoptions.html#matching" class="tsd-kind-icon">matching</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
@@ -337,6 +418,9 @@
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
 								<a href="_interfaces_.icopyoptions.html#progress" class="tsd-kind-icon">progress</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+								<a href="_interfaces_.icopyoptions.html#throttel" class="tsd-kind-icon">throttel</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
 								<a href="_interfaces_.icopyoptions.html#writeprogress" class="tsd-kind-icon">write<wbr>Progress</a>

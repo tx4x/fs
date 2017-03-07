@@ -3,11 +3,11 @@
 //  Enums
 //
 export enum ENodeType {
-	FILE = <any> 'file',
-	DIR = <any> 'dir',
-	SYMLINK = <any> 'symlink',
-	OTHER = <any> 'other',
-	BLOCK = <any> 'block'
+	FILE = <any>'file',
+	DIR = <any>'dir',
+	SYMLINK = <any>'symlink',
+	OTHER = <any>'other',
+	BLOCK = <any>'block'
 }
 
 export let EError: any = {
@@ -59,8 +59,11 @@ export class ErrnoException extends Error {
 //  File operations : copy
 //
 export type ItemProgressCallback = (path: string, current: number, total: number, item?: INode) => boolean;
+
 export type ResolveConflictCallback = (path: string, item: INode, err: string) => Promise<IConflictSettings>;
+
 export type WriteProgressCallback = (path: string, current: number, total: number) => void;
+
 export enum EResolveMode {
 	SKIP = 0,
 	OVERWRITE,
@@ -71,6 +74,26 @@ export enum EResolveMode {
 	ABORT
 }
 
+/**
+ * Additional flags for copy
+ *
+ * @export
+ * @enum {number}
+ */
+export enum ECopyFlags {
+	/**
+	 * Transfer atime and mtime of source to target
+	 */
+	PRESERVE_TIMES = 2,
+	/**
+	 * Empty the target folder
+	 */
+	EMPTY = 4,
+	/**
+	 * When copying, don't copy symlinks but resolve them instead.
+	 */
+	FOLLOW_SYMLINKS = 8
+}
 
 /**
  * Copy options
@@ -132,6 +155,22 @@ export interface ICopyOptions {
 	 * @memberOf ICopyOptions
 	 */
 	throttel?: number;
+
+	/**
+	 * Print console messages.
+	 *
+	 * @type {boolean}
+	 * @memberOf ICopyOptions
+	 */
+	debug?: boolean;
+
+	/**
+	 * The copy flags
+	 *
+	 * @type {ECopyFlags}
+	 * @memberOf ICopyOptions
+	 */
+	flags?: ECopyFlags;
 }
 export enum EResolve {
 	ALWAYS,

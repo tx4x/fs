@@ -80,11 +80,13 @@
 							<h3>Variables</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported"><a href="_copy_.html#q" class="tsd-kind-icon">Q</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported"><a href="_copy_.html#use_progress_threshold" class="tsd-kind-icon">USE_<wbr>PROGRESS_<wbr>THRESHOLD</a></li>
 								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported"><a href="_copy_.html#progress" class="tsd-kind-icon">progress</a></li>
 								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported"><a href="_copy_.html#promisedmkdirp" class="tsd-kind-icon">promised<wbr>Mkdirp</a></li>
 								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported"><a href="_copy_.html#promisedreadlink" class="tsd-kind-icon">promised<wbr>Readlink</a></li>
 								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported"><a href="_copy_.html#promisedsymlink" class="tsd-kind-icon">promised<wbr>Symlink</a></li>
 								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported"><a href="_copy_.html#promisedunlink" class="tsd-kind-icon">promised<wbr>Unlink</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported"><a href="_copy_.html#throttle" class="tsd-kind-icon">throttle</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section tsd-is-external">
@@ -101,7 +103,6 @@
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported"><a href="_copy_.html#copysymlinkasync" class="tsd-kind-icon">copy<wbr>Symlink<wbr>Async</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported"><a href="_copy_.html#copysymlinksync" class="tsd-kind-icon">copy<wbr>Symlink<wbr>Sync</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported"><a href="_copy_.html#onconflict" class="tsd-kind-icon">on<wbr>Conflict</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported"><a href="_copy_.html#onerror" class="tsd-kind-icon">on<wbr>Error</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported"><a href="_copy_.html#parseoptions" class="tsd-kind-icon">parse<wbr>Options</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported"><a href="_copy_.html#resolveconflict" class="tsd-kind-icon">resolve<wbr>Conflict</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-external"><a href="_copy_.html#sync" class="tsd-kind-icon">sync</a></li>
@@ -119,7 +120,17 @@
 					<div class="tsd-signature tsd-kind-icon">Q<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;require(&#x27;q&#x27;)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L17">copy.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L18">copy.ts:18</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
+					<a name="use_progress_threshold" class="tsd-anchor"></a>
+					<h3>USE_<wbr>PROGRESS_<wbr>THRESHOLD</h3>
+					<div class="tsd-signature tsd-kind-icon">USE_<wbr>PROGRESS_<wbr>THRESHOLD<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;1048576 * 5</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L25">copy.ts:25</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -129,7 +140,7 @@
 					<div class="tsd-signature tsd-kind-icon">progress<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;require(&#x27;progress-stream&#x27;)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L22">copy.ts:22</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L23">copy.ts:23</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -139,7 +150,7 @@
 					<div class="tsd-signature tsd-kind-icon">promised<wbr>Mkdirp<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;Q.denodeify(mkdirp)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L21">copy.ts:21</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L22">copy.ts:22</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -149,7 +160,7 @@
 					<div class="tsd-signature tsd-kind-icon">promised<wbr>Readlink<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;Q.denodeify(fs.readlink)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L19">copy.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L20">copy.ts:20</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -159,7 +170,7 @@
 					<div class="tsd-signature tsd-kind-icon">promised<wbr>Symlink<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;Q.denodeify(fs.symlink)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L18">copy.ts:18</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L19">copy.ts:19</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -169,7 +180,17 @@
 					<div class="tsd-signature tsd-kind-icon">promised<wbr>Unlink<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;Q.denodeify(fs.unlink)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L20">copy.ts:20</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L21">copy.ts:21</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
+					<a name="throttle" class="tsd-anchor"></a>
+					<h3>throttle</h3>
+					<div class="tsd-signature tsd-kind-icon">throttle<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;require(&#x27;throttle&#x27;)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L24">copy.ts:24</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -186,7 +207,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L362">copy.ts:362</a></li>
+									<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L402">copy.ts:402</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -224,7 +245,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L188">copy.ts:188</a></li>
+									<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L209">copy.ts:209</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -253,7 +274,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L62">copy.ts:62</a></li>
+									<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L71">copy.ts:71</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -276,13 +297,13 @@
 					<a name="copyfileasync" class="tsd-anchor"></a>
 					<h3>copy<wbr>File<wbr>Async</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">copy<wbr>File<wbr>Async<span class="tsd-signature-symbol">(</span>from<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, to<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, mode<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, retriedAttempt<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">copy<wbr>File<wbr>Async<span class="tsd-signature-symbol">(</span>from<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, to<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, mode<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, options<span class="tsd-signature-symbol">: </span><a href="../interfaces/_interfaces_.icopyoptions.html" class="tsd-signature-type">ICopyOptions</a>, retriedAttempt<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L218">copy.ts:218</a></li>
+									<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L236">copy.ts:236</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -295,6 +316,9 @@
 								</li>
 								<li>
 									<h5>mode: <span class="tsd-signature-type">any</span></h5>
+								</li>
+								<li>
+									<h5>options: <a href="../interfaces/_interfaces_.icopyoptions.html" class="tsd-signature-type">ICopyOptions</a></h5>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> retriedAttempt: <span class="tsd-signature-type">boolean</span></h5>
@@ -314,7 +338,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L102">copy.ts:102</a></li>
+									<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L115">copy.ts:115</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -346,7 +370,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L72">copy.ts:72</a></li>
+									<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L81">copy.ts:81</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -369,13 +393,13 @@
 					<a name="copyitemasync" class="tsd-anchor"></a>
 					<h3>copy<wbr>Item<wbr>Async</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">copy<wbr>Item<wbr>Async<span class="tsd-signature-symbol">(</span>from<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, inspectData<span class="tsd-signature-symbol">: </span><a href="../interfaces/_interfaces_.inode.html" class="tsd-signature-type">INode</a>, to<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+						<li class="tsd-signature tsd-kind-icon">copy<wbr>Item<wbr>Async<span class="tsd-signature-symbol">(</span>from<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, inspectData<span class="tsd-signature-symbol">: </span><a href="../interfaces/_interfaces_.inode.html" class="tsd-signature-type">INode</a>, to<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, options<span class="tsd-signature-symbol">: </span><a href="../interfaces/_interfaces_.icopyoptions.html" class="tsd-signature-type">ICopyOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L270">copy.ts:270</a></li>
+									<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L337">copy.ts:337</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -388,6 +412,9 @@
 								</li>
 								<li>
 									<h5>to: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>options: <a href="../interfaces/_interfaces_.icopyoptions.html" class="tsd-signature-type">ICopyOptions</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
@@ -404,7 +431,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L130">copy.ts:130</a></li>
+									<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L143">copy.ts:143</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -436,7 +463,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L247">copy.ts:247</a></li>
+									<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L313">copy.ts:313</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -462,7 +489,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L113">copy.ts:113</a></li>
+									<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L126">copy.ts:126</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -488,7 +515,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L283">copy.ts:283</a></li>
+									<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L350">copy.ts:350</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -514,38 +541,6 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-					<a name="onerror" class="tsd-anchor"></a>
-					<h3>on<wbr>Error</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">on<wbr>Error<span class="tsd-signature-symbol">(</span>from<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, to<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, options<span class="tsd-signature-symbol">: </span><a href="../interfaces/_interfaces_.icopyoptions.html" class="tsd-signature-type">ICopyOptions</a>, settings<span class="tsd-signature-symbol">: </span><a href="../interfaces/_interfaces_.iconflictsettings.html" class="tsd-signature-type">IConflictSettings</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L299">copy.ts:299</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>from: <span class="tsd-signature-type">string</span></h5>
-								</li>
-								<li>
-									<h5>to: <span class="tsd-signature-type">string</span></h5>
-								</li>
-								<li>
-									<h5>options: <a href="../interfaces/_interfaces_.icopyoptions.html" class="tsd-signature-type">ICopyOptions</a></h5>
-								</li>
-								<li>
-									<h5>settings: <a href="../interfaces/_interfaces_.iconflictsettings.html" class="tsd-signature-type">IConflictSettings</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
 					<a name="parseoptions" class="tsd-anchor"></a>
 					<h3>parse<wbr>Options</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
@@ -555,7 +550,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L44">copy.ts:44</a></li>
+									<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L50">copy.ts:50</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -581,7 +576,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L318">copy.ts:318</a></li>
+									<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L367">copy.ts:367</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -613,7 +608,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L140">copy.ts:140</a></li>
+									<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L153">copy.ts:153</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -642,7 +637,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/xblox/fs/blob/68336d4/src/copy.ts#L31">copy.ts:31</a></li>
+									<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/copy.ts#L34">copy.ts:34</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -686,6 +681,9 @@
 						<a href="_copy_.html#q" class="tsd-kind-icon">Q</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
+						<a href="_copy_.html#use_progress_threshold" class="tsd-kind-icon">USE_<wbr>PROGRESS_<wbr>THRESHOLD</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
 						<a href="_copy_.html#progress" class="tsd-kind-icon">progress</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
@@ -699,6 +697,9 @@
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
 						<a href="_copy_.html#promisedunlink" class="tsd-kind-icon">promised<wbr>Unlink</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
+						<a href="_copy_.html#throttle" class="tsd-kind-icon">throttle</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external">
 						<a href="_copy_.html#async" class="tsd-kind-icon">async</a>
@@ -732,9 +733,6 @@
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
 						<a href="_copy_.html#onconflict" class="tsd-kind-icon">on<wbr>Conflict</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="_copy_.html#onerror" class="tsd-kind-icon">on<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
 						<a href="_copy_.html#parseoptions" class="tsd-kind-icon">parse<wbr>Options</a>

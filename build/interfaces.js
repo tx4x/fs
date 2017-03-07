@@ -31,6 +31,27 @@ var EResolveMode;
     EResolveMode[EResolveMode["THROW"] = 5] = "THROW";
     EResolveMode[EResolveMode["ABORT"] = 6] = "ABORT";
 })(EResolveMode = exports.EResolveMode || (exports.EResolveMode = {}));
+/**
+ * Additional flags for copy
+ *
+ * @export
+ * @enum {number}
+ */
+var ECopyFlags;
+(function (ECopyFlags) {
+    /**
+     * Transfer atime and mtime of source to target
+     */
+    ECopyFlags[ECopyFlags["PRESERVE_TIMES"] = 2] = "PRESERVE_TIMES";
+    /**
+     * Empty the target folder
+     */
+    ECopyFlags[ECopyFlags["EMPTY"] = 4] = "EMPTY";
+    /**
+     * When copying, don't copy symlinks but resolve them instead.
+     */
+    ECopyFlags[ECopyFlags["FOLLOW_SYMLINKS"] = 8] = "FOLLOW_SYMLINKS";
+})(ECopyFlags = exports.ECopyFlags || (exports.ECopyFlags = {}));
 var EResolve;
 (function (EResolve) {
     EResolve[EResolve["ALWAYS"] = 0] = "ALWAYS";

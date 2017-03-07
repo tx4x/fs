@@ -18,6 +18,7 @@ declare module '@gbaumgart/fs/interfaces' {
 	    DIR,
 	    SYMLINK,
 	    OTHER,
+	    BLOCK,
 	}
 	export let EError: any;
 	export interface INode {
@@ -61,6 +62,26 @@ declare module '@gbaumgart/fs/interfaces' {
 	    APPEND = 4,
 	    THROW = 5,
 	    ABORT = 6,
+	}
+	/**
+	 * Additional flags for copy
+	 *
+	 * @export
+	 * @enum {number}
+	 */
+	export enum ECopyFlags {
+	    /**
+	     * Transfer atime and mtime of source to target
+	     */
+	    PRESERVE_TIMES = 2,
+	    /**
+	     * Empty the target folder
+	     */
+	    EMPTY = 4,
+	    /**
+	     * When copying, don't copy symlinks but resolve them instead.
+	     */
+	    FOLLOW_SYMLINKS = 8,
 	}
 	/**
 	 * Copy options
@@ -114,6 +135,27 @@ declare module '@gbaumgart/fs/interfaces' {
 	     * @memberOf ICopyOptions
 	     */
 	    conflictSettings?: IConflictSettings;
+	    /**
+	     * Throttel copy for larger files. This will be only used when writeProgress is set and the file is at least 5MB.
+	     *
+	     * @type {number}
+	     * @memberOf ICopyOptions
+	     */
+	    throttel?: number;
+	    /**
+	     * Print console messages.
+	     *
+	     * @type {boolean}
+	     * @memberOf ICopyOptions
+	     */
+	    debug?: boolean;
+	    /**
+	     * The copy flags
+	     *
+	     * @type {ECopyFlags}
+	     * @memberOf ICopyOptions
+	     */
+	    flags?: ECopyFlags;
 	}
 	export enum EResolve {
 	    ALWAYS = 0,
@@ -258,8 +300,6 @@ declare module '@gbaumgart/fs/copy' {
 	export function sync(from: string, to: string, options?: ICopyOptions): void;
 	/**
 	 * Copy
-	 *
-	 *
 	 * @export
 	 * @param {string} from
 	 * @param {string} to
@@ -307,6 +347,7 @@ declare module '@gbaumgart/fs/read' {
 }
 declare module '@gbaumgart/fs/playground' {
 	export function testBig(): void;
+	export function testManyWithProgress(): void;
 	export function testCollisionDirectory(): void;
 	export function testCollisionFile(): void;
 	export function testCopySymlink(): void;

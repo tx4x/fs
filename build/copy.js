@@ -18,6 +18,7 @@ const mode_1 = require("./utils/mode");
 const tree_walker_1 = require("./utils/tree_walker");
 const validate_1 = require("./utils/validate");
 const write_1 = require("./write");
+const dir_1 = require("./dir");
 const errors_1 = require("./errors");
 const interfaces_1 = require("./interfaces");
 const interfaces_2 = require("./interfaces");
@@ -30,7 +31,7 @@ const promisedUnlink = Q.denodeify(fs.unlink);
 const promisedMkdirp = Q.denodeify(mkdirp);
 const progress = require('progress-stream');
 const throttle = require('throttle');
-const USE_PROGRESS = 1048576 * 5; // minimum file size threshold to use write progress = 5MB
+const USE_PROGRESS_THRESHOLD = 1048576 * 5; // minimum file size threshold to use write progress = 5MB
 function validateInput(methodName, from, to, options) {
     const methodSignature = methodName + '(from, to, [options])';
     validate_1.validateArgument(methodSignature, 'from', from, ['string']);
@@ -42,7 +43,9 @@ function validateInput(methodName, from, to, options) {
         writeProgress: ['function'],
         conflictCallback: ['function'],
         conflictSettings: ['object'],
-        throttel: ['number']
+        throttel: ['number'],
+        debug: ['boolean'],
+        flags: ['number']
     });
 }
 exports.validateInput = validateInput;
@@ -55,6 +58,9 @@ const parseOptions = (options, from) => {
     parsedOptions.writeProgress = opts.writeProgress;
     parsedOptions.conflictCallback = opts.conflictCallback;
     parsedOptions.conflictSettings = opts.conflictSettings;
+    parsedOptions.debug = opts.debug;
+    parsedOptions.throttel = opts.throttel;
+    parsedOptions.flags = opts.flags || 0;
     if (opts.matching) {
         parsedOptions.allowedToCopy = matcher_1.create(from, opts.matching);
     }
@@ -160,6 +166,14 @@ function sync(from, to, options) {
     let nodes = [];
     let current = 0;
     let sizeTotal = 0;
+    if (options && options.flags && interfaces_1.ECopyFlags.EMPTY) {
+        const dstStat = fs.statSync(to);
+        if (dstStat.isDirectory()) {
+            dir_1.sync(to, {
+                empty: true
+            });
+        }
+    }
     const visitor = (path, inspectData) => {
         const rel = pathUtil.relative(from, path);
         const destPath = pathUtil.resolve(to, rel);
@@ -249,10 +263,31 @@ const copyFileAsync = (from, to, mode, options, retriedAttempt) => {
                 reject(err);
             }
         });
-        writeStream.on('finish', resolve);
+        writeStream.on('finish', () => {
+            if (options && options.flags & interfaces_1.ECopyFlags.PRESERVE_TIMES) {
+                const sourceStat = fs.statSync(from);
+                fs.open(to, 'w', function (err, fd) {
+                    if (err) {
+                        throw err;
+                    }
+                    ;
+                    fs.futimes(fd, sourceStat.atime, sourceStat.mtime, function (err) {
+                        if (err) {
+                            throw err;
+                        }
+                        ;
+                        fs.close(fd);
+                        resolve();
+                    });
+                });
+            }
+            else {
+                resolve();
+            }
+        });
         const size = fs.statSync(from).size;
         let progressStream = null;
-        if (options && options.writeProgress && size > USE_PROGRESS) {
+        if (options && options.writeProgress && size > USE_PROGRESS_THRESHOLD) {
             progressStream = progress({
                 length: fs.statSync(from).size,
                 time: 100
@@ -264,6 +299,9 @@ const copyFileAsync = (from, to, mode, options, retriedAttempt) => {
                 elapsed = (Date.now() - started) / 1000;
                 speed = e.transferred / elapsed;
                 options.writeProgress(from, e.transferred, e.length);
+                if (options.debug) {
+                    console.log('write ' + from + ' (' + e.transferred + ' of ' + e.length);
+                }
             });
             if (options.throttel) {
                 readStream.pipe(progressStream).pipe(new throttle(options.throttel)).pipe(writeStream);
@@ -273,11 +311,15 @@ const copyFileAsync = (from, to, mode, options, retriedAttempt) => {
             }
         }
         else {
+            if (options && options.debug) {
+                console.log('write ' + from + ' to ' + to);
+            }
             readStream.pipe(writeStream);
         }
     });
 };
 const copySymlinkAsync = (from, to) => {
+    console.log('copy symlink! ' + from + ' to ' + to);
     return promisedReadlink(from)
         .then((symlinkPointsAt) => {
         return new Promise((resolve, reject) => {
@@ -329,26 +371,6 @@ const onConflict = (from, to, options, settings) => {
     }
     return undefined;
 };
-function onError(from, to, options, settings) {
-    /*
-    switch (settings.overwrite) {
-      case EResolveMode.THROW: {
-        throw ErrDestinationExists(to);
-      }
-      case EResolveMode.OVERWRITE:
-      case EResolveMode.APPEND:
-      case EResolveMode.IF_NEWER:
-      case EResolveMode.ABORT:
-      case EResolveMode.IF_SIZE_DIFFERS:
-      case EResolveMode.SKIP: {
-        return settings.overwrite;
-      }
-    }
-    return undefined;
-    */
-    // return new Promise<void>;
-}
-;
 const resolveConflict = (from, to, options, resolveMode) => {
     // New logic for overwriting
     if (resolveMode !== undefined) {
@@ -408,6 +430,14 @@ function async(from, to, options) {
             let filesInProgress = 0;
             let abort = false;
             let onCopyErrorResolveSettings = null;
+            if (options && options.flags && interfaces_1.ECopyFlags.EMPTY) {
+                const dstStat = fs.statSync(to);
+                if (dstStat.isDirectory()) {
+                    dir_1.sync(to, {
+                        empty: true
+                    });
+                }
+            }
             function visitor() {
                 if (abort) {
                     return resolve();
@@ -495,7 +525,7 @@ function async(from, to, options) {
             tree_walker_1.stream(from, {
                 inspectOptions: {
                     mode: true,
-                    symlinks: true
+                    symlinks: options ? options.flags & interfaces_1.ECopyFlags.FOLLOW_SYMLINKS ? false : true : true
                 }
             }).on('readable', visitor)
                 .on('error', reject)

@@ -1,18 +1,31 @@
-import {ErrnoException } from './interfaces';
+import { ErrnoException } from './interfaces';
+const errno = require('errno');
+
+Object.keys(errno.code).forEach(function (code) {
+	const e = errno.code[code];
+	exports[code] = function (path: string) {
+		let err = new Error(code + ', ' + e.description + (path ? ' \'' + path + '\'' : '')) as ErrnoException;
+		err.errno = e.errno;
+		err.code = code;
+		err.path = path;
+		return err;
+	};
+});
 
 export function ErrDoesntExists(path: string): Error {
-  const err: any = new Error("Path to copy doesn't exist " + path);
-  err.code = 'ENOENT';
-  return err;
+	const err: any = new Error("Path to copy doesn't exist " + path);
+	err.code = 'ENOENT';
+	return err;
 };
 
 export function ErrDestinationExists(path: string): Error {
-  const err: any = new Error('Destination path already exists ' + path);
-  err.code = 'EEXIST';
-  return err;
+	const err: any = new Error('Destination path already exists ' + path);
+	err.code = 'EEXIST';
+	return err;
 };
+
 export function ErrIsNotDirectory(path: string): Error {
-  const err = new ErrnoException('Path you want to find stuff in must be a directory ' + path);
-  err.code = 'ENOTDIR';
-  return err;
+	const err = new ErrnoException('Path you want to find stuff in must be a directory ' + path);
+	err.code = 'ENOTDIR';
+	return err;
 };

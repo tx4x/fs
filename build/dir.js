@@ -13,6 +13,8 @@ const fs_1 = require("fs");
 const rimraf = require("rimraf");
 const mode_1 = require("./utils/mode");
 const validate_1 = require("./utils/validate");
+const errors_1 = require("./errors");
+const interfaces_1 = require("./interfaces");
 const Q = require('q');
 const mkdirp = require('mkdirp');
 exports.validateInput = function (methodName, path, criteria) {
@@ -23,8 +25,8 @@ exports.validateInput = function (methodName, path, criteria) {
         mode: ['string', 'number']
     });
 };
-const defaults = (passedOptions) => {
-    const result = passedOptions || {};
+const defaults = (options) => {
+    const result = options || {};
     if (typeof result.empty !== 'boolean') {
         result.empty = false;
     }
@@ -33,44 +35,39 @@ const defaults = (passedOptions) => {
     }
     return result;
 };
-const ErrNoDirectory = (path) => {
-    return new Error('Path ' + path + ' exists but is not a directory.' +
-        ' Halting jetpack.dir() call for safety reasons.');
-};
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-function checkWhatAlreadyOccupiesPathSync(path) {
+const dirStatsSync = (path) => {
     let stat;
     try {
         stat = fs_1.statSync(path);
     }
     catch (err) {
         // Detection if path already exists
-        if (err.code !== 'ENOENT') {
+        if (err.code !== interfaces_1.EError.NOEXISTS) {
             throw err;
         }
     }
     if (stat && !stat.isDirectory()) {
-        throw ErrNoDirectory(path);
+        throw errors_1.ErrNoDirectory(path);
     }
     return stat;
-}
-;
-function createBrandNewDirectorySync(path, criteria) {
+};
+function mkdirSync(path, criteria) {
     mkdirp.sync(path, { mode: criteria.mode });
 }
 ;
-function checkExistingDirectoryFulfillsCriteriaSync(path, stat, criteria) {
+function checkDirSync(path, stat, options) {
     const checkMode = function () {
         const mode = mode_1.normalizeFileMode(stat.mode);
-        if (criteria.mode !== undefined && criteria.mode !== mode) {
-            fs_1.chmodSync(path, criteria.mode);
+        if (options.mode !== undefined && options.mode !== mode) {
+            fs_1.chmodSync(path, options.mode);
         }
     };
     const checkEmptiness = function () {
         let list;
-        if (criteria.empty) {
+        if (options.empty) {
             // Delete everything inside this directory
             list = fs_1.readdirSync(path);
             list.forEach(function (filename) {
@@ -82,14 +79,14 @@ function checkExistingDirectoryFulfillsCriteriaSync(path, stat, criteria) {
     checkEmptiness();
 }
 ;
-function sync(path, passedCriteria) {
-    let criteria = defaults(passedCriteria);
-    let stat = checkWhatAlreadyOccupiesPathSync(path);
+function sync(path, options) {
+    let criteria = defaults(options);
+    let stat = dirStatsSync(path);
     if (stat) {
-        checkExistingDirectoryFulfillsCriteriaSync(path, stat, criteria);
+        checkDirSync(path, stat, criteria);
     }
     else {
-        createBrandNewDirectorySync(path, criteria);
+        mkdirSync(path, criteria);
     }
 }
 exports.sync = sync;
@@ -102,7 +99,7 @@ const promisedChmod = Q.denodeify(fs_1.chmod);
 const promisedReaddir = Q.denodeify(fs_1.readdir);
 const promisedRimraf = Q.denodeify(rimraf);
 const promisedMkdirp = Q.denodeify(mkdirp);
-function checkWhatAlreadyOccupiesPathAsync(path) {
+function dirStatAsync(path) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
             promisedStat(path)
@@ -111,19 +108,10 @@ function checkWhatAlreadyOccupiesPathAsync(path) {
                     resolve(stat);
                 }
                 else {
-                    reject(ErrNoDirectory(path));
+                    reject(errors_1.ErrNoDirectory(path));
                 }
             })
-                .catch(function (err) {
-                if (err.code === 'ENOENT') {
-                    // Path doesn't exist
-                    resolve(undefined);
-                }
-                else {
-                    // This is other error that nonexistent path, so end here.
-                    reject(err);
-                }
-            });
+                .catch((err) => (err.code === interfaces_1.EError.NOEXISTS ? resolve(undefined) : reject(err)));
         });
     });
 }
@@ -158,7 +146,7 @@ const checkMode = function (criteria, stat, path) {
     }
     return Promise.resolve(null);
 };
-const checkExistingDirectoryFulfillsCriteriaAsync = (path, stat, options) => {
+const checkDirAsync = (path, stat, options) => {
     return new Promise((resolve, reject) => {
         const checkEmptiness = function () {
             if (options.empty) {
@@ -171,18 +159,18 @@ const checkExistingDirectoryFulfillsCriteriaAsync = (path, stat, options) => {
             .then(resolve, reject);
     });
 };
-const createBrandNewDirectoryAsync = (path, criteria) => {
+const mkdirAsync = (path, criteria) => {
     return promisedMkdirp(path, { mode: criteria.mode });
 };
 function async(path, passedCriteria) {
     const criteria = defaults(passedCriteria);
     return new Promise((resolve, reject) => {
-        checkWhatAlreadyOccupiesPathAsync(path)
+        dirStatAsync(path)
             .then((stat) => {
             if (stat !== undefined) {
-                return checkExistingDirectoryFulfillsCriteriaAsync(path, stat, criteria);
+                return checkDirAsync(path, stat, criteria);
             }
-            return createBrandNewDirectoryAsync(path, criteria);
+            return mkdirAsync(path, criteria);
         })
             .then(resolve, reject);
     });

@@ -16,7 +16,8 @@ exports.EError = {
     NONE: 'None',
     EXISTS: 'EEXIST',
     PERMISSION: 'EACCES',
-    NOEXISTS: 'ENOENT'
+    NOEXISTS: 'ENOENT',
+    CROSS_DEVICE: 'EXDEV'
 };
 class ErrnoException extends Error {
 }

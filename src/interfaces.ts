@@ -14,7 +14,8 @@ export let EError: any = {
 	NONE: 'None',
 	EXISTS: 'EEXIST',
 	PERMISSION: 'EACCES',
-	NOEXISTS: 'ENOENT'
+	NOEXISTS: 'ENOENT',
+	CROSS_DEVICE : 'EXDEV'
 };
 
 /////////////////////////////////////////////////////////

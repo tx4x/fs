@@ -6,6 +6,8 @@ import { async as existsAsync, sync as existsSync } from './exists';
 import { validateArgument } from './utils/validate';
 import { ErrDoesntExists } from './errors';
 import { EError } from './interfaces';
+import { sync as copySync } from './copy';
+import { sync as removeSync } from './remove';
 
 export function validateInput(methodName: string, from: string, to: string) {
 	const methodSignature: string = methodName + '(from, to)';
@@ -20,6 +22,21 @@ export function sync(from: string, to: string): void {
 	try {
 		renameSync(from, to);
 	} catch (err) {
+
+		// not the same device, rename doesnt work here
+		if (err.code === EError.CROSS_DEVICE) {
+			try {
+				copySync(from, to);
+			} catch (e) {
+				throw e;
+			}
+			try {
+				removeSync(from);
+			} catch (e) {
+				throw e;
+			}
+			return;
+		}
 		if (err.code !== EError.NOEXISTS) {
 			// We can't make sense of this error. Rethrow it.
 			throw err;

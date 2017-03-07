@@ -42,6 +42,7 @@ declare module '@gbaumgart/fs/interfaces' {
 	    times?: boolean;
 	    absolutePath?: boolean;
 	    symlinks?: boolean;
+	    size?: boolean;
 	}
 	export type ReadWriteDataType = string | Buffer | Object;
 	export class ErrnoException extends Error {
@@ -203,26 +204,35 @@ declare module '@gbaumgart/fs/utils/mode' {
 	export function normalizeFileMode(mode: string | number): string;
 
 }
+declare module '@gbaumgart/fs/errors' {
+	export function ErrNotFile(path: string): Error;
+	export function ErrNoDirectory(path: string): Error;
+	export function ErrDoesntExists(path: string): Error;
+	export function ErrDestinationExists(path: string): Error;
+	export function ErrIsNotDirectory(path: string): Error;
+
+}
 declare module '@gbaumgart/fs/dir' {
-	export interface Options {
+	export interface IOptions {
 	    empty?: boolean;
 	    mode?: number | string;
 	}
-	export const validateInput: (methodName: string, path: string, criteria?: Options) => void;
-	export function sync(path: string, passedCriteria?: Options): void;
-	export function async(path: string, passedCriteria?: Options): Promise<{}>;
+	export const validateInput: (methodName: string, path: string, criteria?: IOptions) => void;
+	export function sync(path: string, options?: IOptions): void;
+	export function async(path: string, passedCriteria?: IOptions): Promise<{}>;
 
 }
 declare module '@gbaumgart/fs/file' {
 	/// <reference types="node" />
-	export interface Options {
+	export interface IOptions {
 	    content: string | Buffer | Object | Array<any>;
 	    jsonIndent: number;
 	    mode: string;
 	}
-	export function validateInput(methodName: string, path: string, criteria?: Options): void;
-	export function sync(path: string, options: Options): void;
-	export function async(path: string, options: Options): Promise<{}>;
+	export function validateInput(methodName: string, path: string, options?: IOptions): void;
+	export function defaults(passedCriteria: IOptions | null): IOptions;
+	export function sync(path: string, options: IOptions): void;
+	export function async(path: string, options: IOptions): Promise<{}>;
 
 }
 declare module '@gbaumgart/fs/inspect' {
@@ -257,23 +267,17 @@ declare module '@gbaumgart/fs/utils/matcher' {
 	export function create(basePath: string, patterns: string[]): (absolutePath: string) => boolean;
 
 }
-declare module '@gbaumgart/fs/errors' {
-	export function ErrDoesntExists(path: string): Error;
-	export function ErrDestinationExists(path: string): Error;
-	export function ErrIsNotDirectory(path: string): Error;
-
-}
 declare module '@gbaumgart/fs/find' {
-	export interface Options {
+	export interface IOptions {
 	    matching?: string[];
 	    files?: boolean;
 	    directories?: boolean;
 	    recursive?: boolean;
 	    cwd?: string;
 	}
-	export function validateInput(methodName: string, path: string, options?: Options): void;
-	export function sync(path: string, options: Options): string[];
-	export function async(path: string, options: Options): Promise<string[]>;
+	export function validateInput(methodName: string, path: string, options?: IOptions): void;
+	export function sync(path: string, options: IOptions): string[];
+	export function async(path: string, options: IOptions): Promise<string[]>;
 
 }
 declare module '@gbaumgart/fs/inspect_tree' {
@@ -309,16 +313,16 @@ declare module '@gbaumgart/fs/copy' {
 	export function async(from: string, to: string, options?: ICopyOptions): Promise<void>;
 
 }
-declare module '@gbaumgart/fs/move' {
-	export function validateInput(methodName: string, from: string, to: string): void;
-	export function sync(from: string, to: string): void;
-	export function async(from: string, to: string): Promise<null>;
-
-}
 declare module '@gbaumgart/fs/remove' {
 	export function validateInput(methodName: string, path: string): void;
 	export function sync(path: string): void;
 	export function async(path: string): Promise<null>;
+
+}
+declare module '@gbaumgart/fs/move' {
+	export function validateInput(methodName: string, from: string, to: string): void;
+	export function sync(from: string, to: string): void;
+	export function async(from: string, to: string): Promise<null>;
 
 }
 declare module '@gbaumgart/fs/rename' {
@@ -359,9 +363,9 @@ declare module '@gbaumgart/fs/playground' {
 declare module '@gbaumgart/fs/jetpack' {
 	/// <reference types="node" />
 	import { Options as AppendOptions } from '@gbaumgart/fs/append';
-	import { Options as DirOptions } from '@gbaumgart/fs/dir';
-	import { Options as FileOptions } from '@gbaumgart/fs/file';
-	import { Options as FindOptions } from '@gbaumgart/fs/find';
+	import { IOptions as DirOptions } from '@gbaumgart/fs/dir';
+	import { IOptions as FileOptions } from '@gbaumgart/fs/file';
+	import { IOptions as FindOptions } from '@gbaumgart/fs/find';
 	import { Options as InspectTreeOptions } from '@gbaumgart/fs/inspect_tree';
 	import { IWriteOptions } from '@gbaumgart/fs/interfaces';
 	import { ICopyOptions, INode, IInspectOptions } from '@gbaumgart/fs/interfaces';

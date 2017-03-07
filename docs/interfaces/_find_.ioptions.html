@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Options | @xblox/fs</title>
+	<title>IOptions | @xblox/fs</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,13 +56,13 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_file_.html">&quot;file&quot;</a>
+					<a href="../modules/_find_.html">&quot;find&quot;</a>
 				</li>
 				<li>
-					<a href="_file_.options.html">Options</a>
+					<a href="_find_.ioptions.html">IOptions</a>
 				</li>
 			</ul>
-			<h1>Interface Options</h1>
+			<h1>Interface IOptions</h1>
 		</div>
 	</div>
 </header>
@@ -73,7 +73,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">Options</span>
+						<span class="target">IOptions</span>
 					</li>
 				</ul>
 			</section>
@@ -84,9 +84,11 @@
 						<section class="tsd-index-section tsd-is-external">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_file_.options.html#content" class="tsd-kind-icon">content</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_file_.options.html#jsonindent" class="tsd-kind-icon">json<wbr>Indent</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_file_.options.html#mode" class="tsd-kind-icon">mode</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_find_.ioptions.html#cwd" class="tsd-kind-icon">cwd</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_find_.ioptions.html#directories" class="tsd-kind-icon">directories</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_find_.ioptions.html#files" class="tsd-kind-icon">files</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_find_.ioptions.html#matching" class="tsd-kind-icon">matching</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_find_.ioptions.html#recursive" class="tsd-kind-icon">recursive</a></li>
 							</ul>
 						</section>
 					</div>
@@ -95,32 +97,52 @@
 			<section class="tsd-panel-group tsd-member-group tsd-is-external">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="content" class="tsd-anchor"></a>
-					<h3>content</h3>
-					<div class="tsd-signature tsd-kind-icon">content<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></div>
+					<a name="cwd" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> cwd</h3>
+					<div class="tsd-signature tsd-kind-icon">cwd<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/file.ts#L12">file.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/93446f7/src/find.ts#L14">find.ts:14</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="jsonindent" class="tsd-anchor"></a>
-					<h3>json<wbr>Indent</h3>
-					<div class="tsd-signature tsd-kind-icon">json<wbr>Indent<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<a name="directories" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> directories</h3>
+					<div class="tsd-signature tsd-kind-icon">directories<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/file.ts#L13">file.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/93446f7/src/find.ts#L12">find.ts:12</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="mode" class="tsd-anchor"></a>
-					<h3>mode</h3>
-					<div class="tsd-signature tsd-kind-icon">mode<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<a name="files" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> files</h3>
+					<div class="tsd-signature tsd-kind-icon">files<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/2a404be/src/file.ts#L14">file.ts:14</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/93446f7/src/find.ts#L11">find.ts:11</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+					<a name="matching" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> matching</h3>
+					<div class="tsd-signature tsd-kind-icon">matching<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/93446f7/src/find.ts#L10">find.ts:10</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+					<a name="recursive" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> recursive</h3>
+					<div class="tsd-signature tsd-kind-icon">recursive<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/93446f7/src/find.ts#L13">find.ts:13</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -133,7 +155,7 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class="current tsd-kind-external-module tsd-is-external">
-						<a href="../modules/_file_.html">"file"</a>
+						<a href="../modules/_find_.html">"find"</a>
 					</li>
 				</ul>
 			</nav>
@@ -142,74 +164,47 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
-						<a href="_file_.options.html" class="tsd-kind-icon">Options</a>
+						<a href="_find_.ioptions.html" class="tsd-kind-icon">IOptions</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_file_.options.html#content" class="tsd-kind-icon">content</a>
+								<a href="_find_.ioptions.html#cwd" class="tsd-kind-icon">cwd</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_file_.options.html#jsonindent" class="tsd-kind-icon">json<wbr>Indent</a>
+								<a href="_find_.ioptions.html#directories" class="tsd-kind-icon">directories</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_file_.options.html#mode" class="tsd-kind-icon">mode</a>
+								<a href="_find_.ioptions.html#files" class="tsd-kind-icon">files</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+								<a href="_find_.ioptions.html#matching" class="tsd-kind-icon">matching</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+								<a href="_find_.ioptions.html#recursive" class="tsd-kind-icon">recursive</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#q" class="tsd-kind-icon">Q</a>
-					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#promisedchmod" class="tsd-kind-icon">promised<wbr>Chmod</a>
-					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#promisedstat" class="tsd-kind-icon">promised<wbr>Stat</a>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external">
+						<a href="../modules/_find_.html#async" class="tsd-kind-icon">async</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#errnotfile" class="tsd-kind-icon">Err<wbr>Not<wbr>File</a>
+						<a href="../modules/_find_.html#defaults" class="tsd-kind-icon">defaults</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#accept" class="tsd-kind-icon">accept</a>
+						<a href="../modules/_find_.html#findasync" class="tsd-kind-icon">find<wbr>Async</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
+						<a href="../modules/_find_.html#findsync" class="tsd-kind-icon">find<wbr>Sync</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
+						<a href="../modules/_find_.html#processfoundobjects" class="tsd-kind-icon">process<wbr>Found<wbr>Objects</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external">
-						<a href="../modules/_file_.html#async" class="tsd-kind-icon">async</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#checkcontent" class="tsd-kind-icon">check<wbr>Content</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#checkcontentasync" class="tsd-kind-icon">check<wbr>Content<wbr>Async</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#checkmode" class="tsd-kind-icon">check<wbr>Mode</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#checkmodeasync" class="tsd-kind-icon">check<wbr>Mode<wbr>Async</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#defaults" class="tsd-kind-icon">defaults</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#isfile" class="tsd-kind-icon">is<wbr>File</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#isfileasync" class="tsd-kind-icon">is<wbr>File<wbr>Async</a>
+						<a href="../modules/_find_.html#sync" class="tsd-kind-icon">sync</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external">
-						<a href="../modules/_file_.html#sync" class="tsd-kind-icon">sync</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#touch" class="tsd-kind-icon">touch</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#touchasync" class="tsd-kind-icon">touch<wbr>Async</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external">
-						<a href="../modules/_file_.html#validateinput" class="tsd-kind-icon">validate<wbr>Input</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
-						<a href="../modules/_file_.html#writeasync" class="tsd-kind-icon">write<wbr>Async</a>
+						<a href="../modules/_find_.html#validateinput" class="tsd-kind-icon">validate<wbr>Input</a>
 					</li>
 				</ul>
 			</nav>

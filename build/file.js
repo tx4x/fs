@@ -13,12 +13,14 @@ const Q = require('q');
 const mode_1 = require("./utils/mode");
 const validate_1 = require("./utils/validate");
 const write_1 = require("./write");
+const errors_1 = require("./errors");
+const interfaces_1 = require("./interfaces");
 const promisedStat = Q.denodeify(fs.stat);
 const promisedChmod = Q.denodeify(fs.chmod);
-function validateInput(methodName, path, criteria) {
+function validateInput(methodName, path, options) {
     const methodSignature = methodName + '(path, [criteria])';
     validate_1.validateArgument(methodSignature, 'path', path, ['string']);
-    validate_1.validateOptions(methodSignature, 'criteria', criteria, {
+    validate_1.validateOptions(methodSignature, 'criteria', options, {
         content: ['string', 'buffer', 'object', 'array'],
         jsonIndent: ['number'],
         mode: ['string', 'number']
@@ -33,32 +35,27 @@ function defaults(passedCriteria) {
     }
     return criteria;
 }
-;
-function ErrNotFile(path) {
-    return new Error('Path ' + path + ' exists but is not a file.' +
-        ' Halting jetpack.file() call for safety reasons.');
-}
+exports.defaults = defaults;
 ;
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-function isFile(path) {
+const isFile = (path) => {
     let stat;
     try {
         stat = fs.statSync(path);
     }
     catch (err) {
         // Detection if path exists
-        if (err.code !== 'ENOENT') {
+        if (err.code !== interfaces_1.EError.NOEXISTS) {
             throw err;
         }
     }
     if (stat && !stat.isFile()) {
-        throw ErrNotFile(path);
+        throw errors_1.ErrNotFile(path);
     }
     return stat;
-}
-;
+};
 const checkContent = function (path, mode, options) {
     if (options.content !== undefined) {
         write_1.sync(path, options.content, {
@@ -110,10 +107,10 @@ function isFileAsync(path) {
                 resolve(stat);
             }
             else {
-                reject(ErrNotFile(path));
+                reject(errors_1.ErrNotFile(path));
             }
         })
-            .catch((err) => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
+            .catch((err) => (err.code === interfaces_1.EError.NOEXISTS ? resolve(undefined) : reject(err)));
     });
 }
 ;

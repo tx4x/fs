@@ -7,6 +7,9 @@ const mkdirp = require("mkdirp");
 const exists_1 = require("./exists");
 const validate_1 = require("./utils/validate");
 const errors_1 = require("./errors");
+const interfaces_1 = require("./interfaces");
+const copy_1 = require("./copy");
+const remove_1 = require("./remove");
 function validateInput(methodName, from, to) {
     const methodSignature = methodName + '(from, to)';
     validate_1.validateArgument(methodSignature, 'from', from, ['string']);
@@ -22,7 +25,23 @@ function sync(from, to) {
         fs_1.renameSync(from, to);
     }
     catch (err) {
-        if (err.code !== 'ENOENT') {
+        // not the same device, rename doesnt work here
+        if (err.code === interfaces_1.EError.CROSS_DEVICE) {
+            try {
+                copy_1.sync(from, to);
+            }
+            catch (e) {
+                throw e;
+            }
+            try {
+                remove_1.sync(from);
+            }
+            catch (e) {
+                throw e;
+            }
+            return;
+        }
+        if (err.code !== interfaces_1.EError.NOEXISTS) {
             // We can't make sense of this error. Rethrow it.
             throw err;
         }
@@ -71,7 +90,7 @@ function async(from, to) {
         promisedRename(from, to)
             .then(resolve)
             .catch(err => {
-            if (err.code !== 'ENOENT') {
+            if (err.code !== interfaces_1.EError.NOEXISTS) {
                 // Something unknown. Rethrow original error.
                 reject(err);
             }

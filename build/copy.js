@@ -18,11 +18,11 @@ const mode_1 = require("./utils/mode");
 const tree_walker_1 = require("./utils/tree_walker");
 const validate_1 = require("./utils/validate");
 const write_1 = require("./write");
-const dir_1 = require("./dir");
 const errors_1 = require("./errors");
 const interfaces_1 = require("./interfaces");
 const interfaces_2 = require("./interfaces");
 const inspect_1 = require("./inspect");
+const remove_1 = require("./remove");
 const interfaces_3 = require("./interfaces");
 const Q = require('q');
 const promisedSymlink = Q.denodeify(fs.symlink);
@@ -93,17 +93,16 @@ function copyFileSyncWithProgress(from, to, options) {
                     resolve();
                 }
             };
-            const rd = fs_1.createReadStream(from);
+            const rd = fs_1.createReadStream(from).
+                on("error", (err) => done(err));
             const str = progress({
                 length: fs.statSync(from).size,
                 time: 100
-            });
-            str.on('progress', (e) => {
+            }).on('progress', (e) => {
                 elapsed = (Date.now() - started) / 1000;
                 speed = e.transferred / elapsed;
                 options.writeProgress(from, e.transferred, e.length);
             });
-            rd.on("error", (err) => done(err));
             const wr = fs_1.createWriteStream(to);
             wr.on("error", (err) => done(err));
             wr.on("close", done);
@@ -164,14 +163,11 @@ function sync(from, to, options) {
     const opts = parseOptions(options, from);
     checksBeforeCopyingSync(from, to, opts);
     let nodes = [];
-    let current = 0;
     let sizeTotal = 0;
-    if (options && options.flags && interfaces_1.ECopyFlags.EMPTY) {
+    if (options && options.flags & interfaces_1.ECopyFlags.EMPTY) {
         const dstStat = fs.statSync(to);
         if (dstStat.isDirectory()) {
-            dir_1.sync(to, {
-                empty: true
-            });
+            remove_1.sync(to);
         }
     }
     const visitor = (path, inspectData) => {
@@ -217,7 +213,6 @@ const checkAsync = (from, to, opts) => {
     return exists_1.async(from)
         .then(srcPathExists => {
         if (!srcPathExists) {
-            console.error('doesn ', new Error().stack);
             throw errors_1.ErrDoesntExists(from);
         }
         else {
@@ -237,6 +232,48 @@ const checkAsync = (from, to, opts) => {
             }
         }
     });
+};
+const checkAsync2 = (from, to, opts) => {
+    const srcPath = exists_1.sync(from);
+    if (!srcPath) {
+        throw errors_1.ErrDoesntExists(from);
+    }
+    const destPathExists = exists_1.sync(to);
+    if (destPathExists) {
+        if (opts.conflictSettings) {
+            return Promise.resolve(opts.conflictSettings);
+        }
+        if (opts.conflictCallback) {
+            console.log('ask');
+            return opts.conflictCallback(to, inspect_1.createItem(to), interfaces_2.EError.EXISTS);
+        }
+        if (!opts.overwrite) {
+            throw errors_1.ErrDestinationExists(to);
+        }
+    }
+    /*
+        return existsASync(from)
+            .then(srcPathExists => {
+                if (!srcPathExists) {
+                    throw ErrDoesntExists(from);
+                } else {
+                    return existsASync(to);
+                }
+            })
+            .then(destPathExists => {
+                if (destPathExists) {
+                    if (opts.conflictSettings) {
+                        return Promise.resolve(opts.conflictSettings);
+                    }
+                    if (opts.conflictCallback) {
+                        return opts.conflictCallback(to, createItem(to), EError.EXISTS);
+                    }
+                    if (!opts.overwrite) {
+                        throw ErrDestinationExists(to);
+                    }
+                }
+            });
+            */
 };
 const copyFileAsync = (from, to, mode, options, retriedAttempt) => {
     return new Promise((resolve, reject) => {
@@ -264,14 +301,15 @@ const copyFileAsync = (from, to, mode, options, retriedAttempt) => {
             }
         });
         writeStream.on('finish', () => {
+            // feature: preserve times
             if (options && options.flags & interfaces_1.ECopyFlags.PRESERVE_TIMES) {
                 const sourceStat = fs.statSync(from);
-                fs.open(to, 'w', function (err, fd) {
+                fs.open(to, 'w', (err, fd) => {
                     if (err) {
                         throw err;
                     }
                     ;
-                    fs.futimes(fd, sourceStat.atime, sourceStat.mtime, function (err) {
+                    fs.futimes(fd, sourceStat.atime, sourceStat.mtime, (err) => {
                         if (err) {
                             throw err;
                         }
@@ -318,8 +356,7 @@ const copyFileAsync = (from, to, mode, options, retriedAttempt) => {
         }
     });
 };
-const copySymlinkAsync = (from, to) => {
-    console.log('copy symlink! ' + from + ' to ' + to);
+function copySymlinkAsync(from, to) {
     return promisedReadlink(from)
         .then((symlinkPointsAt) => {
         return new Promise((resolve, reject) => {
@@ -339,7 +376,9 @@ const copySymlinkAsync = (from, to) => {
             });
         });
     });
-};
+}
+exports.copySymlinkAsync = copySymlinkAsync;
+;
 const copyItemAsync = (from, inspectData, to, options) => {
     const mode = mode_1.normalizeFileMode(inspectData.mode);
     if (inspectData.type === interfaces_1.ENodeType.DIR) {
@@ -371,38 +410,224 @@ const onConflict = (from, to, options, settings) => {
     }
     return undefined;
 };
-const resolveConflict = (from, to, options, resolveMode) => {
+function resolveConflict(from, to, options, resolveMode) {
     // New logic for overwriting
-    if (resolveMode !== undefined) {
-        const src = inspect_1.createItem(from);
-        const dst = inspect_1.createItem(to);
-        if (resolveMode === interfaces_3.EResolveMode.SKIP) {
-            return false;
-        }
-        else if (resolveMode === interfaces_3.EResolveMode.IF_NEWER) {
-            if (dst.modifyTime.getTime() > src.modifyTime.getTime()) {
-                return false;
-            }
-        }
-        else if (resolveMode === interfaces_3.EResolveMode.IF_SIZE_DIFFERS) {
-            // @TODO : not implemented: copy EInspectItemType.DIR with ECopyResolveMode.IF_SIZE_DIFFERS
-            if (src.type === interfaces_1.ENodeType.DIR && dst.type === interfaces_1.ENodeType.DIR) {
-            }
-            else if (src.type === interfaces_1.ENodeType.FILE && dst.type === interfaces_1.ENodeType.FILE) {
-                if (src.size === dst.size) {
-                    return false;
-                }
-            }
-        }
-        else if (resolveMode === interfaces_3.EResolveMode.OVERWRITE) {
-            return true;
-        }
-        else if (resolveMode === interfaces_3.EResolveMode.ABORT) {
+    if (resolveMode === undefined) {
+        return true;
+    }
+    const src = inspect_1.createItem(from);
+    const dst = inspect_1.createItem(to);
+    if (resolveMode === interfaces_3.EResolveMode.SKIP) {
+        return false;
+    }
+    else if (resolveMode === interfaces_3.EResolveMode.IF_NEWER) {
+        if (dst.modifyTime.getTime() > src.modifyTime.getTime()) {
             return false;
         }
     }
-    return true;
-};
+    else if (resolveMode === interfaces_3.EResolveMode.IF_SIZE_DIFFERS) {
+        // @TODO : not implemented: copy EInspectItemType.DIR with ECopyResolveMode.IF_SIZE_DIFFERS
+        if (src.type === interfaces_1.ENodeType.DIR && dst.type === interfaces_1.ENodeType.DIR) {
+        }
+        else if (src.type === interfaces_1.ENodeType.FILE && dst.type === interfaces_1.ENodeType.FILE) {
+            if (src.size === dst.size) {
+                return false;
+            }
+        }
+    }
+    else if (resolveMode === interfaces_3.EResolveMode.OVERWRITE) {
+        return true;
+    }
+    else if (resolveMode === interfaces_3.EResolveMode.ABORT) {
+        return false;
+    }
+}
+exports.resolveConflict = resolveConflict;
+;
+function visitor2(from, to, vars, item) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const options = vars.options;
+        let rel;
+        let destPath;
+        if (!item) {
+            return;
+        }
+        rel = pathUtil.relative(from, item.path);
+        destPath = pathUtil.resolve(to, rel);
+        if (!options.allowedToCopy(item.path)) {
+            return;
+        }
+        vars.filesInProgress += 1;
+        vars['current'] = from;
+        // our main function after sanity checks
+        const checked = (subResolveSettings) => {
+            // if the first resolve callback returned an individual resolve settings "THIS",
+            // ask the user again with the same item
+            let proceed = vars.resolveSettings.mode === interfaces_3.EResolve.ALWAYS;
+            if (subResolveSettings) {
+                if (!proceed) {
+                    let overwriteMode = subResolveSettings.overwrite;
+                    overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
+                    if (overwriteMode === interfaces_3.EResolveMode.ABORT) {
+                        vars.abort = true;
+                    }
+                    if (vars.abort) {
+                        return;
+                    }
+                    if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
+                        vars.filesInProgress -= 1;
+                        if (vars.filesInProgress === 0) {
+                            vars.resolve();
+                        }
+                        return;
+                    }
+                }
+            }
+            copyItemAsync(item.path, item.item, destPath, options).then(() => {
+                vars.filesInProgress -= 1;
+                if (options.progress) {
+                    if (options.progress(item.path, vars.filesInProgress, -1, item.item) === false) {
+                        vars.abort = true;
+                        return vars.resolve();
+                    }
+                }
+                if (vars.filesInProgress === 0) {
+                    vars.resolve();
+                }
+            }).catch((err) => {
+                if (options && options.conflictCallback) {
+                    if (err.code === interfaces_2.EError.PERMISSION || err.code === interfaces_2.EError.NOEXISTS) {
+                        options.conflictCallback(item.path, inspect_1.createItem(destPath), err.code).then((errorResolveSettings) => {
+                            // the user has set the error resolver to always, so we use the last one
+                            if (vars.onCopyErrorResolveSettings) {
+                                errorResolveSettings = vars.onCopyErrorResolveSettings;
+                            }
+                            // user said use this settings always, we track and use this last setting from now on
+                            if (errorResolveSettings.mode === interfaces_3.EResolve.ALWAYS && !vars.onCopyErrorResolveSettings) {
+                                vars.onCopyErrorResolveSettings = errorResolveSettings;
+                            }
+                            if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.ABORT) {
+                                vars.abort = true;
+                                return vars.resolve();
+                            }
+                            if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.THROW) {
+                                vars.abort = true;
+                                return vars.reject(err);
+                            }
+                            if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.SKIP) {
+                                vars.filesInProgress -= 1;
+                            }
+                            // user error, should never happen, unintended
+                            if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.IF_NEWER ||
+                                errorResolveSettings.overwrite === interfaces_3.EResolveMode.IF_SIZE_DIFFERS ||
+                                errorResolveSettings.overwrite === interfaces_3.EResolveMode.OVERWRITE) {
+                                vars.reject(new interfaces_2.ErrnoException('settings make no sense : errorResolveSettings.overwrite = ' + errorResolveSettings.overwrite));
+                            }
+                        });
+                    }
+                }
+                vars.reject(err);
+            });
+        };
+        return checkAsync(item.path, destPath, options).then(checked);
+    });
+}
+function visitor(from, to, vars) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            const options = vars.options;
+            const stream = this;
+            const item = stream.read();
+            let rel;
+            let destPath;
+            if (!item) {
+                return;
+            }
+            rel = pathUtil.relative(from, item.path);
+            destPath = pathUtil.resolve(to, rel);
+            if (!options.allowedToCopy(item.path)) {
+                return;
+            }
+            vars.filesInProgress += 1;
+            // our main function after sanity checks
+            const checked = (subResolveSettings) => {
+                console.log('checked : ' + item.path, subResolveSettings);
+                //let w = item.path.indexOf('write.ts') !== -1;
+                //if (item.path.indexOf('write.ts') !== -1) {
+                //console.log('write', new Error().stack);
+                //}
+                // if the first resolve callback returned an individual resolve settings "THIS",
+                // ask the user again with the same item
+                let proceed = vars.resolveSettings.mode === interfaces_3.EResolve.ALWAYS;
+                if (subResolveSettings) {
+                    if (!proceed) {
+                        let overwriteMode = subResolveSettings.overwrite;
+                        overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
+                        if (overwriteMode === interfaces_3.EResolveMode.ABORT) {
+                            vars.abort = true;
+                        }
+                        if (vars.abort) {
+                            return;
+                        }
+                        if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
+                            vars.filesInProgress -= 1;
+                            if (vars.filesInProgress === 0) {
+                                vars.resolve();
+                            }
+                            return;
+                        }
+                    }
+                }
+                copyItemAsync(item.path, item.item, destPath, options).then(() => {
+                    vars.filesInProgress -= 1;
+                    if (options.progress) {
+                        if (options.progress(item.path, vars.filesInProgress, -1, item.item) === false) {
+                            vars.abort = true;
+                            return vars.resolve();
+                        }
+                    }
+                    if (vars.allFilesDelivered && vars.filesInProgress === 0) {
+                        vars.resolve();
+                    }
+                }).catch((err) => {
+                    if (options && options.conflictCallback) {
+                        if (err.code === interfaces_2.EError.PERMISSION || err.code === interfaces_2.EError.NOEXISTS) {
+                            options.conflictCallback(item.path, inspect_1.createItem(destPath), err.code).then((errorResolveSettings) => {
+                                // the user has set the error resolver to always, so we use the last one
+                                if (vars.onCopyErrorResolveSettings) {
+                                    errorResolveSettings = vars.onCopyErrorResolveSettings;
+                                }
+                                // user said use this settings always, we track and use this last setting from now on
+                                if (errorResolveSettings.mode === interfaces_3.EResolve.ALWAYS && !vars.onCopyErrorResolveSettings) {
+                                    vars.onCopyErrorResolveSettings = errorResolveSettings;
+                                }
+                                if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.ABORT) {
+                                    vars.abort = true;
+                                    return vars.resolve();
+                                }
+                                if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.THROW) {
+                                    vars.abort = true;
+                                    return vars.reject(err);
+                                }
+                                if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.SKIP) {
+                                    vars.filesInProgress -= 1;
+                                }
+                                // user error, should never happen, unintended
+                                if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.IF_NEWER ||
+                                    errorResolveSettings.overwrite === interfaces_3.EResolveMode.IF_SIZE_DIFFERS ||
+                                    errorResolveSettings.overwrite === interfaces_3.EResolveMode.OVERWRITE) {
+                                    vars.reject(new interfaces_2.ErrnoException('settings make no sense : errorResolveSettings.overwrite = ' + errorResolveSettings.overwrite));
+                                }
+                            });
+                        }
+                    }
+                    vars.reject(err);
+                });
+            };
+            checkAsync(item.path, destPath, options).then(checked);
+        });
+    });
+}
 /**
  * Copy
  * @export
@@ -412,126 +637,75 @@ const resolveConflict = (from, to, options, resolveMode) => {
  * @returns
  */
 function async(from, to, options) {
-    const opts = parseOptions(options, from);
+    options = parseOptions(options, from);
     return new Promise((resolve, reject) => {
-        checkAsync(from, to, opts).then((resolveSettings) => {
-            if (!resolveSettings) {
-                resolveSettings = opts.conflictSettings || {
+        checkAsync(from, to, options).then((resolver) => {
+            if (!resolver) {
+                resolver = options.conflictSettings || {
                     mode: interfaces_3.EResolve.THIS,
                     overwrite: interfaces_3.EResolveMode.OVERWRITE
                 };
             }
-            let overwriteMode = resolveSettings.overwrite;
-            overwriteMode = onConflict(from, to, options, resolveSettings);
-            if (opts.conflictSettings || opts.conflictCallback && !resolveConflict(from, to, options, overwriteMode)) {
+            let overwriteMode = resolver.overwrite;
+            overwriteMode = onConflict(from, to, options, resolver);
+            if (options.conflictSettings || options.conflictCallback && !resolveConflict(from, to, options, overwriteMode)) {
                 return resolve();
             }
-            let allFilesDelivered = false;
-            let filesInProgress = 0;
-            let abort = false;
-            let onCopyErrorResolveSettings = null;
-            if (options && options.flags && interfaces_1.ECopyFlags.EMPTY) {
+            // feature: clean before
+            if (options && options.flags & interfaces_1.ECopyFlags.EMPTY) {
                 const dstStat = fs.statSync(to);
                 if (dstStat.isDirectory()) {
-                    dir_1.sync(to, {
-                        empty: true
-                    });
+                    remove_1.sync(to);
                 }
             }
-            function visitor() {
-                if (abort) {
-                    return resolve();
-                }
-                let stream = this;
+            // walker variables
+            const visitorArgs = {
+                resolve: resolve,
+                reject: reject,
+                abort: false,
+                filesInProgress: 0,
+                allFilesDelivered: false,
+                resolveSettings: resolver,
+                options: options
+            };
+            let nodes = [];
+            // This function is being called each time when the treeWalkerStream got an item!
+            // Now instead of calling the 'vistitor', we only collect the item.
+            const collector = function () {
+                const stream = this;
                 const item = stream.read();
-                let rel;
-                let destPath;
                 if (!item) {
                     return;
                 }
-                rel = pathUtil.relative(from, item.path);
-                destPath = pathUtil.resolve(to, rel);
-                if (!opts.allowedToCopy(item.path)) {
-                    return;
-                }
-                filesInProgress += 1;
-                checkAsync(item.path, destPath, opts).then((subResolveSettings) => {
-                    // if the first resolve callback returned an individual resolve settings "THIS",
-                    // ask the user again with the particular item
-                    let proceed = resolveSettings.mode === interfaces_3.EResolve.ALWAYS;
-                    if (subResolveSettings) {
-                        if (!proceed) {
-                            let overwriteMode = subResolveSettings.overwrite;
-                            overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
-                            if (overwriteMode === interfaces_3.EResolveMode.ABORT) {
-                                abort = true;
-                            }
-                            if (abort) {
-                                return;
-                            }
-                            if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
-                                filesInProgress -= 1;
-                                return;
-                            }
-                        }
-                    }
-                    copyItemAsync(item.path, item.item, destPath, options).then(() => {
-                        filesInProgress -= 1;
-                        if (opts.progress) {
-                            if (opts.progress(item.path, filesInProgress, -1, item.item) === false) {
-                                abort = true;
-                                return resolve();
-                            }
-                        }
-                        if (allFilesDelivered && filesInProgress === 0) {
-                            resolve();
-                        }
-                    }).catch((err) => {
-                        if (options && options.conflictCallback) {
-                            if (err.code === interfaces_2.EError.PERMISSION || err.code === interfaces_2.EError.NOEXISTS) {
-                                options.conflictCallback(item.path, inspect_1.createItem(destPath), err.code).then((errorResolveSettings) => {
-                                    // the user has set the error resolver to always, so we use the last one
-                                    if (onCopyErrorResolveSettings) {
-                                        errorResolveSettings = onCopyErrorResolveSettings;
-                                    }
-                                    // user said use this settings always, we track and use this last setting from now on
-                                    if (errorResolveSettings.mode === interfaces_3.EResolve.ALWAYS && !onCopyErrorResolveSettings) {
-                                        onCopyErrorResolveSettings = errorResolveSettings;
-                                    }
-                                    if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.ABORT) {
-                                        abort = true;
-                                        return resolve();
-                                    }
-                                    if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.THROW) {
-                                        abort = true;
-                                        return reject(err);
-                                    }
-                                    if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.SKIP) {
-                                        filesInProgress -= 1;
-                                    }
-                                    // catch modes which make no sense:
-                                    if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.IF_NEWER ||
-                                        errorResolveSettings.overwrite === interfaces_3.EResolveMode.IF_SIZE_DIFFERS ||
-                                        errorResolveSettings.overwrite === interfaces_3.EResolveMode.OVERWRITE) {
-                                        reject(new interfaces_2.ErrnoException('settings make no sense'));
-                                    }
-                                });
-                            }
-                        }
-                        reject(err);
-                    });
+                const path = item.path;
+                const rel = pathUtil.relative(from, path);
+                const destPath = pathUtil.resolve(to, rel);
+                nodes.push({
+                    path: path,
+                    item: item.item,
+                    dst: destPath,
+                    name: item.name,
+                    done: false
                 });
-            }
+            };
+            // a function called when the treeWalkerStream or visitor has been finished
+            const process = function () {
+                if (nodes.length) {
+                    const item = nodes.shift();
+                    visitor2(item.path, item.dst, visitorArgs, item).then(process);
+                }
+            };
             tree_walker_1.stream(from, {
                 inspectOptions: {
                     mode: true,
                     symlinks: options ? options.flags & interfaces_1.ECopyFlags.FOLLOW_SYMLINKS ? false : true : true
                 }
-            }).on('readable', visitor)
+            }).on('readable', function () { return collector.apply(this, arguments); })
                 .on('error', reject)
                 .on('end', () => {
-                allFilesDelivered = true;
-                if (allFilesDelivered && filesInProgress === 0) {
+                process();
+                // a case when nothing matched
+                if (nodes.length === 0 && visitorArgs.filesInProgress === 0) {
                     resolve();
                 }
             });

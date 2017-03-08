@@ -30,6 +30,7 @@ interface ICopyTask {
 	item: INode;
 	dst: string;
 	done: boolean;
+	name?: string;
 }
 
 export function validateInput(methodName: string, from: string, to: string, options?: ICopyOptions): void {
@@ -155,12 +156,10 @@ export function sync(from: string, to: string, options?: ICopyOptions): void {
 	checksBeforeCopyingSync(from, to, opts);
 	let nodes: ICopyTask[] = [];
 	let sizeTotal = 0;
-	if (options && options.flags && ECopyFlags.EMPTY) {
+	if (options && options.flags & ECopyFlags.EMPTY) {
 		const dstStat = fs.statSync(to);
 		if (dstStat.isDirectory()) {
-			dirSync(to, {
-				empty: true
-			});
+			rmSync(to);
 		}
 	}
 
@@ -209,7 +208,6 @@ const checkAsync = (from: string, to: string, opts: ICopyOptions): Promise<IConf
 	return existsASync(from)
 		.then(srcPathExists => {
 			if (!srcPathExists) {
-				console.error('doesn ', new Error().stack);
 				throw ErrDoesntExists(from);
 			} else {
 				return existsASync(to);
@@ -220,7 +218,6 @@ const checkAsync = (from: string, to: string, opts: ICopyOptions): Promise<IConf
 				if (opts.conflictSettings) {
 					return Promise.resolve(opts.conflictSettings);
 				}
-
 				if (opts.conflictCallback) {
 					return opts.conflictCallback(to, createItem(to), EError.EXISTS);
 				}
@@ -229,6 +226,50 @@ const checkAsync = (from: string, to: string, opts: ICopyOptions): Promise<IConf
 				}
 			}
 		});
+};
+const checkAsync2 = (from: string, to: string, opts: ICopyOptions): Promise<IConflictSettings | any> => {
+	const srcPath = existsSync(from);
+	if (!srcPath) {
+		throw ErrDoesntExists(from);
+	}
+
+	const destPathExists = existsSync(to);
+	if (destPathExists) {
+		if (opts.conflictSettings) {
+			return Promise.resolve(opts.conflictSettings);
+		}
+		if (opts.conflictCallback) {
+			console.log('ask');
+			return opts.conflictCallback(to, createItem(to), EError.EXISTS);
+		}
+		if (!opts.overwrite) {
+			throw ErrDestinationExists(to);
+		}
+	}
+
+	/*
+		return existsASync(from)
+			.then(srcPathExists => {
+				if (!srcPathExists) {
+					throw ErrDoesntExists(from);
+				} else {
+					return existsASync(to);
+				}
+			})
+			.then(destPathExists => {
+				if (destPathExists) {
+					if (opts.conflictSettings) {
+						return Promise.resolve(opts.conflictSettings);
+					}
+					if (opts.conflictCallback) {
+						return opts.conflictCallback(to, createItem(to), EError.EXISTS);
+					}
+					if (!opts.overwrite) {
+						throw ErrDestinationExists(to);
+					}
+				}
+			});
+			*/
 };
 
 
@@ -387,6 +428,98 @@ export function resolveConflict(from: string, to: string, options: ICopyOptions,
 		return false;
 	}
 };
+
+async function visitor2(from: string, to: string, vars: any, item: { path: string, item: INode }): Promise<void> {
+	const options = vars.options;
+	let rel: string;
+	let destPath: string;
+	if (!item) {
+		return;
+	}
+	rel = pathUtil.relative(from, item.path);
+	destPath = pathUtil.resolve(to, rel);
+	if (!options.allowedToCopy(item.path)) {
+		return;
+	}
+	vars.filesInProgress += 1;
+	vars['current'] = from;
+
+	// our main function after sanity checks
+	const checked = (subResolveSettings: IConflictSettings) => {
+		// if the first resolve callback returned an individual resolve settings "THIS",
+		// ask the user again with the same item
+		let proceed = vars.resolveSettings.mode === EResolve.ALWAYS;
+		if (subResolveSettings) {
+			if (!proceed) {
+				let overwriteMode = subResolveSettings.overwrite;
+				overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
+
+				if (overwriteMode === EResolveMode.ABORT) {
+					vars.abort = true;
+				}
+				if (vars.abort) {
+					return;
+				}
+				if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
+					vars.filesInProgress -= 1;
+					if (vars.filesInProgress === 0) {
+						vars.resolve();
+					}
+					return;
+				}
+			}
+		}
+		copyItemAsync(item.path, item.item, destPath, options).then(() => {
+			vars.filesInProgress -= 1;
+			if (options.progress) {
+				if (options.progress(item.path, vars.filesInProgress, -1, item.item) === false) {
+					vars.abort = true;
+					return vars.resolve();
+				}
+			}
+			if (vars.filesInProgress === 0) {
+				vars.resolve();
+			}
+		}).catch((err: ErrnoException) => {
+			if (options && options.conflictCallback) {
+				if (err.code === EError.PERMISSION || err.code === EError.NOEXISTS) {
+					options.conflictCallback(item.path, createItem(destPath), err.code).then((errorResolveSettings: IConflictSettings) => {
+						// the user has set the error resolver to always, so we use the last one
+						if (vars.onCopyErrorResolveSettings) {
+							errorResolveSettings = vars.onCopyErrorResolveSettings;
+						}
+						// user said use this settings always, we track and use this last setting from now on
+						if (errorResolveSettings.mode === EResolve.ALWAYS && !vars.onCopyErrorResolveSettings) {
+							vars.onCopyErrorResolveSettings = errorResolveSettings;
+						}
+
+						if (errorResolveSettings.overwrite === EResolveMode.ABORT) {
+							vars.abort = true;
+							return vars.resolve();
+						}
+						if (errorResolveSettings.overwrite === EResolveMode.THROW) {
+							vars.abort = true;
+							return vars.reject(err);
+						}
+						if (errorResolveSettings.overwrite === EResolveMode.SKIP) {
+							vars.filesInProgress -= 1;
+						}
+
+						// user error, should never happen, unintended
+						if (errorResolveSettings.overwrite === EResolveMode.IF_NEWER ||
+							errorResolveSettings.overwrite === EResolveMode.IF_SIZE_DIFFERS ||
+							errorResolveSettings.overwrite === EResolveMode.OVERWRITE) {
+							vars.reject(new ErrnoException('settings make no sense : errorResolveSettings.overwrite = ' + errorResolveSettings.overwrite));
+						}
+					});
+				}
+			}
+			vars.reject(err);
+		});
+	};
+	return checkAsync(item.path, destPath, options).then(checked);
+}
+
 async function visitor(from: string, to: string, vars: any): Promise<void> {
 	return new Promise<void>((resolve, reject) => {
 		const options = vars.options;
@@ -406,24 +539,35 @@ async function visitor(from: string, to: string, vars: any): Promise<void> {
 
 		// our main function after sanity checks
 		const checked = (subResolveSettings: IConflictSettings) => {
+			console.log('checked : ' + item.path, subResolveSettings);
+			//let w = item.path.indexOf('write.ts') !== -1;
+			//if (item.path.indexOf('write.ts') !== -1) {
+			//console.log('write', new Error().stack);
+			//}
 			// if the first resolve callback returned an individual resolve settings "THIS",
 			// ask the user again with the same item
 			let proceed = vars.resolveSettings.mode === EResolve.ALWAYS;
-			if (subResolveSettings && !proceed) {
-				let overwriteMode = subResolveSettings.overwrite;
-				overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
-				if (overwriteMode === EResolveMode.ABORT) {
-					vars.abort = true;
-				}
-				if (vars.abort) {
-					return;
-				}
-				if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
-					vars.filesInProgress -= 1;
-					return;
+			if (subResolveSettings) {
+				if (!proceed) {
+					let overwriteMode = subResolveSettings.overwrite;
+					overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
+
+					if (overwriteMode === EResolveMode.ABORT) {
+						vars.abort = true;
+					}
+					if (vars.abort) {
+						return;
+					}
+					if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
+						vars.filesInProgress -= 1;
+						if (vars.filesInProgress === 0) {
+
+							vars.resolve();
+						}
+						return;
+					}
 				}
 			}
-
 			copyItemAsync(item.path, item.item, destPath, options).then(() => {
 				vars.filesInProgress -= 1;
 				if (options.progress) {
@@ -472,7 +616,7 @@ async function visitor(from: string, to: string, vars: any): Promise<void> {
 				vars.reject(err);
 			});
 		};
-		checkAsync(item.path, destPath, options).then((subResolveSettings: IConflictSettings) => checked);
+		checkAsync(item.path, destPath, options).then(checked);
 	});
 }
 /**
@@ -516,21 +660,50 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 				resolveSettings: resolver,
 				options: options
 			};
+			let nodes: ICopyTask[] = [];
 
+			// This function is being called each time when the treeWalkerStream got an item!
+			// Now instead of calling the 'vistitor', we only collect the item.
+			const collector = function () {
+				const stream: any = this;
+				const item: { path: string, name: string, item: INode } = stream.read();
+				if (!item) {
+					return;
+				}
+				const path = item.path;
+				const rel = pathUtil.relative(from, path);
+				const destPath = pathUtil.resolve(to, rel);
+				nodes.push({
+					path: path,
+					item: item.item,
+					dst: destPath,
+					name: item.name,
+					done: false
+				});
+
+			};
+
+			// a function called when the treeWalkerStream or visitor has been finished
+			const process = function () {
+				if (nodes.length) {
+					const item = nodes.shift();
+					visitor2(item.path, item.dst, visitorArgs, item).then(process);
+				}
+			};
 			treeWalkerStream(from, {
 				inspectOptions: {
 					mode: true,
 					symlinks: options ? options.flags & ECopyFlags.FOLLOW_SYMLINKS ? false : true : true
 				}
-			}).on('readable', function () { return visitor.apply(this, [from, to, visitorArgs]); })
+			}).on('readable', function () { return collector.apply(this, arguments); })
 				.on('error', reject)
 				.on('end', () => {
-					visitorArgs.allFilesDelivered = true;
-					if (visitorArgs.allFilesDelivered && visitorArgs.filesInProgress === 0) {
+					process();
+					// a case when nothing matched
+					if (nodes.length === 0 && visitorArgs.filesInProgress === 0) {
 						resolve();
 					}
 				});
-
 		}).catch(reject);
 	});
 };

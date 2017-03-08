@@ -255,12 +255,12 @@ declare module '@gbaumgart/fs/utils/tree_walker' {
 	/// <reference types="node" />
 	import { Readable } from 'stream';
 	import { IInspectOptions, INode } from '@gbaumgart/fs/interfaces';
-	export interface Options {
+	export interface IOptions {
 	    inspectOptions: IInspectOptions;
 	    maxLevelsDeep?: number;
 	}
-	export function sync(path: string, options: Options, callback: (path: string, item: INode) => void, currentLevel?: number): void;
-	export function stream(path: string, options: Options): Readable;
+	export function sync(path: string, options: IOptions, callback: (path: string, item: INode) => void, currentLevel?: number): void;
+	export function stream(path: string, options: IOptions): Readable;
 
 }
 declare module '@gbaumgart/fs/utils/matcher' {
@@ -298,10 +298,18 @@ declare module '@gbaumgart/fs/exists' {
 	export function async(path: string): Promise<boolean | string>;
 
 }
+declare module '@gbaumgart/fs/remove' {
+	export function validateInput(methodName: string, path: string): void;
+	export function sync(path: string): void;
+	export function async(path: string): Promise<null>;
+
+}
 declare module '@gbaumgart/fs/copy' {
-	import { ICopyOptions } from '@gbaumgart/fs/interfaces';
+	import { ICopyOptions, EResolveMode } from '@gbaumgart/fs/interfaces';
 	export function validateInput(methodName: string, from: string, to: string, options?: ICopyOptions): void;
 	export function sync(from: string, to: string, options?: ICopyOptions): void;
+	export function copySymlinkAsync(from: string, to: string): any;
+	export function resolveConflict(from: string, to: string, options: ICopyOptions, resolveMode: EResolveMode): boolean;
 	/**
 	 * Copy
 	 * @export
@@ -311,12 +319,6 @@ declare module '@gbaumgart/fs/copy' {
 	 * @returns
 	 */
 	export function async(from: string, to: string, options?: ICopyOptions): Promise<void>;
-
-}
-declare module '@gbaumgart/fs/remove' {
-	export function validateInput(methodName: string, path: string): void;
-	export function sync(path: string): void;
-	export function async(path: string): Promise<null>;
 
 }
 declare module '@gbaumgart/fs/move' {

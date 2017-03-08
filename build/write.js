@@ -61,9 +61,9 @@ exports.sync = sync;
 // ---------------------------------------------------------
 // ASYNC
 // ---------------------------------------------------------
-const promisedRename = Q.denodeify(fs.rename);
 const promisedWriteFile = Q.denodeify(fs.writeFile);
 const promisedMkdirp = Q.denodeify(mkdirp);
+const promisedAtomic = Q.denodeify(writeAtomicSync);
 function writeFileAsync(path, data, options) {
     return new Promise((resolve, reject) => {
         promisedWriteFile(path, data, options)
@@ -85,21 +85,10 @@ function writeFileAsync(path, data, options) {
     });
 }
 ;
-function writeAtomicAsync(path, data, options) {
-    return new Promise((resolve, reject) => {
-        // We are assuming there is file on given path, and we don't want
-        // to touch it until we are sure our data has been saved correctly,
-        // so write the data into temporary file...
-        writeFileAsync(path + newExt, data, options)
-            .then(() => promisedRename(path + newExt, path))
-            .then(resolve, reject);
-    });
-}
-;
 function async(path, data, options) {
     const opts = options || {};
     const processedData = toJson(data, opts.jsonIndent);
-    return (opts.atomic ? writeAtomicAsync : writeFileAsync)(path, processedData, { mode: opts.mode });
+    return (opts.atomic ? promisedAtomic : writeFileAsync)(path, processedData, { mode: opts.mode });
 }
 exports.async = async;
 ;

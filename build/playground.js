@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const jetpack_1 = require("./jetpack");
 const validate_1 = require("./utils/validate");
@@ -7,7 +15,8 @@ function testBig() {
     process.on('unhandledRejection', (reason) => {
         console.error('Unhandled rejection, reason: ', reason);
     });
-    jetpack_1.jetpack().copy('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
+    jetpack_1.jetpack().copyAsync('/mnt/anne/backups/eclipsew.tar', '/tmp/eclipsew.tar2', {
+        matching: ['/mnt/anne/backups/eclipsew.tar2'],
         overwrite: true,
         progress: (path, current, total, item) => {
             //console.log('copieing : ' + path + ' ' + item.size);
@@ -18,6 +27,8 @@ function testBig() {
             //console.log('copieing : ' + path + ' ' + item.size);
             console.log('write ' + current + ' from ' + total);
         }
+    }).then(function () {
+        console.log('done!');
     });
 }
 exports.testBig = testBig;
@@ -26,7 +37,7 @@ function testManyWithProgress() {
         console.error('Unhandled rejection, reason: ', reason);
     });
     jetpack_1.jetpack().remove('/tmp/fs_jetpack2');
-    jetpack_1.jetpack().copyAsync('./', '/tmp/fs_jetpack2', {
+    jetpack_1.jetpack().copyAsync('./src', '/tmp/fs_jetpack2', {
         overwrite: true,
         progress: (path, current, total, item) => {
             if (path.indexOf('.exe') !== -1) {
@@ -39,19 +50,46 @@ function testManyWithProgress() {
             //console.log('copieing : ' + path + ' ' + item.size);
             console.log('write ' + path + " : " + current + ' from ' + total);
         }
+    }).then(function () {
+        console.log('done');
     });
 }
 exports.testManyWithProgress = testManyWithProgress;
+function conflict(path, item, err) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log('conflict');
+        return new Promise((resolve, reject) => {
+            setTimeout(function () {
+                resolve({ overwrite: interfaces_1.EResolveMode.OVERWRITE, mode: interfaces_1.EResolve.THIS });
+            }, 500);
+        });
+    });
+}
+;
 function testCollisionDirectory() {
     process.on('unhandledRejection', (reason) => {
         console.error('Unhandled rejection, reason: ', reason);
     });
     const jp = jetpack_1.jetpack('./');
-    jp.copyAsync('./src/', './srcout', {
+    jetpack_1.jetpack().dir('./srcout');
+    let start = 500;
+    jp.copyAsync('./src/fs/utils/', './srcout', {
         matching: ['**/*.ts'],
         overwrite: false,
+        debug: false,
+        //flags: ECopyFlags.EMPTY,
         conflictCallback: (path, item, err) => {
+            //console.log('conflict ' + path);
             if (path.indexOf('write.ts') !== -1) {
+                let abort = false;
+                if (abort) {
+                    //console.log('abort !',new Error().stack);
+                    return new Promise((resolve, reject) => {
+                        setTimeout(function () {
+                            resolve({ overwrite: interfaces_1.EResolveMode.SKIP, mode: interfaces_1.EResolve.THIS });
+                        }, 5000);
+                    });
+                }
                 if (err === 'EACCES') {
                     return Promise.resolve({ overwrite: interfaces_1.EResolveMode.SKIP, mode: interfaces_1.EResolve.THIS });
                 }
@@ -59,11 +97,17 @@ function testCollisionDirectory() {
                     return Promise.resolve({ overwrite: interfaces_1.EResolveMode.THROW, mode: interfaces_1.EResolve.THIS });
                 }
             }
-            return Promise.resolve({ overwrite: interfaces_1.EResolveMode.OVERWRITE, mode: interfaces_1.EResolve.THIS });
+            //return Promise.resolve({ overwrite: EResolveMode.OVERWRITE, mode: EResolve.THIS });
+            //start += 100;
+            return new Promise((resolve, reject) => {
+                setTimeout(function () {
+                    resolve({ overwrite: interfaces_1.EResolveMode.OVERWRITE, mode: interfaces_1.EResolve.THIS });
+                }, start);
+            });
         },
         progress: (path, current, total, item) => {
             //console.log('copieing : ' + path + ' ' + item.size);
-            console.log('copy item ' + current + ' from ' + total);
+            //console.log('copy item ' + current + ' from ' + total);
             return true;
         }
         /*_writeProgress: (path: string, current: number, total: number) => {
@@ -169,4 +213,5 @@ function validateTest() {
     validate_1.validateArgument('foo(thing)', 'thing', 123, ['foo']);
 }
 exports.validateTest = validateTest;
+//testCollisionDirectory();
 //# sourceMappingURL=playground.js.map

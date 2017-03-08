@@ -22,7 +22,6 @@ export function sync(from: string, to: string): void {
 	try {
 		renameSync(from, to);
 	} catch (err) {
-
 		// not the same device, rename doesnt work here
 		if (err.code === EError.CROSS_DEVICE) {
 			try {

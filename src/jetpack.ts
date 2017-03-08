@@ -13,7 +13,7 @@ import * as inspect from './inspect';
 import * as inspectTree from './inspect_tree';
 import { sync as InspectSync } from './inspect_tree';
 import { Options as InspectTreeOptions } from './inspect_tree';
-import { sync as TreeWalkerSync, Options as TreeWalkerOptions } from './utils/tree_walker';
+import { sync as TreeWalkerSync, IOptions as TreeWalkerOptions } from './utils/tree_walker';
 import * as copy from './copy';
 import * as exists from './exists';
 import * as list from './list';

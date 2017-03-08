@@ -5,14 +5,14 @@ import { ENodeType, IInspectOptions, INode } from '../interfaces';
 import { sync as listSync, async as listASync } from '../list';
 
 
-export interface Options {
+export interface IOptions {
 	inspectOptions: IInspectOptions;
 	maxLevelsDeep?: number;
 }
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-export function sync(path: string, options: Options, callback: (path: string, item: INode) => void, currentLevel?: number) {
+export function sync(path: string, options: IOptions, callback: (path: string, item: INode) => void, currentLevel?: number) {
 	const item = inspectSync(path, options.inspectOptions);
 	if (options.maxLevelsDeep === undefined) {
 		options.maxLevelsDeep = Infinity;
@@ -36,7 +36,7 @@ export function sync(path: string, options: Options, callback: (path: string, it
 // STREAM
 // ---------------------------------------------------------
 
-export function stream(path: string, options: Options) {
+export function stream(path: string, options: IOptions) {
 	const rs = new Readable({ objectMode: true });
 	let nextTreeNode = {
 		path: path,

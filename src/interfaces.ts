@@ -10,12 +10,16 @@ export enum ENodeType {
 	BLOCK = <any> 'block'
 }
 
+/**
+ * Native errors.
+ * @todo : replace with errno.
+ */
 export let EError: any = {
 	NONE: 'None',
 	EXISTS: 'EEXIST',
 	PERMISSION: 'EACCES',
 	NOEXISTS: 'ENOENT',
-	CROSS_DEVICE : 'EXDEV'
+	CROSS_DEVICE: 'EXDEV'
 };
 
 /////////////////////////////////////////////////////////
@@ -38,6 +42,12 @@ export interface INode {
 	checksum?: string;
 }
 
+/**
+ * The options for "inspect".
+ *
+ * @export
+ * @interface IInspectOptions
+ */
 export interface IInspectOptions {
 	checksum?: string;
 	mode?: boolean;
@@ -47,8 +57,19 @@ export interface IInspectOptions {
 	size?: boolean;
 }
 
+/**
+ * The accepted types for write and read as union.
+ */
 export type ReadWriteDataType = string | Buffer | Object;
 
+/**
+ * An extented version of Error to make typescript happy. This has been copied from
+ * the official Node typings.
+ *
+ * @export
+ * @class ErrnoException
+ * @extends {Error}
+ */
 export class ErrnoException extends Error {
 	errno?: number;
 	code?: string;
@@ -60,12 +81,50 @@ export class ErrnoException extends Error {
 //
 //  File operations : copy
 //
+/**
+ * Callback prototype signature when an item has been copied.
+ * This is used to abort the copy process when returning false.
+ *
+ * @param {string} path The path of the item.
+ * @param {number} current The current index of the item.
+ * @param {number} total The total of all items.
+ * @param {INode} [item] The node data for the item.
+ * @returns {boolean}
+ */
 export type ItemProgressCallback = (path: string, current: number, total: number, item?: INode) => boolean;
 
+/**
+ * Callback prototype signature when an item conflict occurs.
+ * It's async since the conflict might be resolved in an client application and hence
+ * we have to wait til the user decided.
+ *
+ * This is not being called if:
+ * - a previous callback returned with IConflictSettings#mode == ALWAYS
+ * - the options object already contains pre-defined conflict settings.
+ *
+ * @param {string} path The path of the item.
+ * @param {INode} item The node data.
+ * @param {string} err The native error code of the conflict (EEXIST,...)
+ * @returns {Promise<IConflictSettings>}
+ */
 export type ResolveConflictCallback = (path: string, item: INode, err: string) => Promise<IConflictSettings>;
 
+/**
+ * Callback prototype signature when a file with at least 5MB size is being copied.
+ *
+ * @param {string} path The path of the item.
+ * @param {number} current The current copied bytes.
+ * @param {number} total The total size in bytes.
+ * @returns {Promise<IConflictSettings>}
+ */
 export type WriteProgressCallback = (path: string, current: number, total: number) => void;
 
+/**
+ * The possible modes to resolve a conflict during copy and move.
+ *
+ * @export
+ * @enum {number}
+ */
 export enum EResolveMode {
 	SKIP = 0,
 	OVERWRITE,
@@ -157,28 +216,46 @@ export interface ICopyOptions {
 	 * @memberOf ICopyOptions
 	 */
 	throttel?: number;
-
 	/**
-	 * Print console messages.
+	 * Print some debug messages.
 	 *
 	 * @type {boolean}
 	 * @memberOf ICopyOptions
 	 */
 	debug?: boolean;
-
 	/**
-	 * The copy flags
+	 * The copy flags.
 	 *
 	 * @type {ECopyFlags}
 	 * @memberOf ICopyOptions
 	 */
 	flags?: ECopyFlags;
 }
+
+/**
+ * An enumeration to narrow a conflict resolve to a single item or for all following conflicts.
+ *
+ * @export
+ * @enum {number}
+ */
 export enum EResolve {
+	/**
+	 * Always will use the chose conflict settings for all following conflicts.
+	 */
 	ALWAYS,
+	/**
+	 * 'This' will use the conflict settings for a single conflict so the conflict callback will be triggered again for the next conflict.
+	 */
 	THIS
 }
-// conflict settings
+
+/**
+ * A composite conflict settings and it's scope. This is the result type
+ * for the conflict callback.
+ *
+ * @export
+ * @interface IConflictSettings
+ */
 export interface IConflictSettings {
 	overwrite: EResolveMode;
 	mode: EResolve;
@@ -187,6 +264,13 @@ export interface IConflictSettings {
 //
 //  File operations : write
 //
+
+/**
+ * fs/write options.
+ *
+ * @export
+ * @interface IWriteOptions
+ */
 export interface IWriteOptions {
 	atomic?: boolean;
 	jsonIndent?: number;

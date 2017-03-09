@@ -421,8 +421,6 @@ async function visitor(from: string, to: string, vars: any, item: { path: string
 			let overwriteMode = subResolveSettings.overwrite;
 			overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
 
-
-
 			if (overwriteMode === EResolveMode.ABORT) {
 				vars.abort = true;
 			}

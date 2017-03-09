@@ -12,6 +12,10 @@ var ENodeType;
     ENodeType[ENodeType["OTHER"] = 'other'] = "OTHER";
     ENodeType[ENodeType["BLOCK"] = 'block'] = "BLOCK";
 })(ENodeType = exports.ENodeType || (exports.ENodeType = {}));
+/**
+ * Native errors.
+ * @todo : replace with errno.
+ */
 exports.EError = {
     NONE: 'None',
     EXISTS: 'EEXIST',
@@ -19,9 +23,23 @@ exports.EError = {
     NOEXISTS: 'ENOENT',
     CROSS_DEVICE: 'EXDEV'
 };
+/**
+ * An extented version of Error to make typescript happy. This has been copied from
+ * the official Node typings.
+ *
+ * @export
+ * @class ErrnoException
+ * @extends {Error}
+ */
 class ErrnoException extends Error {
 }
 exports.ErrnoException = ErrnoException;
+/**
+ * The possible modes to resolve a conflict during copy and move.
+ *
+ * @export
+ * @enum {number}
+ */
 var EResolveMode;
 (function (EResolveMode) {
     EResolveMode[EResolveMode["SKIP"] = 0] = "SKIP";
@@ -53,9 +71,21 @@ var ECopyFlags;
      */
     ECopyFlags[ECopyFlags["FOLLOW_SYMLINKS"] = 8] = "FOLLOW_SYMLINKS";
 })(ECopyFlags = exports.ECopyFlags || (exports.ECopyFlags = {}));
+/**
+ * An enumeration to narrow a conflict resolve to a single item or for all following conflicts.
+ *
+ * @export
+ * @enum {number}
+ */
 var EResolve;
 (function (EResolve) {
+    /**
+     * Always will use the chose conflict settings for all following conflicts.
+     */
     EResolve[EResolve["ALWAYS"] = 0] = "ALWAYS";
+    /**
+     * 'This' will use the conflict settings for a single conflict so the conflict callback will be triggered again for the next conflict.
+     */
     EResolve[EResolve["THIS"] = 1] = "THIS";
 })(EResolve = exports.EResolve || (exports.EResolve = {}));
 //# sourceMappingURL=interfaces.js.map

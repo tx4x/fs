@@ -121,9 +121,31 @@
 					<div class="tsd-signature tsd-kind-icon">Item<wbr>Progress<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/4cee6c5/src/interfaces.ts#L63">interfaces.ts:63</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/c8bf9db/src/interfaces.ts#L94">interfaces.ts:94</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Callback prototype signature when an item has been copied.
+							This is used to abort the copy process when returning false.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>param</dt>
+							<dd><p>The path of the item.</p>
+							</dd>
+							<dt>param</dt>
+							<dd><p>The current index of the item.</p>
+							</dd>
+							<dt>param</dt>
+							<dd><p>The total of all items.</p>
+							</dd>
+							<dt>param</dt>
+							<dd><p>The node data for the item.</p>
+							</dd>
+							<dt>returns</dt>
+							<dd></dd>
+						</dl>
+					</div>
 					<div class="tsd-type-declaration">
 						<h4>Type declaration</h4>
 						<ul class="tsd-parameters">
@@ -161,9 +183,14 @@
 					<div class="tsd-signature tsd-kind-icon">Read<wbr>Write<wbr>Data<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/4cee6c5/src/interfaces.ts#L50">interfaces.ts:50</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/c8bf9db/src/interfaces.ts#L63">interfaces.ts:63</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The accepted types for write and read as union.</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
 					<a name="resolveconflictcallback" class="tsd-anchor"></a>
@@ -171,9 +198,34 @@
 					<div class="tsd-signature tsd-kind-icon">Resolve<wbr>Conflict<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/4cee6c5/src/interfaces.ts#L65">interfaces.ts:65</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/c8bf9db/src/interfaces.ts#L110">interfaces.ts:110</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Callback prototype signature when an item conflict occurs.
+								It&#39;s async since the conflict might be resolved in an client application and hence
+							we have to wait til the user decided.</p>
+						</div>
+						<p>This is not being called if:</p>
+						<ul>
+							<li>a previous callback returned with IConflictSettings#mode == ALWAYS</li>
+							<li>the options object already contains pre-defined conflict settings.</li>
+						</ul>
+						<dl class="tsd-comment-tags">
+							<dt>param</dt>
+							<dd><p>The path of the item.</p>
+							</dd>
+							<dt>param</dt>
+							<dd><p>The node data.</p>
+							</dd>
+							<dt>param</dt>
+							<dd><p>The native error code of the conflict (EEXIST,...)</p>
+							</dd>
+							<dt>returns</dt>
+							<dd></dd>
+						</dl>
+					</div>
 					<div class="tsd-type-declaration">
 						<h4>Type declaration</h4>
 						<ul class="tsd-parameters">
@@ -208,9 +260,27 @@
 					<div class="tsd-signature tsd-kind-icon">Write<wbr>Progress<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/4cee6c5/src/interfaces.ts#L67">interfaces.ts:67</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/c8bf9db/src/interfaces.ts#L120">interfaces.ts:120</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Callback prototype signature when a file with at least 5MB size is being copied.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>param</dt>
+							<dd><p>The path of the item.</p>
+							</dd>
+							<dt>param</dt>
+							<dd><p>The current copied bytes.</p>
+							</dd>
+							<dt>param</dt>
+							<dd><p>The total size in bytes.</p>
+							</dd>
+							<dt>returns</dt>
+							<dd></dd>
+						</dl>
+					</div>
 					<div class="tsd-type-declaration">
 						<h4>Type declaration</h4>
 						<ul class="tsd-parameters">
@@ -248,16 +318,26 @@
 					<div class="tsd-signature tsd-kind-icon">EError<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/4cee6c5/src/interfaces.ts#L13">interfaces.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/c8bf9db/src/interfaces.ts#L17">interfaces.ts:17</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Native errors.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>todo</dt>
+							<dd><p>: replace with errno.</p>
+							</dd>
+						</dl>
+					</div>
 					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-external">
 						<a name="eerror.cross_device" class="tsd-anchor"></a>
 						<h3>CROSS_<wbr>DEVICE</h3>
 						<div class="tsd-signature tsd-kind-icon">CROSS_<wbr>DEVICE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;EXDEV&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/xblox/fs/blob/4cee6c5/src/interfaces.ts#L18">interfaces.ts:18</a></li>
+								<li>Defined in <a href="https://github.com/xblox/fs/blob/c8bf9db/src/interfaces.ts#L22">interfaces.ts:22</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -267,7 +347,7 @@
 						<div class="tsd-signature tsd-kind-icon">EXISTS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;EEXIST&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/xblox/fs/blob/4cee6c5/src/interfaces.ts#L15">interfaces.ts:15</a></li>
+								<li>Defined in <a href="https://github.com/xblox/fs/blob/c8bf9db/src/interfaces.ts#L19">interfaces.ts:19</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -277,7 +357,7 @@
 						<div class="tsd-signature tsd-kind-icon">NOEXISTS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;ENOENT&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/xblox/fs/blob/4cee6c5/src/interfaces.ts#L17">interfaces.ts:17</a></li>
+								<li>Defined in <a href="https://github.com/xblox/fs/blob/c8bf9db/src/interfaces.ts#L21">interfaces.ts:21</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -287,7 +367,7 @@
 						<div class="tsd-signature tsd-kind-icon">NONE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;None&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/xblox/fs/blob/4cee6c5/src/interfaces.ts#L14">interfaces.ts:14</a></li>
+								<li>Defined in <a href="https://github.com/xblox/fs/blob/c8bf9db/src/interfaces.ts#L18">interfaces.ts:18</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -297,7 +377,7 @@
 						<div class="tsd-signature tsd-kind-icon">PERMISSION<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;EACCES&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/xblox/fs/blob/4cee6c5/src/interfaces.ts#L16">interfaces.ts:16</a></li>
+								<li>Defined in <a href="https://github.com/xblox/fs/blob/c8bf9db/src/interfaces.ts#L20">interfaces.ts:20</a></li>
 							</ul>
 						</aside>
 					</section>

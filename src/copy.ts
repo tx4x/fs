@@ -504,7 +504,9 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 					overwrite: EResolveMode.OVERWRITE
 				};
 			} else {
-				options.conflictSettings = resolver;
+				if (resolver.mode === EResolve.ALWAYS) {
+					options.conflictSettings = resolver;
+				}
 			}
 			let overwriteMode = resolver.overwrite;
 

@@ -521,7 +521,9 @@ function async(from, to, options) {
                 };
             }
             else {
-                options.conflictSettings = resolver;
+                if (resolver.mode === interfaces_3.EResolve.ALWAYS) {
+                    options.conflictSettings = resolver;
+                }
             }
             let overwriteMode = resolver.overwrite;
             // call onConflict to eventually throw an error

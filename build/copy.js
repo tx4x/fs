@@ -378,6 +378,9 @@ function resolveConflict(from, to, options, resolveMode) {
         return false;
     }
     else if (resolveMode === interfaces_3.EResolveMode.IF_NEWER) {
+        if (src.type === interfaces_1.ENodeType.DIR && dst.type === interfaces_1.ENodeType.DIR) {
+            return true;
+        }
         if (dst.modifyTime.getTime() > src.modifyTime.getTime()) {
             return false;
         }
@@ -385,6 +388,7 @@ function resolveConflict(from, to, options, resolveMode) {
     else if (resolveMode === interfaces_3.EResolveMode.IF_SIZE_DIFFERS) {
         // @TODO : not implemented: copy EInspectItemType.DIR with ECopyResolveMode.IF_SIZE_DIFFERS
         if (src.type === interfaces_1.ENodeType.DIR && dst.type === interfaces_1.ENodeType.DIR) {
+            return true;
         }
         else if (src.type === interfaces_1.ENodeType.FILE && dst.type === interfaces_1.ENodeType.FILE) {
             if (src.size === dst.size) {
@@ -579,7 +583,7 @@ function async(from, to, options) {
                 .on('error', reject)
                 .on('end', () => {
                 process();
-                // a case when nothing matched
+                // a case when nothing matched (single file copy)
                 if (nodes.length === 0 && visitorArgs.filesInProgress === 0) {
                     resolve();
                 }

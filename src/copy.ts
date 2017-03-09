@@ -364,12 +364,16 @@ export function resolveConflict(from: string, to: string, options: ICopyOptions,
 	if (resolveMode === EResolveMode.SKIP) {
 		return false;
 	} else if (resolveMode === EResolveMode.IF_NEWER) {
+		if (src.type === ENodeType.DIR && dst.type === ENodeType.DIR) {
+			return true;
+		}
 		if (dst.modifyTime.getTime() > src.modifyTime.getTime()) {
 			return false;
 		}
 	} else if (resolveMode === EResolveMode.IF_SIZE_DIFFERS) {
 		// @TODO : not implemented: copy EInspectItemType.DIR with ECopyResolveMode.IF_SIZE_DIFFERS
 		if (src.type === ENodeType.DIR && dst.type === ENodeType.DIR) {
+			return true;
 		} else if (src.type === ENodeType.FILE && dst.type === ENodeType.FILE) {
 			if (src.size === dst.size) {
 				return false;
@@ -416,6 +420,8 @@ async function visitor(from: string, to: string, vars: any, item: { path: string
 			}
 			let overwriteMode = subResolveSettings.overwrite;
 			overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
+
+
 
 			if (overwriteMode === EResolveMode.ABORT) {
 				vars.abort = true;
@@ -568,7 +574,7 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 				.on('error', reject)
 				.on('end', () => {
 					process();
-					// a case when nothing matched
+					// a case when nothing matched (single file copy)
 					if (nodes.length === 0 && visitorArgs.filesInProgress === 0) {
 						resolve();
 					}

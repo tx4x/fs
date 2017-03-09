@@ -177,8 +177,7 @@ function sync(from, to, options) {
             nodes.push({
                 path: path,
                 item: inspectData,
-                dst: destPath,
-                done: false
+                dst: destPath
             });
             sizeTotal += inspectData.size;
         }
@@ -405,6 +404,18 @@ function resolveConflict(from, to, options, resolveMode) {
 }
 exports.resolveConflict = resolveConflict;
 ;
+function isDone(nodes) {
+    let done = true;
+    nodes.forEach((element) => {
+        if (element.status !== interfaces_1.ENodeCopyStatus.DONE) {
+            done = false;
+        }
+    });
+    return done;
+}
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled rejection, reason: ', reason);
+});
 /**
  * A callback for treeWalkerStream. This is called when a node has been found.
  *
@@ -424,12 +435,24 @@ function visitor(from, to, vars, item) {
         }
         rel = pathUtil.relative(from, item.path);
         destPath = pathUtil.resolve(to, rel);
-        if (!options.allowedToCopy(item.path)) {
+        item.status = interfaces_1.ENodeCopyStatus.PROCESSING;
+        const done = () => {
+            item.status = interfaces_1.ENodeCopyStatus.DONE;
+            if (isDone(vars.nodes)) {
+                return vars.resolve();
+            }
+        };
+        if (isDone(vars.nodes)) {
+            return vars.resolve();
+        }
+        if (options && !options.allowedToCopy(item.path)) {
+            done();
             return;
         }
         vars.filesInProgress += 1;
         // our main function after sanity checks
         const checked = (subResolveSettings) => {
+            item.status = interfaces_1.ENodeCopyStatus.CHECKED;
             if (subResolveSettings) {
                 // if the first resolve callback returned an individual resolve settings "THIS",
                 // ask the user again with the same item
@@ -446,29 +469,25 @@ function visitor(from, to, vars, item) {
                     return;
                 }
                 if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
-                    vars.filesInProgress -= 1;
-                    if (vars.filesInProgress === 0) {
-                        vars.resolve();
-                    }
+                    done();
                     return;
                 }
             }
+            item.status = interfaces_1.ENodeCopyStatus.COPYING;
             copyItemAsync(item.path, item.item, destPath, options).then(() => {
                 vars.filesInProgress -= 1;
                 if (options.progress) {
-                    if (options.progress(item.path, vars.filesInProgress, -1, item.item) === false) {
+                    if (options.progress(item.path, vars.filesInProgress, vars.filesInProgress, item.item) === false) {
                         vars.abort = true;
                         return vars.resolve();
                     }
                 }
-                if (vars.filesInProgress === 0) {
-                    vars.resolve();
-                }
+                done();
             }).catch((err) => {
                 if (options && options.conflictCallback) {
                     if (err.code === interfaces_2.EError.PERMISSION || err.code === interfaces_2.EError.NOEXISTS) {
                         options.conflictCallback(item.path, inspect_1.createItem(destPath), err.code).then((errorResolveSettings) => {
-                            // the user has set the error resolver to always, so we use the last one
+                            // the user has set the conflict resolver to always, so we use the last one
                             if (vars.onCopyErrorResolveSettings) {
                                 errorResolveSettings = vars.onCopyErrorResolveSettings;
                             }
@@ -502,8 +521,16 @@ function visitor(from, to, vars, item) {
         return checkAsync(item.path, destPath, options).then(checked);
     });
 }
+function next(nodes) {
+    for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].status === interfaces_1.ENodeCopyStatus.COLLECTED) {
+            return nodes[i];
+        }
+    }
+    return null;
+}
 /**
- * Final async copy function
+ * Final async copy function.
  * @export
  * @param {string} from
  * @param {string} to
@@ -564,15 +591,20 @@ function async(from, to, options) {
                     path: item.path,
                     item: item.item,
                     dst: pathUtil.resolve(to, pathUtil.relative(from, item.path)),
-                    name: item.name,
-                    done: false
+                    status: interfaces_1.ENodeCopyStatus.COLLECTED
                 });
             };
             // a function called when the treeWalkerStream or visitor has been finished
             const process = function () {
+                visitorArgs.nodes = nodes;
+                if (isDone(nodes)) {
+                    return resolve();
+                }
                 if (nodes.length) {
-                    const item = nodes.shift();
-                    visitor(item.path, item.dst, visitorArgs, item).then(process);
+                    const item = next(nodes);
+                    if (item) {
+                        visitor(item.path, item.dst, visitorArgs, item).then(process);
+                    }
                 }
             };
             // start digging

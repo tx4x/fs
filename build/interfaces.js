@@ -34,6 +34,16 @@ exports.EError = {
 class ErrnoException extends Error {
 }
 exports.ErrnoException = ErrnoException;
+var ENodeCopyStatus;
+(function (ENodeCopyStatus) {
+    ENodeCopyStatus[ENodeCopyStatus["COLLECTED"] = 0] = "COLLECTED";
+    ENodeCopyStatus[ENodeCopyStatus["CHECKED"] = 1] = "CHECKED";
+    ENodeCopyStatus[ENodeCopyStatus["COPYING"] = 2] = "COPYING";
+    ENodeCopyStatus[ENodeCopyStatus["PROCESSING"] = 3] = "PROCESSING";
+    ENodeCopyStatus[ENodeCopyStatus["ASKING"] = 4] = "ASKING";
+    ENodeCopyStatus[ENodeCopyStatus["ANSWERED"] = 5] = "ANSWERED";
+    ENodeCopyStatus[ENodeCopyStatus["DONE"] = 6] = "DONE";
+})(ENodeCopyStatus = exports.ENodeCopyStatus || (exports.ENodeCopyStatus = {}));
 /**
  * The possible modes to resolve a conflict during copy and move.
  *

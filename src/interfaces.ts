@@ -3,11 +3,11 @@
 //  Enums
 //
 export enum ENodeType {
-	FILE = <any> 'file',
-	DIR = <any> 'dir',
-	SYMLINK = <any> 'symlink',
-	OTHER = <any> 'other',
-	BLOCK = <any> 'block'
+	FILE = <any>'file',
+	DIR = <any>'dir',
+	SYMLINK = <any>'symlink',
+	OTHER = <any>'other',
+	BLOCK = <any>'block'
 }
 
 /**
@@ -119,6 +119,15 @@ export type ResolveConflictCallback = (path: string, item: INode, err: string) =
  */
 export type WriteProgressCallback = (path: string, current: number, total: number) => void;
 
+export enum ENodeCopyStatus {
+	COLLECTED,
+	CHECKED,
+	COPYING,
+	PROCESSING,
+	ASKING,
+	ANSWERED,
+	DONE
+}
 /**
  * The possible modes to resolve a conflict during copy and move.
  *

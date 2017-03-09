@@ -79,6 +79,7 @@ describe('copy', function () {
       preparations();
       jetpack.copyAsync('dir', 'copied/dir')
       .then(function () {
+        console.log('0----');
         expectations();
         done();
       });

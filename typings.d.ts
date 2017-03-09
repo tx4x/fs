@@ -108,6 +108,15 @@ declare module '@gbaumgart/fs/interfaces' {
 	 * @returns {Promise<IConflictSettings>}
 	 */
 	export type WriteProgressCallback = (path: string, current: number, total: number) => void;
+	export enum ENodeCopyStatus {
+	    COLLECTED = 0,
+	    CHECKED = 1,
+	    COPYING = 2,
+	    PROCESSING = 3,
+	    ASKING = 4,
+	    ANSWERED = 5,
+	    DONE = 6,
+	}
 	/**
 	 * The possible modes to resolve a conflict during copy and move.
 	 *
@@ -414,7 +423,7 @@ declare module '@gbaumgart/fs/copy' {
 	export function copySymlinkAsync(from: string, to: string): Promise<string>;
 	export function resolveConflict(from: string, to: string, options: ICopyOptions, resolveMode: EResolveMode): boolean;
 	/**
-	 * Final async copy function
+	 * Final async copy function.
 	 * @export
 	 * @param {string} from
 	 * @param {string} to

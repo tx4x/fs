@@ -37,7 +37,7 @@
   },
   "scripts": {
     "test": "mocha --full-trace mocha \"spec/**/*.spec.js\"",
-    "testcp": "mocha \"spec/write_atomic.spec.js\"",
+    "testcp": "mocha \"spec/copy.spec.js\"",
     "test-with-coverage": "istanbul cover node_modules/.bin/_mocha -- 'spec/**/*.spec.js'",
     "lint": "tslint --project=./tsconfig.json",
     "dev": "nodemon -w src -x ts-node src/playground.ts",

@@ -10,12 +10,13 @@ import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree
 import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync } from './write';
 import { ErrDestinationExists, ErrDoesntExists } from './errors';
-import { INode, ENodeType, IWriteOptions, ECopyFlags } from './interfaces';
+import { INode, ENodeType, IWriteOptions, ECopyFlags, ENodeCopyStatus } from './interfaces';
 import { EError, ErrnoException } from './interfaces';
 import { createItem } from './inspect';
 import { sync as rmSync } from './remove';
 import { ICopyOptions, EResolveMode, IConflictSettings, EResolve } from './interfaces';
 import { promisify } from './promisify';
+
 
 const promisedSymlink = promisify<string, string | Buffer, string, Function>(fs.symlink);
 const promisedReadlink = promisify(fs.readlink);
@@ -30,8 +31,7 @@ interface ICopyTask {
 	path: string;
 	item: INode;
 	dst: string;
-	done: boolean;
-	name?: string;
+	status?: ENodeCopyStatus;
 }
 
 export function validateInput(methodName: string, from: string, to: string, options?: ICopyOptions): void {
@@ -170,8 +170,7 @@ export function sync(from: string, to: string, options?: ICopyOptions): void {
 			nodes.push({
 				path: path,
 				item: inspectData,
-				dst: destPath,
-				done: false
+				dst: destPath
 			});
 			sizeTotal += inspectData.size;
 		}
@@ -386,6 +385,18 @@ export function resolveConflict(from: string, to: string, options: ICopyOptions,
 	}
 };
 
+function isDone(nodes: ICopyTask[]) {
+	let done = true;
+	nodes.forEach((element: ICopyTask) => {
+		if (element.status !== ENodeCopyStatus.DONE) {
+			done = false;
+		}
+	});
+	return done;
+}
+process.on('unhandledRejection', (reason: string) => {
+	console.error('Unhandled rejection, reason: ', reason);
+});
 /**
  * A callback for treeWalkerStream. This is called when a node has been found.
  *
@@ -395,7 +406,7 @@ export function resolveConflict(from: string, to: string, options: ICopyOptions,
  * @param {{ path: string, item: INode }} item
  * @returns {Promise<void>}
  */
-async function visitor(from: string, to: string, vars: any, item: { path: string, item: INode }): Promise<void> {
+async function visitor(from: string, to: string, vars: any, item: ICopyTask): Promise<void> {
 	const options = vars.options;
 	let rel: string;
 	let destPath: string;
@@ -404,13 +415,27 @@ async function visitor(from: string, to: string, vars: any, item: { path: string
 	}
 	rel = pathUtil.relative(from, item.path);
 	destPath = pathUtil.resolve(to, rel);
-	if (!options.allowedToCopy(item.path)) {
+
+	item.status = ENodeCopyStatus.PROCESSING;
+	const done = () => {
+		item.status = ENodeCopyStatus.DONE;
+		if (isDone(vars.nodes)) {
+			return vars.resolve();
+		}
+	};
+
+	if (isDone(vars.nodes)) {
+		return vars.resolve();
+	}
+
+	if (options && !options.allowedToCopy(item.path)) {
+		done();
 		return;
 	}
 	vars.filesInProgress += 1;
-
 	// our main function after sanity checks
 	const checked = (subResolveSettings: IConflictSettings) => {
+		item.status = ENodeCopyStatus.CHECKED;
 		if (subResolveSettings) {
 			// if the first resolve callback returned an individual resolve settings "THIS",
 			// ask the user again with the same item
@@ -429,29 +454,26 @@ async function visitor(from: string, to: string, vars: any, item: { path: string
 			}
 
 			if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
-				vars.filesInProgress -= 1;
-				if (vars.filesInProgress === 0) {
-					vars.resolve();
-				}
+				done();
 				return;
 			}
 		}
+		item.status = ENodeCopyStatus.COPYING;
 		copyItemAsync(item.path, item.item, destPath, options).then(() => {
 			vars.filesInProgress -= 1;
 			if (options.progress) {
-				if (options.progress(item.path, vars.filesInProgress, -1, item.item) === false) {
+				if (options.progress(item.path, vars.filesInProgress, vars.filesInProgress, item.item) === false) {
 					vars.abort = true;
 					return vars.resolve();
 				}
 			}
-			if (vars.filesInProgress === 0) {
-				vars.resolve();
-			}
+			done();
 		}).catch((err: ErrnoException) => {
 			if (options && options.conflictCallback) {
 				if (err.code === EError.PERMISSION || err.code === EError.NOEXISTS) {
 					options.conflictCallback(item.path, createItem(destPath), err.code).then((errorResolveSettings: IConflictSettings) => {
-						// the user has set the error resolver to always, so we use the last one
+
+						// the user has set the conflict resolver to always, so we use the last one
 						if (vars.onCopyErrorResolveSettings) {
 							errorResolveSettings = vars.onCopyErrorResolveSettings;
 						}
@@ -486,8 +508,16 @@ async function visitor(from: string, to: string, vars: any, item: { path: string
 	};
 	return checkAsync(item.path, destPath, options).then(checked);
 }
+function next(nodes: ICopyTask[]): ICopyTask {
+	for (let i = 0; i < nodes.length; i++) {
+		if (nodes[i].status === ENodeCopyStatus.COLLECTED) {
+			return nodes[i];
+		}
+	}
+	return null;
+}
 /**
- * Final async copy function
+ * Final async copy function.
  * @export
  * @param {string} from
  * @param {string} to
@@ -550,17 +580,22 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 					path: item.path,
 					item: item.item,
 					dst: pathUtil.resolve(to, pathUtil.relative(from, item.path)),
-					name: item.name,
-					done: false
+					status: ENodeCopyStatus.COLLECTED
 				});
 
 			};
 
 			// a function called when the treeWalkerStream or visitor has been finished
 			const process = function () {
+				visitorArgs.nodes = nodes;
+				if (isDone(nodes)) {
+					return resolve();
+				}
 				if (nodes.length) {
-					const item = nodes.shift();
-					visitor(item.path, item.dst, visitorArgs, item).then(process);
+					const item = next(nodes);
+					if (item) {
+						visitor(item.path, item.dst, visitorArgs, item).then(process);
+					}
 				}
 			};
 

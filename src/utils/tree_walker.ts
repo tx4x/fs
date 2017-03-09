@@ -8,6 +8,7 @@ import { sync as listSync, async as listASync } from '../list';
 export interface IOptions {
 	inspectOptions: IInspectOptions;
 	maxLevelsDeep?: number;
+	user?: any;
 }
 // ---------------------------------------------------------
 // SYNC

@@ -15,12 +15,12 @@ const mode_1 = require("./utils/mode");
 const validate_1 = require("./utils/validate");
 const errors_1 = require("./errors");
 const interfaces_1 = require("./interfaces");
-const Q = require('q');
-const mkdirp = require('mkdirp');
-exports.validateInput = function (methodName, path, criteria) {
+const promisify_1 = require("./promisify");
+const mkdirp = require("mkdirp");
+exports.validateInput = function (methodName, path, options) {
     let methodSignature = methodName + '(path, [criteria])';
     validate_1.validateArgument(methodSignature, 'path', path, ['string']);
-    validate_1.validateOptions(methodSignature, 'criteria', criteria, {
+    validate_1.validateOptions(methodSignature, 'criteria', options, {
         empty: ['boolean'],
         mode: ['string', 'number']
     });
@@ -55,7 +55,7 @@ const dirStatsSync = (path) => {
     return stat;
 };
 function mkdirSync(path, criteria) {
-    mkdirp.sync(path, { mode: criteria.mode });
+    mkdirp.sync(path, { mode: criteria.mode, fs: null });
 }
 ;
 function checkDirSync(path, stat, options) {
@@ -94,11 +94,11 @@ exports.sync = sync;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-const promisedStat = Q.denodeify(fs_1.stat);
-const promisedChmod = Q.denodeify(fs_1.chmod);
-const promisedReaddir = Q.denodeify(fs_1.readdir);
-const promisedRimraf = Q.denodeify(rimraf);
-const promisedMkdirp = Q.denodeify(mkdirp);
+const promisedStat = promisify_1.promisify(fs_1.stat);
+const promisedChmod = promisify_1.promisify(fs_1.chmod);
+const promisedReaddir = promisify_1.promisify(fs_1.readdir);
+const promisedRimraf = promisify_1.promisify(rimraf);
+const promisedMkdirp = promisify_1.promisify(mkdirp);
 function dirStatAsync(path) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {

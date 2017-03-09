@@ -233,48 +233,6 @@ const checkAsync = (from, to, opts) => {
         }
     });
 };
-const checkAsync2 = (from, to, opts) => {
-    const srcPath = exists_1.sync(from);
-    if (!srcPath) {
-        throw errors_1.ErrDoesntExists(from);
-    }
-    const destPathExists = exists_1.sync(to);
-    if (destPathExists) {
-        if (opts.conflictSettings) {
-            return Promise.resolve(opts.conflictSettings);
-        }
-        if (opts.conflictCallback) {
-            console.log('ask');
-            return opts.conflictCallback(to, inspect_1.createItem(to), interfaces_2.EError.EXISTS);
-        }
-        if (!opts.overwrite) {
-            throw errors_1.ErrDestinationExists(to);
-        }
-    }
-    /*
-        return existsASync(from)
-            .then(srcPathExists => {
-                if (!srcPathExists) {
-                    throw ErrDoesntExists(from);
-                } else {
-                    return existsASync(to);
-                }
-            })
-            .then(destPathExists => {
-                if (destPathExists) {
-                    if (opts.conflictSettings) {
-                        return Promise.resolve(opts.conflictSettings);
-                    }
-                    if (opts.conflictCallback) {
-                        return opts.conflictCallback(to, createItem(to), EError.EXISTS);
-                    }
-                    if (!opts.overwrite) {
-                        throw ErrDestinationExists(to);
-                    }
-                }
-            });
-            */
-};
 const copyFileAsync = (from, to, mode, options, retriedAttempt) => {
     return new Promise((resolve, reject) => {
         const readStream = fs.createReadStream(from);
@@ -444,7 +402,16 @@ function resolveConflict(from, to, options, resolveMode) {
 }
 exports.resolveConflict = resolveConflict;
 ;
-function visitor2(from, to, vars, item) {
+/**
+ * A callback for treeWalkerStream. This is called when a node has been found.
+ *
+ * @param {string} from
+ * @param {string} to
+ * @param {*} vars
+ * @param {{ path: string, item: INode }} item
+ * @returns {Promise<void>}
+ */
+function visitor(from, to, vars, item) {
     return __awaiter(this, void 0, void 0, function* () {
         const options = vars.options;
         let rel;
@@ -532,104 +499,8 @@ function visitor2(from, to, vars, item) {
         return checkAsync(item.path, destPath, options).then(checked);
     });
 }
-function visitor(from, to, vars) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise((resolve, reject) => {
-            const options = vars.options;
-            const stream = this;
-            const item = stream.read();
-            let rel;
-            let destPath;
-            if (!item) {
-                return;
-            }
-            rel = pathUtil.relative(from, item.path);
-            destPath = pathUtil.resolve(to, rel);
-            if (!options.allowedToCopy(item.path)) {
-                return;
-            }
-            vars.filesInProgress += 1;
-            // our main function after sanity checks
-            const checked = (subResolveSettings) => {
-                console.log('checked : ' + item.path, subResolveSettings);
-                //let w = item.path.indexOf('write.ts') !== -1;
-                //if (item.path.indexOf('write.ts') !== -1) {
-                //console.log('write', new Error().stack);
-                //}
-                // if the first resolve callback returned an individual resolve settings "THIS",
-                // ask the user again with the same item
-                let proceed = vars.resolveSettings.mode === interfaces_3.EResolve.ALWAYS;
-                if (subResolveSettings) {
-                    if (!proceed) {
-                        let overwriteMode = subResolveSettings.overwrite;
-                        overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
-                        if (overwriteMode === interfaces_3.EResolveMode.ABORT) {
-                            vars.abort = true;
-                        }
-                        if (vars.abort) {
-                            return;
-                        }
-                        if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
-                            vars.filesInProgress -= 1;
-                            if (vars.filesInProgress === 0) {
-                                vars.resolve();
-                            }
-                            return;
-                        }
-                    }
-                }
-                copyItemAsync(item.path, item.item, destPath, options).then(() => {
-                    vars.filesInProgress -= 1;
-                    if (options.progress) {
-                        if (options.progress(item.path, vars.filesInProgress, -1, item.item) === false) {
-                            vars.abort = true;
-                            return vars.resolve();
-                        }
-                    }
-                    if (vars.allFilesDelivered && vars.filesInProgress === 0) {
-                        vars.resolve();
-                    }
-                }).catch((err) => {
-                    if (options && options.conflictCallback) {
-                        if (err.code === interfaces_2.EError.PERMISSION || err.code === interfaces_2.EError.NOEXISTS) {
-                            options.conflictCallback(item.path, inspect_1.createItem(destPath), err.code).then((errorResolveSettings) => {
-                                // the user has set the error resolver to always, so we use the last one
-                                if (vars.onCopyErrorResolveSettings) {
-                                    errorResolveSettings = vars.onCopyErrorResolveSettings;
-                                }
-                                // user said use this settings always, we track and use this last setting from now on
-                                if (errorResolveSettings.mode === interfaces_3.EResolve.ALWAYS && !vars.onCopyErrorResolveSettings) {
-                                    vars.onCopyErrorResolveSettings = errorResolveSettings;
-                                }
-                                if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.ABORT) {
-                                    vars.abort = true;
-                                    return vars.resolve();
-                                }
-                                if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.THROW) {
-                                    vars.abort = true;
-                                    return vars.reject(err);
-                                }
-                                if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.SKIP) {
-                                    vars.filesInProgress -= 1;
-                                }
-                                // user error, should never happen, unintended
-                                if (errorResolveSettings.overwrite === interfaces_3.EResolveMode.IF_NEWER ||
-                                    errorResolveSettings.overwrite === interfaces_3.EResolveMode.IF_SIZE_DIFFERS ||
-                                    errorResolveSettings.overwrite === interfaces_3.EResolveMode.OVERWRITE) {
-                                    vars.reject(new interfaces_2.ErrnoException('settings make no sense : errorResolveSettings.overwrite = ' + errorResolveSettings.overwrite));
-                                }
-                            });
-                        }
-                    }
-                    vars.reject(err);
-                });
-            };
-            checkAsync(item.path, destPath, options).then(checked);
-        });
-    });
-}
 /**
- * Copy
+ * Final async copy function
  * @export
  * @param {string} from
  * @param {string} to
@@ -671,19 +542,18 @@ function async(from, to, options) {
             let nodes = [];
             // This function is being called each time when the treeWalkerStream got an item!
             // Now instead of calling the 'vistitor', we only collect the item.
+            // The reason why we collect and then process each serial is because the
+            // conflictCallback needs to be excecuted one by one
             const collector = function () {
                 const stream = this;
                 const item = stream.read();
                 if (!item) {
                     return;
                 }
-                const path = item.path;
-                const rel = pathUtil.relative(from, path);
-                const destPath = pathUtil.resolve(to, rel);
                 nodes.push({
-                    path: path,
+                    path: item.path,
                     item: item.item,
-                    dst: destPath,
+                    dst: pathUtil.resolve(to, pathUtil.relative(from, item.path)),
                     name: item.name,
                     done: false
                 });
@@ -692,9 +562,10 @@ function async(from, to, options) {
             const process = function () {
                 if (nodes.length) {
                     const item = nodes.shift();
-                    visitor2(item.path, item.dst, visitorArgs, item).then(process);
+                    visitor(item.path, item.dst, visitorArgs, item).then(process);
                 }
             };
+            // start digging
             tree_walker_1.stream(from, {
                 inspectOptions: {
                     mode: true,

@@ -24,14 +24,14 @@ const interfaces_2 = require("./interfaces");
 const inspect_1 = require("./inspect");
 const remove_1 = require("./remove");
 const interfaces_3 = require("./interfaces");
-const Q = require('q');
-const promisedSymlink = Q.denodeify(fs.symlink);
-const promisedReadlink = Q.denodeify(fs.readlink);
-const promisedUnlink = Q.denodeify(fs.unlink);
-const promisedMkdirp = Q.denodeify(mkdirp);
+const promisify_1 = require("./promisify");
+const promisedSymlink = promisify_1.promisify(fs.symlink);
+const promisedReadlink = promisify_1.promisify(fs.readlink);
+const promisedUnlink = promisify_1.promisify(fs.unlink);
+const promisedMkdirp = promisify_1.promisify(mkdirp);
 const progress = require('progress-stream');
 const throttle = require('throttle');
-const USE_PROGRESS_THRESHOLD = 1048576 * 5; // minimum file size threshold to use write progress = 5MB
+const CPROGRESS_THRESHOLD = 1048576 * 5; // minimum file size threshold to use write progress = 5MB
 function validateInput(methodName, from, to, options) {
     const methodSignature = methodName + '(from, to, [options])';
     validate_1.validateArgument(methodSignature, 'from', from, ['string']);
@@ -243,9 +243,9 @@ const copyFileAsync = (from, to, mode, options, retriedAttempt) => {
             // Force read stream to close, since write stream errored
             // read stream serves us no purpose.
             readStream.resume();
-            if (err.code === 'ENOENT' && retriedAttempt === undefined) {
+            if (err.code === interfaces_2.EError.NOEXISTS && retriedAttempt === undefined) {
                 // Some parent directory doesn't exits. Create it and retry.
-                promisedMkdirp(toDirPath).then(() => {
+                promisedMkdirp(toDirPath, null).then(() => {
                     // Make retry attempt only once to prevent vicious infinite loop
                     // (when for some obscure reason I/O will keep returning ENOENT error).
                     // Passing retriedAttempt = true.
@@ -283,7 +283,7 @@ const copyFileAsync = (from, to, mode, options, retriedAttempt) => {
         });
         const size = fs.statSync(from).size;
         let progressStream = null;
-        if (options && options.writeProgress && size > USE_PROGRESS_THRESHOLD) {
+        if (options && options.writeProgress && size > CPROGRESS_THRESHOLD) {
             progressStream = progress({
                 length: fs.statSync(from).size,
                 time: 100
@@ -318,14 +318,14 @@ function copySymlinkAsync(from, to) {
     return promisedReadlink(from)
         .then((symlinkPointsAt) => {
         return new Promise((resolve, reject) => {
-            promisedSymlink(symlinkPointsAt, to)
+            promisedSymlink(symlinkPointsAt, to, null)
                 .then(resolve)
                 .catch((err) => {
                 if (err.code === interfaces_2.EError.EXISTS) {
                     // There is already file/symlink with this name on destination location.
                     // Must erase it manually, otherwise system won't allow us to place symlink there.
                     promisedUnlink(to)
-                        .then(() => { return promisedSymlink(symlinkPointsAt, to); })
+                        .then(() => { return promisedSymlink(symlinkPointsAt, to, null); })
                         .then(resolve, reject);
                 }
                 else {
@@ -349,7 +349,7 @@ const copyItemAsync = (from, inspectData, to, options) => {
         return copySymlinkAsync(from, to);
     }
     // EInspectItemType.OTHER
-    return new Q();
+    return Promise.resolve();
 };
 // handle user side setting "THROW" and non enum values (null)
 const onConflict = (from, to, options, settings) => {

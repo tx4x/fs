@@ -1,8 +1,8 @@
 import * as  pathUtil from "path";
 import * as fs from 'fs';
 import { symlinkSync, readFileSync, createReadStream, createWriteStream } from 'fs';
-
 import * as mkdirp from 'mkdirp';
+
 import { sync as existsSync, async as existsASync } from './exists';
 import { create as matcher } from './utils/matcher';
 import { normalizeFileMode as fileMode } from './utils/mode';
@@ -15,14 +15,16 @@ import { EError, ErrnoException } from './interfaces';
 import { createItem } from './inspect';
 import { sync as rmSync } from './remove';
 import { ICopyOptions, EResolveMode, IConflictSettings, EResolve } from './interfaces';
-const Q = require('q');
-const promisedSymlink = Q.denodeify(fs.symlink);
-const promisedReadlink = Q.denodeify(fs.readlink);
-const promisedUnlink = Q.denodeify(fs.unlink);
-const promisedMkdirp = Q.denodeify(mkdirp);
+import { promisify } from './promisify';
+
+const promisedSymlink = promisify<string, string | Buffer, string, Function>(fs.symlink);
+const promisedReadlink = promisify(fs.readlink);
+const promisedUnlink = promisify(fs.unlink);
+const promisedMkdirp = promisify<string, any, Function>(mkdirp);
 const progress = require('progress-stream');
 const throttle = require('throttle');
-const USE_PROGRESS_THRESHOLD = 1048576 * 5; // minimum file size threshold to use write progress = 5MB
+
+const CPROGRESS_THRESHOLD = 1048576 * 5; // minimum file size threshold to use write progress = 5MB
 
 interface ICopyTask {
 	path: string;
@@ -102,7 +104,6 @@ async function copyFileSyncWithProgress(from: string, to: string, options?: ICop
 			speed = e.transferred / elapsed;
 			options.writeProgress(from, e.transferred, e.length);
 		});
-
 
 		const wr = createWriteStream(to);
 		wr.on("error", (err: Error) => done(err));
@@ -237,10 +238,9 @@ const copyFileAsync = (from: string, to: string, mode: any, options?: ICopyOptio
 			// Force read stream to close, since write stream errored
 			// read stream serves us no purpose.
 			readStream.resume();
-
-			if (err.code === 'ENOENT' && retriedAttempt === undefined) {
+			if (err.code === EError.NOEXISTS && retriedAttempt === undefined) {
 				// Some parent directory doesn't exits. Create it and retry.
-				promisedMkdirp(toDirPath).then(() => {
+				promisedMkdirp(toDirPath, null).then(() => {
 					// Make retry attempt only once to prevent vicious infinite loop
 					// (when for some obscure reason I/O will keep returning ENOENT error).
 					// Passing retriedAttempt = true.
@@ -274,7 +274,7 @@ const copyFileAsync = (from: string, to: string, mode: any, options?: ICopyOptio
 
 		const size = fs.statSync(from).size;
 		let progressStream = null;
-		if (options && options.writeProgress && size > USE_PROGRESS_THRESHOLD) {
+		if (options && options.writeProgress && size > CPROGRESS_THRESHOLD) {
 			progressStream = progress({
 				length: fs.statSync(from).size,
 				time: 100
@@ -307,7 +307,7 @@ export function copySymlinkAsync(from: string, to: string) {
 	return promisedReadlink(from)
 		.then((symlinkPointsAt: string) => {
 			return new Promise((resolve, reject) => {
-				promisedSymlink(symlinkPointsAt, to)
+				promisedSymlink(symlinkPointsAt, to, null)
 					.then(resolve)
 					.catch((err: ErrnoException) => {
 						if (err.code === EError.EXISTS) {
@@ -315,7 +315,7 @@ export function copySymlinkAsync(from: string, to: string) {
 							// Must erase it manually, otherwise system won't allow us to place symlink there.
 							promisedUnlink(to)
 								// Retry...
-								.then(() => { return promisedSymlink(symlinkPointsAt, to); })
+								.then(() => { return promisedSymlink(symlinkPointsAt, to, null); })
 								.then(resolve, reject);
 						} else {
 							reject(err);
@@ -325,7 +325,7 @@ export function copySymlinkAsync(from: string, to: string) {
 		});
 };
 
-const copyItemAsync = (from: string, inspectData: INode, to: string, options: ICopyOptions) => {
+const copyItemAsync = (from: string, inspectData: INode, to: string, options: ICopyOptions): Promise<any> => {
 	const mode = fileMode(inspectData.mode);
 	if (inspectData.type === ENodeType.DIR) {
 		return promisedMkdirp(to, { mode: mode });
@@ -335,7 +335,7 @@ const copyItemAsync = (from: string, inspectData: INode, to: string, options: IC
 		return copySymlinkAsync(from, to);
 	}
 	// EInspectItemType.OTHER
-	return new Q();
+	return Promise.resolve();
 };
 // handle user side setting "THROW" and non enum values (null)
 const onConflict = (from: string, to: string, options: ICopyOptions, settings: IConflictSettings): EResolveMode | undefined => {

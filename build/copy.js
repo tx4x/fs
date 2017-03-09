@@ -369,7 +369,6 @@ const onConflict = (from, to, options, settings) => {
     return undefined;
 };
 function resolveConflict(from, to, options, resolveMode) {
-    // New logic for overwriting
     if (resolveMode === undefined) {
         return true;
     }
@@ -425,29 +424,29 @@ function visitor(from, to, vars, item) {
             return;
         }
         vars.filesInProgress += 1;
-        vars['current'] = from;
         // our main function after sanity checks
         const checked = (subResolveSettings) => {
-            // if the first resolve callback returned an individual resolve settings "THIS",
-            // ask the user again with the same item
-            let proceed = vars.resolveSettings.mode === interfaces_3.EResolve.ALWAYS;
             if (subResolveSettings) {
-                if (!proceed) {
-                    let overwriteMode = subResolveSettings.overwrite;
-                    overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
-                    if (overwriteMode === interfaces_3.EResolveMode.ABORT) {
-                        vars.abort = true;
+                // if the first resolve callback returned an individual resolve settings "THIS",
+                // ask the user again with the same item
+                let always = subResolveSettings.mode === interfaces_3.EResolve.ALWAYS;
+                if (always) {
+                    options.conflictSettings = subResolveSettings;
+                }
+                let overwriteMode = subResolveSettings.overwrite;
+                overwriteMode = onConflict(item.path, destPath, options, subResolveSettings);
+                if (overwriteMode === interfaces_3.EResolveMode.ABORT) {
+                    vars.abort = true;
+                }
+                if (vars.abort) {
+                    return;
+                }
+                if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
+                    vars.filesInProgress -= 1;
+                    if (vars.filesInProgress === 0) {
+                        vars.resolve();
                     }
-                    if (vars.abort) {
-                        return;
-                    }
-                    if (!resolveConflict(item.path, destPath, options, overwriteMode)) {
-                        vars.filesInProgress -= 1;
-                        if (vars.filesInProgress === 0) {
-                            vars.resolve();
-                        }
-                        return;
-                    }
+                    return;
                 }
             }
             copyItemAsync(item.path, item.item, destPath, options).then(() => {
@@ -517,9 +516,14 @@ function async(from, to, options) {
                     overwrite: interfaces_3.EResolveMode.OVERWRITE
                 };
             }
+            else {
+                options.conflictSettings = resolver;
+            }
             let overwriteMode = resolver.overwrite;
+            // call onConflict to eventually throw an error
             overwriteMode = onConflict(from, to, options, resolver);
-            if (options.conflictSettings || options.conflictCallback && !resolveConflict(from, to, options, overwriteMode)) {
+            // now evaluate the copy conflict settings and eventually abort
+            if (options && options.conflictSettings && !resolveConflict(from, to, options, overwriteMode)) {
                 return resolve();
             }
             // feature: clean before

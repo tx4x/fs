@@ -212,12 +212,30 @@ declare module '@gbaumgart/fs/errors' {
 	export function ErrIsNotDirectory(path: string): Error;
 
 }
+declare module '@gbaumgart/fs/promisify' {
+	export function promisify<T>(f: (cb: (err: any, res: T) => void) => void, thisContext?: any): () => Promise<T>;
+	export function promisify<A, T>(f: (arg: A, cb: (err: any, res: T) => void) => void, thisContext?: any): (arg: A) => Promise<T>;
+	export function promisify<A, A2, T>(f: (arg: A, arg2: A2, cb: (err: any, res: T) => void) => void, thisContext?: any): (arg: A, arg2: A2) => Promise<T>;
+	export function promisify<A, A2, A3, T>(f: (arg: A, arg2: A2, arg3: A3, cb: (err: any, res: T) => void) => void, thisContext?: any): (arg: A, arg2: A2, arg3: A3) => Promise<T>;
+	export function promisify<A, A2, A3, A4, T>(f: (arg: A, arg2: A2, arg3: A3, arg4: A4, cb: (err: any, res: T) => void) => void, thisContext?: any): (arg: A, arg2: A2, arg3: A3, arg4: A4) => Promise<T>;
+	export function promisify<A, A2, A3, A4, A5, T>(f: (arg: A, arg2: A2, arg3: A3, arg4: A4, arg5: A5, cb: (err: any, res: T) => void) => void, thisContext?: any): (arg: A, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => Promise<T>;
+	export function map<T, U>(elts: PromiseLike<PromiseLike<T>[]>, f: (t: T) => U | PromiseLike<U>): Promise<U[]>;
+	export function map<T, U>(elts: PromiseLike<T[]>, f: (t: T) => U | PromiseLike<U>): Promise<U[]>;
+	export function map<T, U>(elts: PromiseLike<T>[], f: (t: T) => U | PromiseLike<U>): Promise<U[]>;
+	export function map<T, U>(elts: T[], f: (t: T) => U | PromiseLike<U>): Promise<U[]>;
+	export function _try<T>(f: () => T): Promise<T>;
+	export function _try<T>(f: (arg: any) => T, arg: any): Promise<T>;
+	export function _try<T>(f: (arg: any, arg2: any) => T, arg: any, arg2: any): Promise<T>;
+	export function _try<T>(f: (arg: any, arg2: any, arg3: any) => T, arg: any, arg2: any, arg3: any): Promise<T>;
+	export function _try<T>(f: (arg: any, arg2: any, arg3: any, arg4: any) => T, arg: any, arg2: any, arg3: any, arg4: any): Promise<T>;
+
+}
 declare module '@gbaumgart/fs/dir' {
 	export interface IOptions {
 	    empty?: boolean;
 	    mode?: number | string;
 	}
-	export const validateInput: (methodName: string, path: string, criteria?: IOptions) => void;
+	export const validateInput: (methodName: string, path: string, options?: IOptions) => void;
 	export function sync(path: string, options?: IOptions): void;
 	export function async(path: string, passedCriteria?: IOptions): Promise<{}>;
 
@@ -258,6 +276,7 @@ declare module '@gbaumgart/fs/utils/tree_walker' {
 	export interface IOptions {
 	    inspectOptions: IInspectOptions;
 	    maxLevelsDeep?: number;
+	    user?: any;
 	}
 	export function sync(path: string, options: IOptions, callback: (path: string, item: INode) => void, currentLevel?: number): void;
 	export function stream(path: string, options: IOptions): Readable;
@@ -308,10 +327,10 @@ declare module '@gbaumgart/fs/copy' {
 	import { ICopyOptions, EResolveMode } from '@gbaumgart/fs/interfaces';
 	export function validateInput(methodName: string, from: string, to: string, options?: ICopyOptions): void;
 	export function sync(from: string, to: string, options?: ICopyOptions): void;
-	export function copySymlinkAsync(from: string, to: string): any;
+	export function copySymlinkAsync(from: string, to: string): Promise<string>;
 	export function resolveConflict(from: string, to: string, options: ICopyOptions, resolveMode: EResolveMode): boolean;
 	/**
-	 * Copy
+	 * Final async copy function
 	 * @export
 	 * @param {string} from
 	 * @param {string} to

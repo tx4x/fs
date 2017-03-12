@@ -1,6 +1,5 @@
 import { Stats, readlinkSync, statSync, lstatSync, stat, lstat, readlink, createReadStream, readFileSync, readdir, readdirSync } from 'fs';
-//const getMime = require("simple-mime")("application/octet-stream");
-const mime = require("mime");
+import { lookup as mime } from "mime";
 import * as  pathUtil from "path";
 import { validateArgument, validateOptions } from './utils/validate';
 import { createHash } from 'crypto';
@@ -152,7 +151,7 @@ const createInspectObj = (path: string, options: IInspectOptions, stat: Stats): 
 		else if (stat.isFIFO()) { obj.mime = "inode/fifo"; }
 		else if (stat.isSocket()) { obj.mime = "inode/socket"; }
 		else {
-			obj.mime = mime.lookup(path);
+			obj.mime = mime(path);
 		}
 	}
 

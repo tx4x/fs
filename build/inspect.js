@@ -9,8 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
-//const getMime = require("simple-mime")("application/octet-stream");
-const mime = require("mime");
+const mime_1 = require("mime");
 const pathUtil = require("path");
 const validate_1 = require("./utils/validate");
 const crypto_1 = require("crypto");
@@ -174,7 +173,7 @@ const createInspectObj = (path, options, stat) => {
             obj.mime = "inode/socket";
         }
         else {
-            obj.mime = mime.lookup(path);
+            obj.mime = mime_1.lookup(path);
         }
     }
     if (options.times) {

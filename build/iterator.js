@@ -37,13 +37,15 @@ function async(from, options) {
         };
         let nodes = [];
         return new Promise((resolve, reject) => {
+            console.log('c', options.flags & interfaces_1.EInspectFlags.CHECKSUM);
             // start digging
             tree_walker_1.stream(from, {
                 inspectOptions: {
-                    mode: true,
-                    times: true,
-                    checksum: 'md5',
-                    symlinks: options ? options.flags & interfaces_1.EBaseFlags.FOLLOW_SYMLINKS ? false : true : true
+                    mode: options ? options.flags & interfaces_1.EInspectFlags.MODE ? true : false : false,
+                    times: options ? options.flags & interfaces_1.EInspectFlags.TIMES ? true : false : false,
+                    checksum: options ? options.flags & interfaces_1.EInspectFlags.CHECKSUM ? 'md5' : null : null,
+                    symlinks: options ? options.flags & interfaces_1.EInspectFlags.SYMLINKS ? false : true : true,
+                    mime: options ? options.flags & interfaces_1.EInspectFlags.MIME ? true : false : false
                 }
             }).on('readable', function () { return collector.apply(this, arguments); })
                 .on('error', reject)

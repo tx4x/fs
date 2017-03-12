@@ -40,6 +40,7 @@ export interface INode {
 	children?: INode[];
 	total?: number;
 	checksum?: string;
+	mime?: string;
 }
 /**
  * The options for "inspect".
@@ -54,6 +55,7 @@ export interface IInspectOptions {
 	absolutePath?: boolean;
 	symlinks?: boolean;
 	size?: boolean;
+	mime?: boolean;
 }
 
 /**
@@ -106,14 +108,20 @@ export enum EBaseFlags {
  * @enum {number}
  */
 export enum EInspectFlags {
-	MODE,
-	TIMES,
-	SYMLINKS,
-	FILE_SIZE,
-	DIRECTORY_SIZE,
-	CHECKSUM
+	MODE = 2,
+	TIMES = 4,
+	SYMLINKS = 8,
+	FILE_SIZE = 16,
+	DIRECTORY_SIZE = 32,
+	CHECKSUM = 64,
+	MIME = 128
 }
-
+/**
+ * Basic options for file operations: used by cp, mv, rename and rm.
+ *
+ * @export
+ * @interface IBaseOptions
+ */
 export interface IBaseOptions {
 	/**
 	 * Array of glob minimatch patterns
@@ -129,7 +137,7 @@ export interface IBaseOptions {
 	 */
 	filter?: (from: string) => boolean;
 
-	flags?: EBaseFlags;
+	flags?: EInspectFlags;
 }
 /////////////////////////////////////////////////////////
 //

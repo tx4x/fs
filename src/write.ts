@@ -65,6 +65,7 @@ export function sync(path: string, data: ReadWriteDataType, options?: IWriteOpti
 const promisedWriteFile = Q.denodeify(fs.writeFile);
 const promisedMkdirp = Q.denodeify(mkdirp);
 const promisedAtomic = Q.denodeify(writeAtomicSync);
+
 function writeFileAsync(path: string, data: string, options?: IWriteOptions): Promise<null> {
 	return new Promise<null>((resolve, reject) => {
 		promisedWriteFile(path, data, options)

@@ -1,4 +1,6 @@
 import { Stats, readlinkSync, statSync, lstatSync, stat, lstat, readlink, createReadStream, readFileSync, readdir, readdirSync } from 'fs';
+//const getMime = require("simple-mime")("application/octet-stream");
+const mime = require("mime");
 import * as  pathUtil from "path";
 import { validateArgument, validateOptions } from './utils/validate';
 import { createHash } from 'crypto';
@@ -111,7 +113,8 @@ export function validateInput(methodName: string, path: string, options?: IInspe
 		times: ['boolean'],
 		absolutePath: ['boolean'],
 		symlinks: ['boolean'],
-		size: 'number'
+		size: 'number',
+		mime: 'string'
 	});
 
 	if (options && options.checksum !== undefined
@@ -138,6 +141,19 @@ const createInspectObj = (path: string, options: IInspectOptions, stat: Stats): 
 
 	if (options.mode) {
 		obj.mode = stat.mode;
+	}
+
+	if (options.mime) {
+		if (stat.isDirectory()) {
+			obj.mime = "inode/directory";
+		} else if (stat.isBlockDevice()) { obj.mime = "inode/blockdevice"; }
+		else if (stat.isCharacterDevice()) { obj.mime = "inode/chardevice"; }
+		else if (stat.isSymbolicLink()) { obj.mime = "inode/symlink"; }
+		else if (stat.isFIFO()) { obj.mime = "inode/fifo"; }
+		else if (stat.isSocket()) { obj.mime = "inode/socket"; }
+		else {
+			obj.mime = mime.lookup(path);
+		}
 	}
 
 	if (options.times) {

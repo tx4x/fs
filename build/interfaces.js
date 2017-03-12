@@ -55,12 +55,13 @@ var EBaseFlags;
  */
 var EInspectFlags;
 (function (EInspectFlags) {
-    EInspectFlags[EInspectFlags["MODE"] = 0] = "MODE";
-    EInspectFlags[EInspectFlags["TIMES"] = 1] = "TIMES";
-    EInspectFlags[EInspectFlags["SYMLINKS"] = 2] = "SYMLINKS";
-    EInspectFlags[EInspectFlags["FILE_SIZE"] = 3] = "FILE_SIZE";
-    EInspectFlags[EInspectFlags["DIRECTORY_SIZE"] = 4] = "DIRECTORY_SIZE";
-    EInspectFlags[EInspectFlags["CHECKSUM"] = 5] = "CHECKSUM";
+    EInspectFlags[EInspectFlags["MODE"] = 2] = "MODE";
+    EInspectFlags[EInspectFlags["TIMES"] = 4] = "TIMES";
+    EInspectFlags[EInspectFlags["SYMLINKS"] = 8] = "SYMLINKS";
+    EInspectFlags[EInspectFlags["FILE_SIZE"] = 16] = "FILE_SIZE";
+    EInspectFlags[EInspectFlags["DIRECTORY_SIZE"] = 32] = "DIRECTORY_SIZE";
+    EInspectFlags[EInspectFlags["CHECKSUM"] = 64] = "CHECKSUM";
+    EInspectFlags[EInspectFlags["MIME"] = 128] = "MIME";
 })(EInspectFlags = exports.EInspectFlags || (exports.EInspectFlags = {}));
 /**
  * Status of a node operation.

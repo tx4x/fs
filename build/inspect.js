@@ -9,6 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
+//const getMime = require("simple-mime")("application/octet-stream");
+const mime = require("mime");
 const pathUtil = require("path");
 const validate_1 = require("./utils/validate");
 const crypto_1 = require("crypto");
@@ -122,7 +124,8 @@ function validateInput(methodName, path, options) {
         times: ['boolean'],
         absolutePath: ['boolean'],
         symlinks: ['boolean'],
-        size: 'number'
+        size: 'number',
+        mime: 'string'
     });
     if (options && options.checksum !== undefined
         && exports.supportedChecksumAlgorithms.indexOf(options.checksum) === -1) {
@@ -150,6 +153,29 @@ const createInspectObj = (path, options, stat) => {
     }
     if (options.mode) {
         obj.mode = stat.mode;
+    }
+    if (options.mime) {
+        if (stat.isDirectory()) {
+            obj.mime = "inode/directory";
+        }
+        else if (stat.isBlockDevice()) {
+            obj.mime = "inode/blockdevice";
+        }
+        else if (stat.isCharacterDevice()) {
+            obj.mime = "inode/chardevice";
+        }
+        else if (stat.isSymbolicLink()) {
+            obj.mime = "inode/symlink";
+        }
+        else if (stat.isFIFO()) {
+            obj.mime = "inode/fifo";
+        }
+        else if (stat.isSocket()) {
+            obj.mime = "inode/socket";
+        }
+        else {
+            obj.mime = mime.lookup(path);
+        }
     }
     if (options.times) {
         obj.accessTime = stat.atime;

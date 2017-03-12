@@ -95,7 +95,7 @@ function stream(path, options) {
         })
             .catch(error);
     };
-    rs['_read'] = function () {
+    rs['_read'] = () => {
         if (!running) {
             readSome();
         }

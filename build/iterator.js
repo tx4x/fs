@@ -37,7 +37,6 @@ function async(from, options) {
         };
         let nodes = [];
         return new Promise((resolve, reject) => {
-            console.log('c', options.flags & interfaces_1.EInspectFlags.CHECKSUM);
             // start digging
             tree_walker_1.stream(from, {
                 inspectOptions: {

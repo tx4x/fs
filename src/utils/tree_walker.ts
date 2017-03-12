@@ -110,7 +110,7 @@ export function stream(path: string, options: IOptions) {
 			})
 			.catch(error);
 	};
-	rs['_read'] = function () {
+	rs['_read'] = () => {
 		if (!running) {
 			readSome();
 		}

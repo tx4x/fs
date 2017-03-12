@@ -6,13 +6,13 @@ Check out [EXAMPLES](EXAMPLES.md) to see few snippets what it can do.
 
 ## Installation
 ```
-npm install @gbaumgart/fs
+npm install @xblox/fs
 ```
 
 ## Usage
 
 ```javascript
-var jetpack = require('@gbaumgart/fs');
+var fsx = require('@xblox/fs');
 ```
 
 

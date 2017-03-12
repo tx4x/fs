@@ -226,11 +226,11 @@ function jetpack(cwdPath) {
 }
 exports.jetpack = jetpack;
 ;
-//inspectTreeTest();
-//testCollisionDirectory();
-//testCollisionFile();
-//prepareSymlink();
-//testCopySymlink();
-//testBig();
-//testManyWithProgress();
+// inspectTreeTest();
+// testCollisionDirectory();
+// testCollisionFile();
+// prepareSymlink();
+// testCopySymlink();
+// testBig();
+// testManyWithProgress();
 //# sourceMappingURL=jetpack.js.map

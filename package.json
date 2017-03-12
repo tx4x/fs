@@ -1,7 +1,7 @@
 {
   "name": "@xblox/fs",
   "description": "Simplified file system API in Typescript",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "contributors": [
     {
       "name": "xblox"

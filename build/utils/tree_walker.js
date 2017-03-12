@@ -29,9 +29,7 @@ function sync(path, options, callback, currentLevel) {
 }
 exports.sync = sync;
 ;
-// ---------------------------------------------------------
-// STREAM
-// ---------------------------------------------------------
+;
 function stream(path, options) {
     const rs = new stream_1.Readable({ objectMode: true });
     let nextTreeNode = {
@@ -71,12 +69,10 @@ function stream(path, options) {
         inspect_1.async(theNode.path, options.inspectOptions)
             .then((inspected) => {
             theNode.inspected = inspected;
-            if (inspected &&
-                (inspected).type === interfaces_1.ENodeType.DIR &&
-                theNode.level < options.maxLevelsDeep) {
+            if (inspected && inspected.type === interfaces_1.ENodeType.DIR && theNode.level < options.maxLevelsDeep) {
                 list_1.async(theNode.path)
                     .then((childrenNames) => {
-                    const children = childrenNames.map(function (name) {
+                    const children = childrenNames.map((name) => {
                         return {
                             name: name,
                             path: theNode.path + pathUtil.sep + name,

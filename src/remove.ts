@@ -1,6 +1,8 @@
 import * as rm from 'rimraf';
 import * as denodeify from 'denodeify';
 import { validateArgument } from './utils/validate';
+
+
 export function validateInput(methodName: string, path: string) {
 	const methodSignature = methodName + '([path])';
 	validateArgument(methodSignature, 'path', path, ['string', 'undefined']);

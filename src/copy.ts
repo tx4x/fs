@@ -10,7 +10,7 @@ import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree
 import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync } from './write';
 import { ErrDestinationExists, ErrDoesntExists } from './errors';
-import { INode, ENodeType, IWriteOptions, ECopyFlags, ENodeCopyStatus } from './interfaces';
+import { INode, ENodeType, IWriteOptions, ECopyFlags, ENodeOperationStatus } from './interfaces';
 import { EError, ErrnoException } from './interfaces';
 import { createItem } from './inspect';
 import { sync as rmSync } from './remove';
@@ -31,7 +31,7 @@ interface ICopyTask {
 	path: string;
 	item: INode;
 	dst: string;
-	status?: ENodeCopyStatus;
+	status?: ENodeOperationStatus;
 }
 
 export function validateInput(methodName: string, from: string, to: string, options?: ICopyOptions): void {
@@ -61,10 +61,12 @@ const parseOptions = (options: any | null, from: string): ICopyOptions => {
 	parsedOptions.debug = opts.debug;
 	parsedOptions.throttel = opts.throttel;
 	parsedOptions.flags = opts.flags || 0;
-	if (opts.matching) {
-		parsedOptions.allowedToCopy = matcher(from, opts.matching);
-	} else {
-		parsedOptions.allowedToCopy = () => { return true; };
+	if (!opts.filter) {
+		if (opts.matching) {
+			parsedOptions.filter = matcher(from, opts.matching);
+		} else {
+			parsedOptions.filter = () => { return true; };
+		}
 	}
 	return parsedOptions;
 };
@@ -166,7 +168,7 @@ export function sync(from: string, to: string, options?: ICopyOptions): void {
 	const visitor = (path: string, inspectData: INode) => {
 		const rel = pathUtil.relative(from, path);
 		const destPath = pathUtil.resolve(to, rel);
-		if (opts.allowedToCopy(path)) {
+		if (opts.filter(path)) {
 			nodes.push({
 				path: path,
 				item: inspectData,
@@ -388,7 +390,7 @@ export function resolveConflict(from: string, to: string, options: ICopyOptions,
 function isDone(nodes: ICopyTask[]) {
 	let done = true;
 	nodes.forEach((element: ICopyTask) => {
-		if (element.status !== ENodeCopyStatus.DONE) {
+		if (element.status !== ENodeOperationStatus.DONE) {
 			done = false;
 		}
 	});
@@ -416,9 +418,9 @@ async function visitor(from: string, to: string, vars: any, item: ICopyTask): Pr
 	rel = pathUtil.relative(from, item.path);
 	destPath = pathUtil.resolve(to, rel);
 
-	item.status = ENodeCopyStatus.PROCESSING;
+	item.status = ENodeOperationStatus.PROCESSING;
 	const done = () => {
-		item.status = ENodeCopyStatus.DONE;
+		item.status = ENodeOperationStatus.DONE;
 		if (isDone(vars.nodes)) {
 			return vars.resolve();
 		}
@@ -428,14 +430,14 @@ async function visitor(from: string, to: string, vars: any, item: ICopyTask): Pr
 		return vars.resolve();
 	}
 
-	if (options && !options.allowedToCopy(item.path)) {
+	if (options && !options.filter(item.path)) {
 		done();
 		return;
 	}
 	vars.filesInProgress += 1;
 	// our main function after sanity checks
 	const checked = (subResolveSettings: IConflictSettings) => {
-		item.status = ENodeCopyStatus.CHECKED;
+		item.status = ENodeOperationStatus.CHECKED;
 		if (subResolveSettings) {
 			// if the first resolve callback returned an individual resolve settings "THIS",
 			// ask the user again with the same item
@@ -458,7 +460,7 @@ async function visitor(from: string, to: string, vars: any, item: ICopyTask): Pr
 				return;
 			}
 		}
-		item.status = ENodeCopyStatus.COPYING;
+		item.status = ENodeOperationStatus.COPYING;
 		copyItemAsync(item.path, item.item, destPath, options).then(() => {
 			vars.filesInProgress -= 1;
 			if (options.progress) {
@@ -472,7 +474,6 @@ async function visitor(from: string, to: string, vars: any, item: ICopyTask): Pr
 			if (options && options.conflictCallback) {
 				if (err.code === EError.PERMISSION || err.code === EError.NOEXISTS) {
 					options.conflictCallback(item.path, createItem(destPath), err.code).then((errorResolveSettings: IConflictSettings) => {
-
 						// the user has set the conflict resolver to always, so we use the last one
 						if (vars.onCopyErrorResolveSettings) {
 							errorResolveSettings = vars.onCopyErrorResolveSettings;
@@ -510,7 +511,7 @@ async function visitor(from: string, to: string, vars: any, item: ICopyTask): Pr
 }
 function next(nodes: ICopyTask[]): ICopyTask {
 	for (let i = 0; i < nodes.length; i++) {
-		if (nodes[i].status === ENodeCopyStatus.COLLECTED) {
+		if (nodes[i].status === ENodeOperationStatus.COLLECTED) {
 			return nodes[i];
 		}
 	}
@@ -580,7 +581,7 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 					path: item.path,
 					item: item.item,
 					dst: pathUtil.resolve(to, pathUtil.relative(from, item.path)),
-					status: ENodeCopyStatus.COLLECTED
+					status: ENodeOperationStatus.COLLECTED
 				});
 
 			};

@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>ICopyOptions | @xblox/fs</title>
+	<title>IBaseOptions | @xblox/fs</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,35 +59,21 @@
 					<a href="../modules/_interfaces_.html">&quot;interfaces&quot;</a>
 				</li>
 				<li>
-					<a href="_interfaces_.icopyoptions.html">ICopyOptions</a>
+					<a href="_interfaces_.ibaseoptions.html">IBaseOptions</a>
 				</li>
 			</ul>
-			<h1>Interface ICopyOptions</h1>
+			<h1>Interface IBaseOptions</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-comment">
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>Copy options</p>
-					</div>
-					<dl class="tsd-comment-tags">
-						<dt>export</dt>
-						<dd></dd>
-						<dt>interface</dt>
-						<dd><p>ICopyOptions</p>
-						</dd>
-					</dl>
-				</div>
-			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">ICopyOptions</span>
+						<span class="target">IBaseOptions</span>
 					</li>
 				</ul>
 			</section>
@@ -98,16 +84,9 @@
 						<section class="tsd-index-section tsd-is-external">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#conflictcallback" class="tsd-kind-icon">conflict<wbr>Callback</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#conflictsettings" class="tsd-kind-icon">conflict<wbr>Settings</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#debug" class="tsd-kind-icon">debug</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#filter" class="tsd-kind-icon">filter</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#flags" class="tsd-kind-icon">flags</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#matching" class="tsd-kind-icon">matching</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#overwrite" class="tsd-kind-icon">overwrite</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#progress" class="tsd-kind-icon">progress</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#throttel" class="tsd-kind-icon">throttel</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.icopyoptions.html#writeprogress" class="tsd-kind-icon">write<wbr>Progress</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.ibaseoptions.html#filter" class="tsd-kind-icon">filter</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.ibaseoptions.html#flags" class="tsd-kind-icon">flags</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.ibaseoptions.html#matching" class="tsd-kind-icon">matching</a></li>
 							</ul>
 						</section>
 					</div>
@@ -116,92 +95,22 @@
 			<section class="tsd-panel-group tsd-member-group tsd-is-external">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="conflictcallback" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> conflict<wbr>Callback</h3>
-					<div class="tsd-signature tsd-kind-icon">conflict<wbr>Callback<span class="tsd-signature-symbol">:</span> <a href="../modules/_interfaces_.html#resolveconflictcallback" class="tsd-signature-type">ResolveConflictCallback</a></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/0ee6dc9/src/interfaces.ts#L279">interfaces.ts:279</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>A callback when a conflict or error occurs. This is being called only if the user
-							didn&#39;t provide conflictSettings.</p>
-						</div>
-						<dl class="tsd-comment-tags">
-							<dt>type</dt>
-							<dd><p>{ResolveConflictCallback}</p>
-							</dd>
-							<dt>memberof</dt>
-							<dd><p>ICopyOptions</p>
-							</dd>
-						</dl>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="conflictsettings" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> conflict<wbr>Settings</h3>
-					<div class="tsd-signature tsd-kind-icon">conflict<wbr>Settings<span class="tsd-signature-symbol">:</span> <a href="_interfaces_.iconflictsettings.html" class="tsd-signature-type">IConflictSettings</a></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/0ee6dc9/src/interfaces.ts#L286">interfaces.ts:286</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Ability to set conflict resolver settings in advance, so that no callback will be called.</p>
-						</div>
-						<dl class="tsd-comment-tags">
-							<dt>type</dt>
-							<dd><p>{IConflictSettings}</p>
-							</dd>
-							<dt>memberof</dt>
-							<dd><p>ICopyOptions</p>
-							</dd>
-						</dl>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="debug" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> debug</h3>
-					<div class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/0ee6dc9/src/interfaces.ts#L300">interfaces.ts:300</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Print some debug messages.</p>
-						</div>
-						<dl class="tsd-comment-tags">
-							<dt>type</dt>
-							<dd><p>{boolean}</p>
-							</dd>
-							<dt>memberof</dt>
-							<dd><p>ICopyOptions</p>
-							</dd>
-						</dl>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
 					<a name="filter" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> filter</h3>
 					<div class="tsd-signature tsd-kind-icon">filter<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/0ee6dc9/src/interfaces.ts#L260">interfaces.ts:260</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/0ee6dc9/src/interfaces.ts#L130">interfaces.ts:130</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>A function called to reject or accept nodes to be copied. This is used only when matching
+							<p>A function called to reject or accept nodes. This is used only when matching
 							has been left empty.</p>
 						</div>
 						<dl class="tsd-comment-tags">
 							<dt>memberof</dt>
-							<dd><p>ICopyOptions</p>
+							<dd><p>IBaseOptions</p>
 							</dd>
 						</dl>
 					</div>
@@ -230,25 +139,12 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
 					<a name="flags" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> flags</h3>
-					<div class="tsd-signature tsd-kind-icon">flags<span class="tsd-signature-symbol">:</span> <a href="../enums/_interfaces_.ecopyflags.html" class="tsd-signature-type">ECopyFlags</a></div>
+					<div class="tsd-signature tsd-kind-icon">flags<span class="tsd-signature-symbol">:</span> <a href="../enums/_interfaces_.ebaseflags.html" class="tsd-signature-type">EBaseFlags</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/0ee6dc9/src/interfaces.ts#L307">interfaces.ts:307</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/0ee6dc9/src/interfaces.ts#L132">interfaces.ts:132</a></li>
 						</ul>
 					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>The copy flags.</p>
-						</div>
-						<dl class="tsd-comment-tags">
-							<dt>type</dt>
-							<dd><p>{ECopyFlags}</p>
-							</dd>
-							<dt>memberof</dt>
-							<dd><p>ICopyOptions</p>
-							</dd>
-						</dl>
-					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
 					<a name="matching" class="tsd-anchor"></a>
@@ -256,7 +152,7 @@
 					<div class="tsd-signature tsd-kind-icon">matching<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/0ee6dc9/src/interfaces.ts#L254">interfaces.ts:254</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/0ee6dc9/src/interfaces.ts#L124">interfaces.ts:124</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -268,91 +164,7 @@
 							<dd><p>{string[]}</p>
 							</dd>
 							<dt>memberof</dt>
-							<dd><p>ICopyOptions</p>
-							</dd>
-						</dl>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="overwrite" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> overwrite</h3>
-					<div class="tsd-signature tsd-kind-icon">overwrite<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/0ee6dc9/src/interfaces.ts#L247">interfaces.ts:247</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<dl class="tsd-comment-tags">
-							<dt>type</dt>
-							<dd><p>{boolean}</p>
-							</dd>
-							<dt>deprecated</dt>
-							<dd><p>Use conflict callback instead.</p>
-							</dd>
-							<dt>memberof</dt>
-							<dd><p>ICopyOptions</p>
-							</dd>
-						</dl>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="progress" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> progress</h3>
-					<div class="tsd-signature tsd-kind-icon">progress<span class="tsd-signature-symbol">:</span> <a href="../modules/_interfaces_.html#itemprogresscallback" class="tsd-signature-type">ItemProgressCallback</a></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/0ee6dc9/src/interfaces.ts#L264">interfaces.ts:264</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>A progress callback for any copied item. Only excecuted in async.</p>
-						</div>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="throttel" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> throttel</h3>
-					<div class="tsd-signature tsd-kind-icon">throttel<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/0ee6dc9/src/interfaces.ts#L293">interfaces.ts:293</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Throttel copy for larger files. This will be only used when writeProgress is set and the file is at least 5MB.</p>
-						</div>
-						<dl class="tsd-comment-tags">
-							<dt>type</dt>
-							<dd><p>{number}</p>
-							</dd>
-							<dt>memberof</dt>
-							<dd><p>ICopyOptions</p>
-							</dd>
-						</dl>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="writeprogress" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> write<wbr>Progress</h3>
-					<div class="tsd-signature tsd-kind-icon">write<wbr>Progress<span class="tsd-signature-symbol">:</span> <a href="../modules/_interfaces_.html#writeprogresscallback" class="tsd-signature-type">WriteProgressCallback</a></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/0ee6dc9/src/interfaces.ts#L271">interfaces.ts:271</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>A progress function called for async and larger files only.</p>
-						</div>
-						<dl class="tsd-comment-tags">
-							<dt>type</dt>
-							<dd><p>{WriteProgressCallback}</p>
-							</dd>
-							<dt>memberof</dt>
-							<dd><p>ICopyOptions</p>
+							<dd><p>IBaseOptions</p>
 							</dd>
 						</dl>
 					</div>
@@ -396,51 +208,30 @@
 					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-is-external">
 						<a href="../classes/_interfaces_.errnoexception.html" class="tsd-kind-icon">Errno<wbr>Exception</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
-						<a href="_interfaces_.ibaseoptions.html" class="tsd-kind-icon">IBase<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
-						<a href="_interfaces_.iconflictsettings.html" class="tsd-kind-icon">IConflict<wbr>Settings</a>
-					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
-						<a href="_interfaces_.icopyoptions.html" class="tsd-kind-icon">ICopy<wbr>Options</a>
+						<a href="_interfaces_.ibaseoptions.html" class="tsd-kind-icon">IBase<wbr>Options</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_interfaces_.icopyoptions.html#conflictcallback" class="tsd-kind-icon">conflict<wbr>Callback</a>
+								<a href="_interfaces_.ibaseoptions.html#filter" class="tsd-kind-icon">filter</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_interfaces_.icopyoptions.html#conflictsettings" class="tsd-kind-icon">conflict<wbr>Settings</a>
+								<a href="_interfaces_.ibaseoptions.html#flags" class="tsd-kind-icon">flags</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_interfaces_.icopyoptions.html#debug" class="tsd-kind-icon">debug</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_interfaces_.icopyoptions.html#filter" class="tsd-kind-icon">filter</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_interfaces_.icopyoptions.html#flags" class="tsd-kind-icon">flags</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_interfaces_.icopyoptions.html#matching" class="tsd-kind-icon">matching</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_interfaces_.icopyoptions.html#overwrite" class="tsd-kind-icon">overwrite</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_interfaces_.icopyoptions.html#progress" class="tsd-kind-icon">progress</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_interfaces_.icopyoptions.html#throttel" class="tsd-kind-icon">throttel</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_interfaces_.icopyoptions.html#writeprogress" class="tsd-kind-icon">write<wbr>Progress</a>
+								<a href="_interfaces_.ibaseoptions.html#matching" class="tsd-kind-icon">matching</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
+						<a href="_interfaces_.iconflictsettings.html" class="tsd-kind-icon">IConflict<wbr>Settings</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
+						<a href="_interfaces_.icopyoptions.html" class="tsd-kind-icon">ICopy<wbr>Options</a>
+					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
 						<a href="_interfaces_.ideleteoptions.html" class="tsd-kind-icon">IDelete<wbr>Options</a>
 					</li>

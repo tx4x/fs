@@ -36,18 +36,25 @@ export function sync(path: string, options: IOptions, callback: (path: string, i
 // ---------------------------------------------------------
 // STREAM
 // ---------------------------------------------------------
-
+interface IPrivateNode {
+	path: string;
+	level: number;
+	parent?: IPrivateNode;
+	nextSibling?: IPrivateNode;
+	inspected?: INode;
+	item?: INode;
+};
 export function stream(path: string, options: IOptions) {
 	const rs = new Readable({ objectMode: true });
-	let nextTreeNode = {
+	let nextTreeNode: IPrivateNode = {
 		path: path,
 		parent: undefined,
 		level: 0
-	} as any;
+	};
 	let running = false;
 	let readSome: any;
 	const error = (err: Error) => { rs.emit('error', err); };
-	const findNextUnprocessedNode = (node: any): void => {
+	const findNextUnprocessedNode = (node: IPrivateNode): IPrivateNode => {
 		if (node.nextSibling) {
 			return node.nextSibling;
 		} else if (node.parent) {
@@ -72,17 +79,15 @@ export function stream(path: string, options: IOptions) {
 	}
 
 	readSome = (): void => {
-		const theNode: any = nextTreeNode;
+		const theNode: IPrivateNode = nextTreeNode;
 		running = true;
 		inspectASync(theNode.path, options.inspectOptions)
 			.then((inspected: INode) => {
 				theNode.inspected = inspected;
-				if (inspected &&
-					(inspected).type === ENodeType.DIR &&
-					theNode.level < options.maxLevelsDeep) {
+				if (inspected && inspected.type === ENodeType.DIR && theNode.level < options.maxLevelsDeep) {
 					listASync(theNode.path)
 						.then((childrenNames: string[]) => {
-							const children = childrenNames.map(function (name) {
+							const children = childrenNames.map((name) => {
 								return {
 									name: name,
 									path: theNode.path + pathUtil.sep + name,
@@ -90,7 +95,7 @@ export function stream(path: string, options: IOptions) {
 									level: theNode.level + 1
 								};
 							});
-							children.forEach((child: any, index: number) => {
+							children.forEach((child: IPrivateNode, index: number) => {
 								child.nextSibling = children[index + 1];
 							});
 

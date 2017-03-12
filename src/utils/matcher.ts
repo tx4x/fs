@@ -1,4 +1,9 @@
 import { Minimatch } from 'minimatch';
+export interface IOptions {
+	matchBase: boolean;
+	nocomment: boolean;
+	dot: boolean;
+}
 const patternToAbsolutePath = (basePath: string, pattern: string): string => {
 	// All patterns without slash are left as they are, if pattern contain
 	// any slash we need to turn it into absolute path.
@@ -26,7 +31,7 @@ const patternToAbsolutePath = (basePath: string, pattern: string): string => {
 	return pattern;
 };
 
-export function create(basePath: string, patterns: string[]) {
+export function create(basePath: string, patterns: string[], options?: IOptions) {
 	let matchers: any[];
 	if (typeof patterns === 'string') {
 		patterns = [patterns];
@@ -34,7 +39,7 @@ export function create(basePath: string, patterns: string[]) {
 	matchers = patterns.map(pattern => {
 		return patternToAbsolutePath(basePath, pattern);
 	}).map(pattern => {
-		return new Minimatch(pattern, {
+		return new Minimatch(pattern, options || {
 			matchBase: true,
 			nocomment: true,
 			dot: true

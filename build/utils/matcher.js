@@ -24,7 +24,7 @@ const patternToAbsolutePath = (basePath, pattern) => {
     }
     return pattern;
 };
-function create(basePath, patterns) {
+function create(basePath, patterns, options) {
     let matchers;
     if (typeof patterns === 'string') {
         patterns = [patterns];
@@ -32,7 +32,7 @@ function create(basePath, patterns) {
     matchers = patterns.map(pattern => {
         return patternToAbsolutePath(basePath, pattern);
     }).map(pattern => {
-        return new minimatch_1.Minimatch(pattern, {
+        return new minimatch_1.Minimatch(pattern, options || {
             matchBase: true,
             nocomment: true,
             dot: true

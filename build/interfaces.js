@@ -34,16 +34,57 @@ exports.EError = {
 class ErrnoException extends Error {
 }
 exports.ErrnoException = ErrnoException;
-var ENodeCopyStatus;
-(function (ENodeCopyStatus) {
-    ENodeCopyStatus[ENodeCopyStatus["COLLECTED"] = 0] = "COLLECTED";
-    ENodeCopyStatus[ENodeCopyStatus["CHECKED"] = 1] = "CHECKED";
-    ENodeCopyStatus[ENodeCopyStatus["COPYING"] = 2] = "COPYING";
-    ENodeCopyStatus[ENodeCopyStatus["PROCESSING"] = 3] = "PROCESSING";
-    ENodeCopyStatus[ENodeCopyStatus["ASKING"] = 4] = "ASKING";
-    ENodeCopyStatus[ENodeCopyStatus["ANSWERED"] = 5] = "ANSWERED";
-    ENodeCopyStatus[ENodeCopyStatus["DONE"] = 6] = "DONE";
-})(ENodeCopyStatus = exports.ENodeCopyStatus || (exports.ENodeCopyStatus = {}));
+/**
+ * Basic flags during a file operation.
+ *
+ * @export
+ * @enum {number}
+ */
+var EBaseFlags;
+(function (EBaseFlags) {
+    /**
+     * When copying, don't copy symlinks but resolve them instead.
+     */
+    EBaseFlags[EBaseFlags["FOLLOW_SYMLINKS"] = 8] = "FOLLOW_SYMLINKS";
+})(EBaseFlags = exports.EBaseFlags || (exports.EBaseFlags = {}));
+/**
+ * Flags to determine certain properties during inspection.
+ *
+ * @export
+ * @enum {number}
+ */
+var EInspectFlags;
+(function (EInspectFlags) {
+    EInspectFlags[EInspectFlags["MODE"] = 0] = "MODE";
+    EInspectFlags[EInspectFlags["TIMES"] = 1] = "TIMES";
+    EInspectFlags[EInspectFlags["SYMLINKS"] = 2] = "SYMLINKS";
+    EInspectFlags[EInspectFlags["FILE_SIZE"] = 3] = "FILE_SIZE";
+    EInspectFlags[EInspectFlags["DIRECTORY_SIZE"] = 4] = "DIRECTORY_SIZE";
+    EInspectFlags[EInspectFlags["CHECKSUM"] = 5] = "CHECKSUM";
+})(EInspectFlags = exports.EInspectFlags || (exports.EInspectFlags = {}));
+/**
+ * Status of a node operation.
+ *
+ * @export
+ * @enum {number}
+ */
+var ENodeOperationStatus;
+(function (ENodeOperationStatus) {
+    // Node has been collected
+    ENodeOperationStatus[ENodeOperationStatus["COLLECTED"] = 0] = "COLLECTED";
+    // Node has been checked for existance
+    ENodeOperationStatus[ENodeOperationStatus["CHECKED"] = 1] = "CHECKED";
+    // Node is in progress, before copy
+    ENodeOperationStatus[ENodeOperationStatus["PROCESSING"] = 2] = "PROCESSING";
+    // Node is in copy process
+    ENodeOperationStatus[ENodeOperationStatus["COPYING"] = 3] = "COPYING";
+    // Node is in conflict, and user is being asked what to do
+    ENodeOperationStatus[ENodeOperationStatus["ASKING"] = 4] = "ASKING";
+    // Node conflict has been resolved by user
+    ENodeOperationStatus[ENodeOperationStatus["ANSWERED"] = 5] = "ANSWERED";
+    // Node has been copied
+    ENodeOperationStatus[ENodeOperationStatus["DONE"] = 6] = "DONE";
+})(ENodeOperationStatus = exports.ENodeOperationStatus || (exports.ENodeOperationStatus = {}));
 /**
  * The possible modes to resolve a conflict during copy and move.
  *

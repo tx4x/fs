@@ -41,7 +41,6 @@ export interface INode {
 	total?: number;
 	checksum?: string;
 }
-
 /**
  * The options for "inspect".
  *
@@ -76,6 +75,61 @@ export class ErrnoException extends Error {
 	path?: string;
 	syscall?: string;
 	stack?: string;
+}
+
+/**
+ * Structure for file operations.
+ */
+export interface IProcessingNodes {
+	path: string;
+	item: INode;
+	status?: ENodeOperationStatus;
+}
+
+/**
+ * Basic flags during a file operation.
+ *
+ * @export
+ * @enum {number}
+ */
+export enum EBaseFlags {
+	/**
+	 * When copying, don't copy symlinks but resolve them instead.
+	 */
+	FOLLOW_SYMLINKS = 8
+}
+
+/**
+ * Flags to determine certain properties during inspection.
+ *
+ * @export
+ * @enum {number}
+ */
+export enum EInspectFlags {
+	MODE,
+	TIMES,
+	SYMLINKS,
+	FILE_SIZE,
+	DIRECTORY_SIZE,
+	CHECKSUM
+}
+
+export interface IBaseOptions {
+	/**
+	 * Array of glob minimatch patterns
+	 *
+	 * @type {string[]}
+	 * @memberOf IBaseOptions
+	 */
+	matching?: string[];
+	/**
+	 * A function called to reject or accept nodes. This is used only when matching
+	 * has been left empty.
+	 * @memberOf IBaseOptions
+	 */
+	filter?: (from: string) => boolean;
+
+	flags?: EBaseFlags;
 }
 /////////////////////////////////////////////////////////
 //
@@ -119,13 +173,26 @@ export type ResolveConflictCallback = (path: string, item: INode, err: string) =
  */
 export type WriteProgressCallback = (path: string, current: number, total: number) => void;
 
-export enum ENodeCopyStatus {
+/**
+ * Status of a node operation.
+ *
+ * @export
+ * @enum {number}
+ */
+export enum ENodeOperationStatus {
+	// Node has been collected
 	COLLECTED,
+	// Node has been checked for existance
 	CHECKED,
-	COPYING,
+	// Node is in progress, before copy
 	PROCESSING,
+	// Node is in copy process
+	COPYING,
+	// Node is in conflict, and user is being asked what to do
 	ASKING,
+	// Node conflict has been resolved by user
 	ANSWERED,
+	// Node has been copied
 	DONE
 }
 /**
@@ -190,7 +257,7 @@ export interface ICopyOptions {
 	 * has been left empty.
 	 * @memberOf ICopyOptions
 	 */
-	allowedToCopy?: (from: string) => boolean;
+	filter?: (from: string) => boolean;
 	/**
 	 * A progress callback for any copied item. Only excecuted in async.
 	 */
@@ -217,7 +284,6 @@ export interface ICopyOptions {
 	 * @memberOf ICopyOptions
 	 */
 	conflictSettings?: IConflictSettings;
-
 	/**
 	 * Throttel copy for larger files. This will be only used when writeProgress is set and the file is at least 5MB.
 	 *
@@ -284,4 +350,24 @@ export interface IWriteOptions {
 	atomic?: boolean;
 	jsonIndent?: number;
 	mode?: string;
+}
+/////////////////////////////////////////////////////////
+//
+//  File operations : remove
+//
+
+/**
+ * Delete options
+ *
+ * @export
+ * @interface IDeleteOptions
+ */
+export interface IDeleteOptions {
+	/**
+	 * Array of glob minimatch patterns
+	 *
+	 * @type {string[]}
+	 * @memberOf IDeleteOptions
+	 */
+	matching?: string[];
 }

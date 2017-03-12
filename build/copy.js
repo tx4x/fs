@@ -61,11 +61,13 @@ const parseOptions = (options, from) => {
     parsedOptions.debug = opts.debug;
     parsedOptions.throttel = opts.throttel;
     parsedOptions.flags = opts.flags || 0;
-    if (opts.matching) {
-        parsedOptions.allowedToCopy = matcher_1.create(from, opts.matching);
-    }
-    else {
-        parsedOptions.allowedToCopy = () => { return true; };
+    if (!opts.filter) {
+        if (opts.matching) {
+            parsedOptions.filter = matcher_1.create(from, opts.matching);
+        }
+        else {
+            parsedOptions.filter = () => { return true; };
+        }
     }
     return parsedOptions;
 };
@@ -173,7 +175,7 @@ function sync(from, to, options) {
     const visitor = (path, inspectData) => {
         const rel = pathUtil.relative(from, path);
         const destPath = pathUtil.resolve(to, rel);
-        if (opts.allowedToCopy(path)) {
+        if (opts.filter(path)) {
             nodes.push({
                 path: path,
                 item: inspectData,
@@ -407,7 +409,7 @@ exports.resolveConflict = resolveConflict;
 function isDone(nodes) {
     let done = true;
     nodes.forEach((element) => {
-        if (element.status !== interfaces_1.ENodeCopyStatus.DONE) {
+        if (element.status !== interfaces_1.ENodeOperationStatus.DONE) {
             done = false;
         }
     });
@@ -435,9 +437,9 @@ function visitor(from, to, vars, item) {
         }
         rel = pathUtil.relative(from, item.path);
         destPath = pathUtil.resolve(to, rel);
-        item.status = interfaces_1.ENodeCopyStatus.PROCESSING;
+        item.status = interfaces_1.ENodeOperationStatus.PROCESSING;
         const done = () => {
-            item.status = interfaces_1.ENodeCopyStatus.DONE;
+            item.status = interfaces_1.ENodeOperationStatus.DONE;
             if (isDone(vars.nodes)) {
                 return vars.resolve();
             }
@@ -445,14 +447,14 @@ function visitor(from, to, vars, item) {
         if (isDone(vars.nodes)) {
             return vars.resolve();
         }
-        if (options && !options.allowedToCopy(item.path)) {
+        if (options && !options.filter(item.path)) {
             done();
             return;
         }
         vars.filesInProgress += 1;
         // our main function after sanity checks
         const checked = (subResolveSettings) => {
-            item.status = interfaces_1.ENodeCopyStatus.CHECKED;
+            item.status = interfaces_1.ENodeOperationStatus.CHECKED;
             if (subResolveSettings) {
                 // if the first resolve callback returned an individual resolve settings "THIS",
                 // ask the user again with the same item
@@ -473,7 +475,7 @@ function visitor(from, to, vars, item) {
                     return;
                 }
             }
-            item.status = interfaces_1.ENodeCopyStatus.COPYING;
+            item.status = interfaces_1.ENodeOperationStatus.COPYING;
             copyItemAsync(item.path, item.item, destPath, options).then(() => {
                 vars.filesInProgress -= 1;
                 if (options.progress) {
@@ -523,7 +525,7 @@ function visitor(from, to, vars, item) {
 }
 function next(nodes) {
     for (let i = 0; i < nodes.length; i++) {
-        if (nodes[i].status === interfaces_1.ENodeCopyStatus.COLLECTED) {
+        if (nodes[i].status === interfaces_1.ENodeOperationStatus.COLLECTED) {
             return nodes[i];
         }
     }
@@ -591,7 +593,7 @@ function async(from, to, options) {
                     path: item.path,
                     item: item.item,
                     dst: pathUtil.resolve(to, pathUtil.relative(from, item.path)),
-                    status: interfaces_1.ENodeCopyStatus.COLLECTED
+                    status: interfaces_1.ENodeOperationStatus.COLLECTED
                 });
             };
             // a function called when the treeWalkerStream or visitor has been finished

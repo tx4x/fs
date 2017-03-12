@@ -74,6 +74,56 @@ declare module '@gbaumgart/fs/interfaces' {
 	    stack?: string;
 	}
 	/**
+	 * Structure for file operations.
+	 */
+	export interface IProcessingNodes {
+	    path: string;
+	    item: INode;
+	    status?: ENodeOperationStatus;
+	}
+	/**
+	 * Basic flags during a file operation.
+	 *
+	 * @export
+	 * @enum {number}
+	 */
+	export enum EBaseFlags {
+	    /**
+	     * When copying, don't copy symlinks but resolve them instead.
+	     */
+	    FOLLOW_SYMLINKS = 8,
+	}
+	/**
+	 * Flags to determine certain properties during inspection.
+	 *
+	 * @export
+	 * @enum {number}
+	 */
+	export enum EInspectFlags {
+	    MODE = 0,
+	    TIMES = 1,
+	    SYMLINKS = 2,
+	    FILE_SIZE = 3,
+	    DIRECTORY_SIZE = 4,
+	    CHECKSUM = 5,
+	}
+	export interface IBaseOptions {
+	    /**
+	     * Array of glob minimatch patterns
+	     *
+	     * @type {string[]}
+	     * @memberOf IBaseOptions
+	     */
+	    matching?: string[];
+	    /**
+	     * A function called to reject or accept nodes. This is used only when matching
+	     * has been left empty.
+	     * @memberOf IBaseOptions
+	     */
+	    filter?: (from: string) => boolean;
+	    flags?: EBaseFlags;
+	}
+	/**
 	 * Callback prototype signature when an item has been copied.
 	 * This is used to abort the copy process when returning false.
 	 *
@@ -108,11 +158,17 @@ declare module '@gbaumgart/fs/interfaces' {
 	 * @returns {Promise<IConflictSettings>}
 	 */
 	export type WriteProgressCallback = (path: string, current: number, total: number) => void;
-	export enum ENodeCopyStatus {
+	/**
+	 * Status of a node operation.
+	 *
+	 * @export
+	 * @enum {number}
+	 */
+	export enum ENodeOperationStatus {
 	    COLLECTED = 0,
 	    CHECKED = 1,
-	    COPYING = 2,
-	    PROCESSING = 3,
+	    PROCESSING = 2,
+	    COPYING = 3,
 	    ASKING = 4,
 	    ANSWERED = 5,
 	    DONE = 6,
@@ -177,7 +233,7 @@ declare module '@gbaumgart/fs/interfaces' {
 	     * has been left empty.
 	     * @memberOf ICopyOptions
 	     */
-	    allowedToCopy?: (from: string) => boolean;
+	    filter?: (from: string) => boolean;
 	    /**
 	     * A progress callback for any copied item. Only excecuted in async.
 	     */
@@ -264,6 +320,21 @@ declare module '@gbaumgart/fs/interfaces' {
 	    jsonIndent?: number;
 	    mode?: string;
 	}
+	/**
+	 * Delete options
+	 *
+	 * @export
+	 * @interface IDeleteOptions
+	 */
+	export interface IDeleteOptions {
+	    /**
+	     * Array of glob minimatch patterns
+	     *
+	     * @type {string[]}
+	     * @memberOf IDeleteOptions
+	     */
+	    matching?: string[];
+	}
 
 }
 declare module '@gbaumgart/fs/utils/validate' {
@@ -272,13 +343,10 @@ declare module '@gbaumgart/fs/utils/validate' {
 
 }
 declare module '@gbaumgart/fs/write' {
-	/// <reference types="node" />
-	import { IWriteOptions } from '@gbaumgart/fs/interfaces';
-	export type Data = string | Buffer | Object;
-	import { ReadWriteDataType } from '@gbaumgart/fs/interfaces';
+	import { IWriteOptions, ReadWriteDataType } from '@gbaumgart/fs/interfaces';
 	export function validateInput(methodName: string, path: string, data: ReadWriteDataType, options: IWriteOptions): void;
-	export function sync(path: string, data: Data, options?: IWriteOptions): void;
-	export function async(path: string, data: Data, options?: IWriteOptions): Promise<null>;
+	export function sync(path: string, data: ReadWriteDataType, options?: IWriteOptions): void;
+	export function async(path: string, data: ReadWriteDataType, options?: IWriteOptions): Promise<null>;
 
 }
 declare module '@gbaumgart/fs/append' {
@@ -376,7 +444,12 @@ declare module '@gbaumgart/fs/utils/tree_walker' {
 
 }
 declare module '@gbaumgart/fs/utils/matcher' {
-	export function create(basePath: string, patterns: string[]): (absolutePath: string) => boolean;
+	export interface IOptions {
+	    matchBase: boolean;
+	    nocomment: boolean;
+	    dot: boolean;
+	}
+	export function create(basePath: string, patterns: string[], options?: IOptions): (absolutePath: string) => boolean;
 
 }
 declare module '@gbaumgart/fs/find' {
@@ -463,15 +536,9 @@ declare module '@gbaumgart/fs/read' {
 	export function async(path: string, returnAs?: string): Promise<ReadWriteDataType>;
 
 }
-declare module '@gbaumgart/fs/playground' {
-	export function testBig(): void;
-	export function testManyWithProgress(): void;
-	export function testCollisionDirectory(): void;
-	export function testCollisionFile(): void;
-	export function testCopySymlink(): void;
-	export function prepareSymlink(): void;
-	export function inspectTreeTest(): void;
-	export function validateTest(): void;
+declare module '@gbaumgart/fs/iterator' {
+	import { IProcessingNodes, IBaseOptions } from '@gbaumgart/fs/interfaces';
+	export function async(from: string, options: IBaseOptions): Promise<IProcessingNodes[]>;
 
 }
 declare module '@gbaumgart/fs/jetpack' {

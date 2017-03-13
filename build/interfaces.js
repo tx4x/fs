@@ -122,6 +122,10 @@ var ECopyFlags;
      * When copying, don't copy symlinks but resolve them instead.
      */
     ECopyFlags[ECopyFlags["FOLLOW_SYMLINKS"] = 8] = "FOLLOW_SYMLINKS";
+    /**
+     * Collect errors & success
+     */
+    ECopyFlags[ECopyFlags["REPORT"] = 16] = "REPORT";
 })(ECopyFlags = exports.ECopyFlags || (exports.ECopyFlags = {}));
 /**
  * An enumeration to narrow a conflict resolve to a single item or for all following conflicts.

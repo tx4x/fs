@@ -56,6 +56,11 @@ declare module '@gbaumgart/fs/interfaces' {
 	    size?: boolean;
 	    mime?: boolean;
 	}
+	export interface INodeReport {
+	    node: IProcessingNode;
+	    error: string;
+	    resolved: IConflictSettings;
+	}
 	/**
 	 * The accepted types for write and read as union.
 	 */
@@ -82,6 +87,7 @@ declare module '@gbaumgart/fs/interfaces' {
 	    path: string;
 	    item: INode;
 	    status?: ENodeOperationStatus;
+	    dst?: string;
 	}
 	/**
 	 * Basic flags during a file operation.
@@ -222,6 +228,10 @@ declare module '@gbaumgart/fs/interfaces' {
 	     * When copying, don't copy symlinks but resolve them instead.
 	     */
 	    FOLLOW_SYMLINKS = 8,
+	    /**
+	     * Collect errors & success
+	     */
+	    REPORT = 16,
 	}
 	/**
 	 * Copy options
@@ -321,9 +331,29 @@ declare module '@gbaumgart/fs/interfaces' {
 	 * @interface IConflictSettings
 	 */
 	export interface IConflictSettings {
+	    /**
+	     * How to resolve this conflict/error.
+	     *
+	     * @type {EResolveMode}
+	     * @memberOf IConflictSettings
+	     */
 	    overwrite: EResolveMode;
+	    /**
+	     * The scope of this conflict resolver: always or this.
+	     *
+	     * @type {EResolve}
+	     * @memberOf IConflictSettings
+	     */
 	    mode: EResolve;
+	    /**
+	     * Track the origin error type for this settings.
+	     *
+	     * @type {string}
+	     * @memberOf IConflictSettings
+	     */
+	    error?: string;
 	}
+	export type TCopyResult = void | INodeReport[];
 	/**
 	 * fs/write options.
 	 *
@@ -534,7 +564,7 @@ declare module '@gbaumgart/fs/iterator' {
 
 }
 declare module '@gbaumgart/fs/copy' {
-	import { ICopyOptions, EResolveMode } from '@gbaumgart/fs/interfaces';
+	import { ICopyOptions, EResolveMode, TCopyResult } from '@gbaumgart/fs/interfaces';
 	export function validateInput(methodName: string, from: string, to: string, options?: ICopyOptions): void;
 	export function sync(from: string, to: string, options?: ICopyOptions): void;
 	export function copySymlinkAsync(from: string, to: string): Promise<string>;
@@ -547,7 +577,7 @@ declare module '@gbaumgart/fs/copy' {
 	 * @param {ICopyOptions} [options]
 	 * @returns
 	 */
-	export function async(from: string, to: string, options?: ICopyOptions): Promise<void>;
+	export function async(from: string, to: string, options?: ICopyOptions): Promise<TCopyResult>;
 
 }
 declare module '@gbaumgart/fs/move' {

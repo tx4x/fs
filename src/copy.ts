@@ -10,31 +10,22 @@ import { sync as treeWalkerSync } from './utils/tree_walker';
 import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync } from './write';
 import { ErrDestinationExists, ErrDoesntExists } from './errors';
-import { INode, ENodeType, IWriteOptions, ECopyFlags, ENodeOperationStatus } from './interfaces';
-import { EError, ErrnoException, EInspectFlags, IProcessingNode } from './interfaces';
+import { INode, ENodeType, IWriteOptions, ECopyFlags, ENodeOperationStatus, EError, ErrnoException, EInspectFlags, IProcessingNode, ICopyOptions, EResolveMode, IConflictSettings, EResolve, TCopyResult, INodeReport } from './interfaces';
 import { createItem } from './inspect';
 import { sync as rmSync } from './remove';
-import { ICopyOptions, EResolveMode, IConflictSettings, EResolve } from './interfaces';
 import { promisify } from './promisify';
-
 import { async as iteratorAsync } from './iterator';
-
 
 const promisedSymlink = promisify<string, string | Buffer, string, Function>(fs.symlink);
 const promisedReadlink = promisify(fs.readlink);
 const promisedUnlink = promisify(fs.unlink);
 const promisedMkdirp = promisify<string, any, Function>(mkdirp);
+
 const progress = require('progress-stream');
 const throttle = require('throttle');
 
-const CPROGRESS_THRESHOLD = 1048576 * 5; // minimum file size threshold to use write progress = 5MB
 
-interface ICopyTask {
-	path: string;
-	item: INode;
-	dst: string;
-	status?: ENodeOperationStatus;
-}
+const CPROGRESS_THRESHOLD = 1048576 * 5; // minimum file size threshold to use write progress = 5MB
 
 export function validateInput(methodName: string, from: string, to: string, options?: ICopyOptions): void {
 	const methodSignature = methodName + '(from, to, [options])';
@@ -158,7 +149,7 @@ async function copyItemSync(from: string, inspectData: INode, to: string, option
 export function sync(from: string, to: string, options?: ICopyOptions): void {
 	const opts = parseOptions(options, from);
 	checksBeforeCopyingSync(from, to, opts);
-	let nodes: ICopyTask[] = [];
+	let nodes: IProcessingNode[] = [];
 	let sizeTotal = 0;
 	if (options && options.flags & ECopyFlags.EMPTY) {
 		const dstStat = fs.statSync(to);
@@ -168,13 +159,11 @@ export function sync(from: string, to: string, options?: ICopyOptions): void {
 	}
 
 	const visitor = (path: string, inspectData: INode) => {
-		const rel = pathUtil.relative(from, path);
-		const destPath = pathUtil.resolve(to, rel);
 		if (opts.filter(path)) {
 			nodes.push({
 				path: path,
 				item: inspectData,
-				dst: destPath
+				dst: pathUtil.resolve(to, pathUtil.relative(from, path))
 			});
 			sizeTotal += inspectData.size;
 		}
@@ -222,7 +211,11 @@ const checkAsync = (from: string, to: string, opts: ICopyOptions): Promise<IConf
 					return Promise.resolve(opts.conflictSettings);
 				}
 				if (opts.conflictCallback) {
-					return opts.conflictCallback(to, createItem(to), EError.EXISTS);
+					const promise = opts.conflictCallback(to, createItem(to), EError.EXISTS);
+					promise.then((settings: IConflictSettings) => {
+						settings.error  = EError.EXISTS;
+					});
+					return promise;
 				}
 				if (!opts.overwrite) {
 					throw ErrDestinationExists(to);
@@ -280,7 +273,7 @@ const copyFileAsync = (from: string, to: string, mode: any, options?: ICopyOptio
 		if (options && options.writeProgress && size > CPROGRESS_THRESHOLD) {
 			progressStream = progress({
 				length: fs.statSync(from).size,
-				time: 100
+				time: 100 // call progress each 100 ms
 			});
 			let elapsed = Date.now();
 			let speed = 0;
@@ -389,9 +382,9 @@ export function resolveConflict(from: string, to: string, options: ICopyOptions,
 	}
 };
 
-function isDone(nodes: ICopyTask[]) {
+function isDone(nodes: IProcessingNode[]) {
 	let done = true;
-	nodes.forEach((element: ICopyTask) => {
+	nodes.forEach((element: IProcessingNode) => {
 		if (element.status !== ENodeOperationStatus.DONE) {
 			done = false;
 		}
@@ -410,7 +403,7 @@ process.on('unhandledRejection', (reason: string) => {
  * @param {{ path: string, item: INode }} item
  * @returns {Promise<void>}
  */
-async function visitor(from: string, to: string, vars: any, item: ICopyTask): Promise<void> {
+async function visitor(from: string, to: string, vars: IVisitorArgs, item: IProcessingNode): Promise<void> {
 	const options = vars.options;
 	let rel: string;
 	let destPath: string;
@@ -424,16 +417,25 @@ async function visitor(from: string, to: string, vars: any, item: ICopyTask): Pr
 	const done = () => {
 		item.status = ENodeOperationStatus.DONE;
 		if (isDone(vars.nodes)) {
-			return vars.resolve();
+			return vars.resolve(vars.result);
 		}
 	};
 	if (isDone(vars.nodes)) {
-		return vars.resolve();
+		return vars.resolve(vars.result);
 	}
 	vars.filesInProgress += 1;
 	// our main function after sanity checks
 	const checked = (subResolveSettings: IConflictSettings) => {
+
 		item.status = ENodeOperationStatus.CHECKED;
+		// feature : report
+		if (options && options.flags && options.flags & ECopyFlags.REPORT) {
+			(vars.result as INodeReport[]).push({
+				error: subResolveSettings.error,
+				node: item,
+				resolved: subResolveSettings
+			} as INodeReport);
+		}
 		if (subResolveSettings) {
 			// if the first resolve callback returned an individual resolve settings "THIS",
 			// ask the user again with the same item
@@ -455,6 +457,7 @@ async function visitor(from: string, to: string, vars: any, item: ICopyTask): Pr
 				done();
 				return;
 			}
+
 		}
 		item.status = ENodeOperationStatus.COPYING;
 		copyItemAsync(item.path, item.item, destPath, options).then(() => {
@@ -505,7 +508,7 @@ async function visitor(from: string, to: string, vars: any, item: ICopyTask): Pr
 	};
 	return checkAsync(item.path, destPath, options).then(checked);
 }
-function next(nodes: ICopyTask[]): ICopyTask {
+function next(nodes: IProcessingNode[]): IProcessingNode {
 	for (let i = 0; i < nodes.length; i++) {
 		if (nodes[i].status === ENodeOperationStatus.COLLECTED) {
 			return nodes[i];
@@ -513,6 +516,20 @@ function next(nodes: ICopyTask[]): ICopyTask {
 	}
 	return null;
 }
+
+interface IVisitorArgs {
+	resolve: Function;
+	reject: Function;
+	abort: boolean;
+	filesInProgress: number;
+	allFilesDelivered: boolean;
+	resolveSettings: IConflictSettings;
+	options: ICopyOptions;
+	result: TCopyResult;
+	nodes: IProcessingNode[];
+	onCopyErrorResolveSettings: IConflictSettings;
+}
+
 /**
  * Final async copy function.
  * @export
@@ -521,9 +538,9 @@ function next(nodes: ICopyTask[]): ICopyTask {
  * @param {ICopyOptions} [options]
  * @returns
  */
-export function async(from: string, to: string, options?: ICopyOptions): Promise<void> {
+export function async(from: string, to: string, options?: ICopyOptions): Promise<TCopyResult> {
 	options = parseOptions(options, from);
-	return new Promise<void>((resolve, reject) => {
+	return new Promise<TCopyResult>((resolve, reject) => {
 		checkAsync(from, to, options).then((resolver: IConflictSettings) => {
 			if (!resolver) {
 				resolver = options.conflictSettings || {
@@ -536,6 +553,11 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 				}
 			}
 			let overwriteMode = resolver.overwrite;
+			let result: TCopyResult = void 0;
+
+			if (options && options.flags && options.flags & ECopyFlags.REPORT) {
+				result = [];
+			}
 
 			// call onConflict to eventually throw an error
 			overwriteMode = onConflict(from, to, options, resolver);
@@ -552,22 +574,25 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 				}
 			}
 			// walker variables
-			const visitorArgs: any = {
+			const visitorArgs: IVisitorArgs = {
 				resolve: resolve,
 				reject: reject,
 				abort: false,
 				filesInProgress: 0,
 				allFilesDelivered: false,
 				resolveSettings: resolver,
-				options: options
+				options: options,
+				result: result,
+				nodes: null,
+				onCopyErrorResolveSettings: null
 			};
-			let nodes: ICopyTask[] = [];
+			let nodes: IProcessingNode[] = [];
 
 			// a function called when the treeWalkerStream or visitor has been finished
 			const process = function () {
 				visitorArgs.nodes = nodes;
 				if (isDone(nodes)) {
-					return resolve();
+					return resolve(result);
 				}
 				if (nodes.length) {
 					const item = next(nodes);

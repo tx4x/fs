@@ -58,6 +58,13 @@ export interface IInspectOptions {
 	mime?: boolean;
 }
 
+export interface INodeReport {
+	node: IProcessingNode;
+	error: string;
+	resolved: IConflictSettings;
+}
+
+
 /**
  * The accepted types for write and read as union.
  */
@@ -86,6 +93,7 @@ export interface IProcessingNode {
 	path: string;
 	item: INode;
 	status?: ENodeOperationStatus;
+	dst?: string;
 }
 
 /**
@@ -242,7 +250,11 @@ export enum ECopyFlags {
 	/**
 	 * When copying, don't copy symlinks but resolve them instead.
 	 */
-	FOLLOW_SYMLINKS = 8
+	FOLLOW_SYMLINKS = 8,
+	/**
+	 * Collect errors & success
+	 */
+	REPORT = 16
 }
 
 /**
@@ -345,9 +357,32 @@ export enum EResolve {
  * @interface IConflictSettings
  */
 export interface IConflictSettings {
+	/**
+	 * How to resolve this conflict/error.
+	 *
+	 * @type {EResolveMode}
+	 * @memberOf IConflictSettings
+	 */
 	overwrite: EResolveMode;
+	/**
+	 * The scope of this conflict resolver: always or this.
+	 *
+	 * @type {EResolve}
+	 * @memberOf IConflictSettings
+	 */
 	mode: EResolve;
+	/**
+	 * Track the origin error type for this settings.
+	 *
+	 * @type {string}
+	 * @memberOf IConflictSettings
+	 */
+	error?: string;
 }
+
+export type TCopyResult = void | INodeReport[];
+
+
 /////////////////////////////////////////////////////////
 //
 //  File operations : write

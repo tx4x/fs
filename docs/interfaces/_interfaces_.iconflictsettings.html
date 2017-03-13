@@ -99,6 +99,7 @@
 						<section class="tsd-index-section tsd-is-external">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.iconflictsettings.html#error" class="tsd-kind-icon">error</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.iconflictsettings.html#mode" class="tsd-kind-icon">mode</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.iconflictsettings.html#overwrite" class="tsd-kind-icon">overwrite</a></li>
 							</ul>
@@ -109,14 +110,50 @@
 			<section class="tsd-panel-group tsd-member-group tsd-is-external">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+					<a name="error" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> error</h3>
+					<div class="tsd-signature tsd-kind-icon">error<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/16be51e/src/interfaces.ts#L380">interfaces.ts:380</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Track the origin error type for this settings.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>type</dt>
+							<dd><p>{string}</p>
+							</dd>
+							<dt>memberof</dt>
+							<dd><p>IConflictSettings</p>
+							</dd>
+						</dl>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
 					<a name="mode" class="tsd-anchor"></a>
 					<h3>mode</h3>
 					<div class="tsd-signature tsd-kind-icon">mode<span class="tsd-signature-symbol">:</span> <a href="../enums/_interfaces_.eresolve.html" class="tsd-signature-type">EResolve</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/baf4a28/src/interfaces.ts#L349">interfaces.ts:349</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/16be51e/src/interfaces.ts#L373">interfaces.ts:373</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The scope of this conflict resolver: always or this.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>type</dt>
+							<dd><p>{EResolve}</p>
+							</dd>
+							<dt>memberof</dt>
+							<dd><p>IConflictSettings</p>
+							</dd>
+						</dl>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
 					<a name="overwrite" class="tsd-anchor"></a>
@@ -124,9 +161,22 @@
 					<div class="tsd-signature tsd-kind-icon">overwrite<span class="tsd-signature-symbol">:</span> <a href="../enums/_interfaces_.eresolvemode.html" class="tsd-signature-type">EResolveMode</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/baf4a28/src/interfaces.ts#L348">interfaces.ts:348</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/16be51e/src/interfaces.ts#L366">interfaces.ts:366</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>How to resolve this conflict/error.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>type</dt>
+							<dd><p>{EResolveMode}</p>
+							</dd>
+							<dt>memberof</dt>
+							<dd><p>IConflictSettings</p>
+							</dd>
+						</dl>
+					</div>
 				</section>
 			</section>
 		</div>
@@ -176,6 +226,9 @@
 						<a href="_interfaces_.iconflictsettings.html" class="tsd-kind-icon">IConflict<wbr>Settings</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+								<a href="_interfaces_.iconflictsettings.html#error" class="tsd-kind-icon">error</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
 								<a href="_interfaces_.iconflictsettings.html#mode" class="tsd-kind-icon">mode</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
@@ -198,6 +251,9 @@
 						<a href="_interfaces_.inode.html" class="tsd-kind-icon">INode</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
+						<a href="_interfaces_.inodereport.html" class="tsd-kind-icon">INode<wbr>Report</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
 						<a href="_interfaces_.iprocessingnode.html" class="tsd-kind-icon">IProcessing<wbr>Node</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
@@ -211,6 +267,9 @@
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
 						<a href="../modules/_interfaces_.html#resolveconflictcallback" class="tsd-kind-icon">Resolve<wbr>Conflict<wbr>Callback</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
+						<a href="../modules/_interfaces_.html#tcopyresult" class="tsd-kind-icon">TCopy<wbr>Result</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
 						<a href="../modules/_interfaces_.html#writeprogresscallback" class="tsd-kind-icon">Write<wbr>Progress<wbr>Callback</a>

@@ -1,8 +1,8 @@
 import { sync as treeWalkerSync } from './utils/tree_walker';
-import { INode, ENodeOperationStatus, IProcessingNodes, IBaseOptions, EInspectFlags } from './interfaces';
+import { INode, ENodeOperationStatus, IProcessingNode, IBaseOptions, EInspectFlags } from './interfaces';
 import { create as matcher } from './utils/matcher';
 
-export async function async(from: string, options: IBaseOptions): Promise<IProcessingNodes[]> {
+export async function async(from: string, options: IBaseOptions): Promise<IProcessingNode[]> {
 	if (options && !options.filter) {
 		if (options.matching) {
 			options.filter = matcher(from, options.matching);
@@ -22,8 +22,8 @@ export async function async(from: string, options: IBaseOptions): Promise<IProce
 			});
 		}
 	};
-	let nodes: IProcessingNodes[] = [];
-	return new Promise<IProcessingNodes[]>((resolve, reject) => {
+	let nodes: IProcessingNode[] = [];
+	return new Promise<IProcessingNode[]>((resolve, reject) => {
 		treeWalkerSync(from, {
 			inspectOptions: {
 				mode: options ? options.flags & EInspectFlags.MODE ? true : false : false,

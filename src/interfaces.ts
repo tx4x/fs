@@ -82,7 +82,7 @@ export class ErrnoException extends Error {
 /**
  * Structure for file operations.
  */
-export interface IProcessingNodes {
+export interface IProcessingNode {
 	path: string;
 	item: INode;
 	status?: ENodeOperationStatus;
@@ -136,7 +136,12 @@ export interface IBaseOptions {
 	 * @memberOf IBaseOptions
 	 */
 	filter?: (from: string) => boolean;
-
+	/**
+	 * Flags to determine properties per node
+	 *
+	 * @type {EInspectFlags}
+	 * @memberOf IBaseOptions
+	 */
 	flags?: EInspectFlags;
 }
 /////////////////////////////////////////////////////////

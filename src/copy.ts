@@ -11,7 +11,7 @@ import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync } from './write';
 import { ErrDestinationExists, ErrDoesntExists } from './errors';
 import { INode, ENodeType, IWriteOptions, ECopyFlags, ENodeOperationStatus } from './interfaces';
-import { EError, ErrnoException, EInspectFlags, IProcessingNodes } from './interfaces';
+import { EError, ErrnoException, EInspectFlags, IProcessingNode } from './interfaces';
 import { createItem } from './inspect';
 import { sync as rmSync } from './remove';
 import { ICopyOptions, EResolveMode, IConflictSettings, EResolve } from './interfaces';
@@ -590,8 +590,8 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 			iteratorAsync(from, {
 				filter: options.filter,
 				flags: flags
-			}).then((iteratorNodes: IProcessingNodes[]) => {
-				iteratorNodes.map((node: IProcessingNodes) => {
+			}).then((iteratorNodes: IProcessingNode[]) => {
+				iteratorNodes.map((node: IProcessingNode) => {
 					nodes.push({
 						path: node.path,
 						item: node.item,

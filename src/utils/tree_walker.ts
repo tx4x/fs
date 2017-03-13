@@ -13,7 +13,7 @@ export interface IOptions {
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-export function sync(path: string, options: IOptions, callback: (path: string, item: INode) => void, currentLevel?: number) {
+export function sync(path: string, options: IOptions, callback: (path: string, item: INode) => void, currentLevel?: number): void {
 	const item = inspectSync(path, options.inspectOptions);
 	if (options.maxLevelsDeep === undefined) {
 		options.maxLevelsDeep = Infinity;

@@ -78,7 +78,7 @@ declare module '@gbaumgart/fs/interfaces' {
 	/**
 	 * Structure for file operations.
 	 */
-	export interface IProcessingNodes {
+	export interface IProcessingNode {
 	    path: string;
 	    item: INode;
 	    status?: ENodeOperationStatus;
@@ -130,6 +130,12 @@ declare module '@gbaumgart/fs/interfaces' {
 	     * @memberOf IBaseOptions
 	     */
 	    filter?: (from: string) => boolean;
+	    /**
+	     * Flags to determine properties per node
+	     *
+	     * @type {EInspectFlags}
+	     * @memberOf IBaseOptions
+	     */
 	    flags?: EInspectFlags;
 	}
 	/**
@@ -499,8 +505,8 @@ declare module '@gbaumgart/fs/remove' {
 
 }
 declare module '@gbaumgart/fs/iterator' {
-	import { IProcessingNodes, IBaseOptions } from '@gbaumgart/fs/interfaces';
-	export function async(from: string, options: IBaseOptions): Promise<IProcessingNodes[]>;
+	import { IProcessingNode, IBaseOptions } from '@gbaumgart/fs/interfaces';
+	export function async(from: string, options: IBaseOptions): Promise<IProcessingNode[]>;
 
 }
 declare module '@gbaumgart/fs/copy' {

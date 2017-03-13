@@ -39,6 +39,7 @@ declare module '@gbaumgart/fs/interfaces' {
 	    children?: INode[];
 	    total?: number;
 	    checksum?: string;
+	    mime?: string;
 	}
 	/**
 	 * The options for "inspect".
@@ -53,6 +54,7 @@ declare module '@gbaumgart/fs/interfaces' {
 	    absolutePath?: boolean;
 	    symlinks?: boolean;
 	    size?: boolean;
+	    mime?: boolean;
 	}
 	/**
 	 * The accepted types for write and read as union.
@@ -100,13 +102,20 @@ declare module '@gbaumgart/fs/interfaces' {
 	 * @enum {number}
 	 */
 	export enum EInspectFlags {
-	    MODE = 0,
-	    TIMES = 1,
-	    SYMLINKS = 2,
-	    FILE_SIZE = 3,
-	    DIRECTORY_SIZE = 4,
-	    CHECKSUM = 5,
+	    MODE = 2,
+	    TIMES = 4,
+	    SYMLINKS = 8,
+	    FILE_SIZE = 16,
+	    DIRECTORY_SIZE = 32,
+	    CHECKSUM = 64,
+	    MIME = 128,
 	}
+	/**
+	 * Basic options for file operations: used by cp, mv, rename and rm.
+	 *
+	 * @export
+	 * @interface IBaseOptions
+	 */
 	export interface IBaseOptions {
 	    /**
 	     * Array of glob minimatch patterns
@@ -121,7 +130,7 @@ declare module '@gbaumgart/fs/interfaces' {
 	     * @memberOf IBaseOptions
 	     */
 	    filter?: (from: string) => boolean;
-	    flags?: EBaseFlags;
+	    flags?: EInspectFlags;
 	}
 	/**
 	 * Callback prototype signature when an item has been copied.
@@ -489,6 +498,11 @@ declare module '@gbaumgart/fs/remove' {
 	export function async(path: string): Promise<null>;
 
 }
+declare module '@gbaumgart/fs/iterator' {
+	import { IProcessingNodes, IBaseOptions } from '@gbaumgart/fs/interfaces';
+	export function async(from: string, options: IBaseOptions): Promise<IProcessingNodes[]>;
+
+}
 declare module '@gbaumgart/fs/copy' {
 	import { ICopyOptions, EResolveMode } from '@gbaumgart/fs/interfaces';
 	export function validateInput(methodName: string, from: string, to: string, options?: ICopyOptions): void;
@@ -534,11 +548,6 @@ declare module '@gbaumgart/fs/read' {
 	export function validateInput(methodName: string, path: string, returnAs: string): void;
 	export function sync(path: string, returnAs?: string): ReadWriteDataType;
 	export function async(path: string, returnAs?: string): Promise<ReadWriteDataType>;
-
-}
-declare module '@gbaumgart/fs/iterator' {
-	import { IProcessingNodes, IBaseOptions } from '@gbaumgart/fs/interfaces';
-	export function async(from: string, options: IBaseOptions): Promise<IProcessingNodes[]>;
 
 }
 declare module '@gbaumgart/fs/jetpack' {

@@ -6,16 +6,18 @@ import * as mkdirp from 'mkdirp';
 import { sync as existsSync, async as existsASync } from './exists';
 import { create as matcher } from './utils/matcher';
 import { normalizeFileMode as fileMode } from './utils/mode';
-import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
+import { sync as treeWalkerSync } from './utils/tree_walker';
 import { validateArgument, validateOptions } from './utils/validate';
 import { sync as writeSync } from './write';
 import { ErrDestinationExists, ErrDoesntExists } from './errors';
 import { INode, ENodeType, IWriteOptions, ECopyFlags, ENodeOperationStatus } from './interfaces';
-import { EError, ErrnoException } from './interfaces';
+import { EError, ErrnoException, EInspectFlags, IProcessingNodes } from './interfaces';
 import { createItem } from './inspect';
 import { sync as rmSync } from './remove';
 import { ICopyOptions, EResolveMode, IConflictSettings, EResolve } from './interfaces';
 import { promisify } from './promisify';
+
+import { async as iteratorAsync } from './iterator';
 
 
 const promisedSymlink = promisify<string, string | Buffer, string, Function>(fs.symlink);
@@ -567,25 +569,6 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 			};
 			let nodes: ICopyTask[] = [];
 
-			// This function is being called each time when the treeWalkerStream got an item!
-			// Now instead of calling the 'vistitor', we only collect the item.
-			// The reason why we collect and then process each serial is because the
-			// conflictCallback needs to be excecuted one by one
-			const collector = function () {
-				const stream: any = this;
-				const item: { path: string, name: string, item: INode } = stream.read();
-				if (!item) {
-					return;
-				}
-				nodes.push({
-					path: item.path,
-					item: item.item,
-					dst: pathUtil.resolve(to, pathUtil.relative(from, item.path)),
-					status: ENodeOperationStatus.COLLECTED
-				});
-
-			};
-
 			// a function called when the treeWalkerStream or visitor has been finished
 			const process = function () {
 				visitorArgs.nodes = nodes;
@@ -600,21 +583,24 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 				}
 			};
 
-			// start digging
-			treeWalkerStream(from, {
-				inspectOptions: {
-					mode: true,
-					symlinks: options ? options.flags & ECopyFlags.FOLLOW_SYMLINKS ? false : true : true
-				}
-			}).on('readable', function () { return collector.apply(this, arguments); })
-				.on('error', reject)
-				.on('end', () => {
-					process();
-					// a case when nothing matched (single file copy)
-					if (nodes.length === 0 && visitorArgs.filesInProgress === 0) {
-						resolve();
-					}
+			let flags: EInspectFlags = EInspectFlags.MODE;
+			if (options && options.flags && options.flags & ECopyFlags.FOLLOW_SYMLINKS) {
+				flags |= EInspectFlags.SYMLINKS;
+			}
+			iteratorAsync(from, {
+				filter: options.filter,
+				flags: flags
+			}).then((iteratorNodes: IProcessingNodes[]) => {
+				iteratorNodes.map((node: IProcessingNodes) => {
+					nodes.push({
+						path: node.path,
+						item: node.item,
+						dst: pathUtil.resolve(to, pathUtil.relative(from, node.path)),
+						status: ENodeOperationStatus.COLLECTED
+					});
 				});
+				process();
+			});
 		}).catch(reject);
 	});
 };

@@ -21,24 +21,21 @@ function async(from, options) {
                 options.filter = () => { return true; };
             }
         }
-        const collector = function () {
-            const stream = this;
-            const item = stream.read();
+        const collectorSync = function (path, item) {
             if (!item) {
                 return;
             }
-            if (options.filter(item.path)) {
+            if (options.filter(path)) {
                 nodes.push({
-                    path: item.path,
-                    item: item.item,
+                    path: path,
+                    item: item,
                     status: interfaces_1.ENodeOperationStatus.COLLECTED
                 });
             }
         };
         let nodes = [];
         return new Promise((resolve, reject) => {
-            // start digging
-            tree_walker_1.stream(from, {
+            tree_walker_1.sync(from, {
                 inspectOptions: {
                     mode: options ? options.flags & interfaces_1.EInspectFlags.MODE ? true : false : false,
                     times: options ? options.flags & interfaces_1.EInspectFlags.TIMES ? true : false : false,
@@ -46,11 +43,8 @@ function async(from, options) {
                     symlinks: options ? options.flags & interfaces_1.EInspectFlags.SYMLINKS ? false : true : true,
                     mime: options ? options.flags & interfaces_1.EInspectFlags.MIME ? true : false : false
                 }
-            }).on('readable', function () { return collector.apply(this, arguments); })
-                .on('error', reject)
-                .on('end', () => {
-                resolve(nodes);
-            });
+            }, collectorSync);
+            resolve(nodes);
         });
     });
 }

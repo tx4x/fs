@@ -25,6 +25,7 @@ const inspect_1 = require("./inspect");
 const remove_1 = require("./remove");
 const interfaces_3 = require("./interfaces");
 const promisify_1 = require("./promisify");
+const iterator_1 = require("./iterator");
 const promisedSymlink = promisify_1.promisify(fs.symlink);
 const promisedReadlink = promisify_1.promisify(fs.readlink);
 const promisedUnlink = promisify_1.promisify(fs.unlink);
@@ -579,23 +580,6 @@ function async(from, to, options) {
                 options: options
             };
             let nodes = [];
-            // This function is being called each time when the treeWalkerStream got an item!
-            // Now instead of calling the 'vistitor', we only collect the item.
-            // The reason why we collect and then process each serial is because the
-            // conflictCallback needs to be excecuted one by one
-            const collector = function () {
-                const stream = this;
-                const item = stream.read();
-                if (!item) {
-                    return;
-                }
-                nodes.push({
-                    path: item.path,
-                    item: item.item,
-                    dst: pathUtil.resolve(to, pathUtil.relative(from, item.path)),
-                    status: interfaces_1.ENodeOperationStatus.COLLECTED
-                });
-            };
             // a function called when the treeWalkerStream or visitor has been finished
             const process = function () {
                 visitorArgs.nodes = nodes;
@@ -609,20 +593,23 @@ function async(from, to, options) {
                     }
                 }
             };
-            // start digging
-            tree_walker_1.stream(from, {
-                inspectOptions: {
-                    mode: true,
-                    symlinks: options ? options.flags & interfaces_1.ECopyFlags.FOLLOW_SYMLINKS ? false : true : true
-                }
-            }).on('readable', function () { return collector.apply(this, arguments); })
-                .on('error', reject)
-                .on('end', () => {
+            let flags = interfaces_2.EInspectFlags.MODE;
+            if (options && options.flags && options.flags & interfaces_1.ECopyFlags.FOLLOW_SYMLINKS) {
+                flags |= interfaces_2.EInspectFlags.SYMLINKS;
+            }
+            iterator_1.async(from, {
+                filter: options.filter,
+                flags: flags
+            }).then((iteratorNodes) => {
+                iteratorNodes.map((node) => {
+                    nodes.push({
+                        path: node.path,
+                        item: node.item,
+                        dst: pathUtil.resolve(to, pathUtil.relative(from, node.path)),
+                        status: interfaces_1.ENodeOperationStatus.COLLECTED
+                    });
+                });
                 process();
-                // a case when nothing matched (single file copy)
-                if (nodes.length === 0 && visitorArgs.filesInProgress === 0) {
-                    resolve();
-                }
             });
         }).catch(reject);
     });

@@ -1,11 +1,6 @@
-import { stream as treeWalkerStream } from './utils/tree_walker';
+import { sync as treeWalkerSync } from './utils/tree_walker';
 import { INode, ENodeOperationStatus, IProcessingNodes, IBaseOptions, EInspectFlags } from './interfaces';
 import { create as matcher } from './utils/matcher';
-interface IStreamResult {
-	path: string;
-	name: string;
-	item: INode;
-}
 
 export async function async(from: string, options: IBaseOptions): Promise<IProcessingNodes[]> {
 	if (options && !options.filter) {
@@ -15,25 +10,21 @@ export async function async(from: string, options: IBaseOptions): Promise<IProce
 			options.filter = () => { return true; };
 		}
 	}
-	const collector = function () {
-		const stream: NodeJS.ReadableStream = this;
-		const item: IStreamResult = <any> stream.read();
+	const collectorSync = function (path: string, item: INode) {
 		if (!item) {
 			return;
 		}
-		if (options.filter(item.path)) {
+		if (options.filter(path)) {
 			nodes.push({
-				path: item.path,
-				item: item.item,
+				path: path,
+				item: item,
 				status: ENodeOperationStatus.COLLECTED
 			});
 		}
-
 	};
 	let nodes: IProcessingNodes[] = [];
 	return new Promise<IProcessingNodes[]>((resolve, reject) => {
-		// start digging
-		treeWalkerStream(from, {
+		treeWalkerSync(from, {
 			inspectOptions: {
 				mode: options ? options.flags & EInspectFlags.MODE ? true : false : false,
 				times: options ? options.flags & EInspectFlags.TIMES ? true : false : false,
@@ -41,10 +32,7 @@ export async function async(from: string, options: IBaseOptions): Promise<IProce
 				symlinks: options ? options.flags & EInspectFlags.SYMLINKS ? false : true : true,
 				mime: options ? options.flags & EInspectFlags.MIME ? true : false : false
 			}
-		}).on('readable', function () { return collector.apply(this, arguments); })
-			.on('error', reject)
-			.on('end', () => {
-				resolve(nodes);
-			});
+		}, collectorSync);
+		resolve(nodes);
 	});
 }

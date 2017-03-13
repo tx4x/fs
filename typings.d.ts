@@ -439,8 +439,32 @@ declare module '@gbaumgart/fs/inspect' {
 	export function async(path: string, options?: IInspectOptions): Promise<INode>;
 
 }
+declare module '@gbaumgart/fs/utils/platform' {
+	export enum Platform {
+	    Web = 0,
+	    Mac = 1,
+	    Linux = 2,
+	    Windows = 3,
+	}
+	export let _platform: Platform;
+	export const isWindows: boolean;
+	export const isMacintosh: boolean;
+	export const isLinux: boolean;
+	export const isRootUser: boolean;
+	export const isNative: boolean;
+	export const isWeb: boolean;
+	export const isQunit: boolean;
+	export const platform: Platform;
+
+}
+declare module '@gbaumgart/fs/utils/strings' {
+	export let canNormalize: boolean;
+	export function normalizeNFC(str: string): string;
+
+}
 declare module '@gbaumgart/fs/list' {
 	export function validateInput(methodName: string, path: string): void;
+	export function _readdirSync(path: string): string[];
 	export function sync(path: string): string[];
 	export function async(path: string): Promise<string[]>;
 

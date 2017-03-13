@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>IProcessingNode | @xblox/fs</title>
+	<title>&quot;utils/strings&quot; | @xblox/fs</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,80 +56,83 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_interfaces_.html">&quot;interfaces&quot;</a>
-				</li>
-				<li>
-					<a href="_interfaces_.iprocessingnode.html">IProcessingNode</a>
+					<a href="_utils_strings_.html">&quot;utils/strings&quot;</a>
 				</li>
 			</ul>
-			<h1>Interface IProcessingNode</h1>
+			<h1>External module &quot;utils/strings&quot;</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-comment">
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>Structure for file operations.</p>
-					</div>
-				</div>
-			</section>
-			<section class="tsd-panel tsd-hierarchy">
-				<h3>Hierarchy</h3>
-				<ul class="tsd-hierarchy">
-					<li>
-						<span class="target">IProcessingNode</span>
-					</li>
-				</ul>
-			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section tsd-is-external">
-							<h3>Properties</h3>
+							<h3>Variables</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.iprocessingnode.html#item" class="tsd-kind-icon">item</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.iprocessingnode.html#path" class="tsd-kind-icon">path</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.iprocessingnode.html#status" class="tsd-kind-icon">status</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-external"><a href="_utils_strings_.html#cannormalize" class="tsd-kind-icon">can<wbr>Normalize</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported"><a href="_utils_strings_.html#nonasciicharacterspattern" class="tsd-kind-icon">non<wbr>Ascii<wbr>Characters<wbr>Pattern</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section tsd-is-external">
+							<h3>Functions</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-external"><a href="_utils_strings_.html#normalizenfc" class="tsd-kind-icon">normalizeNFC</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group tsd-is-external">
-				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="item" class="tsd-anchor"></a>
-					<h3>item</h3>
-					<div class="tsd-signature tsd-kind-icon">item<span class="tsd-signature-symbol">:</span> <a href="_interfaces_.inode.html" class="tsd-signature-type">INode</a></div>
+				<h2>Variables</h2>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-external">
+					<a name="cannormalize" class="tsd-anchor"></a>
+					<h3>can<wbr>Normalize</h3>
+					<div class="tsd-signature tsd-kind-icon">can<wbr>Normalize<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;typeof ((&lt;any&gt; &#x27;&#x27;).normalize) &#x3D;&#x3D;&#x3D; &#x27;function&#x27;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/4c4ed00/src/interfaces.ts#L87">interfaces.ts:87</a></li>
+							<li>Defined in utils/strings.ts:1</li>
 						</ul>
 					</aside>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="path" class="tsd-anchor"></a>
-					<h3>path</h3>
-					<div class="tsd-signature tsd-kind-icon">path<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
+					<a name="nonasciicharacterspattern" class="tsd-anchor"></a>
+					<h3>non<wbr>Ascii<wbr>Characters<wbr>Pattern</h3>
+					<div class="tsd-signature tsd-kind-icon">non<wbr>Ascii<wbr>Characters<wbr>Pattern<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">RegExp</span><span class="tsd-signature-symbol"> =&nbsp;/[^\u0000-\u0080]/</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/4c4ed00/src/interfaces.ts#L86">interfaces.ts:86</a></li>
+							<li>Defined in utils/strings.ts:2</li>
 						</ul>
 					</aside>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-					<a name="status" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> status</h3>
-					<div class="tsd-signature tsd-kind-icon">status<span class="tsd-signature-symbol">:</span> <a href="../enums/_interfaces_.enodeoperationstatus.html" class="tsd-signature-type">ENodeOperationStatus</a></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/4c4ed00/src/interfaces.ts#L88">interfaces.ts:88</a></li>
-						</ul>
-					</aside>
+			</section>
+			<section class="tsd-panel-group tsd-member-group tsd-is-external">
+				<h2>Functions</h2>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-is-external">
+					<a name="normalizenfc" class="tsd-anchor"></a>
+					<h3>normalizeNFC</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">normalizeNFC<span class="tsd-signature-symbol">(</span>str<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in utils/strings.ts:3</li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>str: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
 				</section>
 			</section>
 		</div>
@@ -140,89 +143,20 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class="current tsd-kind-external-module tsd-is-external">
-						<a href="../modules/_interfaces_.html">"interfaces"</a>
+						<a href="_utils_strings_.html">"utils/strings"</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
-						<a href="../enums/_interfaces_.ebaseflags.html" class="tsd-kind-icon">EBase<wbr>Flags</a>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-external">
+						<a href="_utils_strings_.html#cannormalize" class="tsd-kind-icon">can<wbr>Normalize</a>
 					</li>
-					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
-						<a href="../enums/_interfaces_.ecopyflags.html" class="tsd-kind-icon">ECopy<wbr>Flags</a>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-external tsd-is-not-exported">
+						<a href="_utils_strings_.html#nonasciicharacterspattern" class="tsd-kind-icon">non<wbr>Ascii<wbr>Characters<wbr>Pattern</a>
 					</li>
-					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
-						<a href="../enums/_interfaces_.einspectflags.html" class="tsd-kind-icon">EInspect<wbr>Flags</a>
-					</li>
-					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
-						<a href="../enums/_interfaces_.enodeoperationstatus.html" class="tsd-kind-icon">ENode<wbr>Operation<wbr>Status</a>
-					</li>
-					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
-						<a href="../enums/_interfaces_.enodetype.html" class="tsd-kind-icon">ENode<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
-						<a href="../enums/_interfaces_.eresolve.html" class="tsd-kind-icon">EResolve</a>
-					</li>
-					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
-						<a href="../enums/_interfaces_.eresolvemode.html" class="tsd-kind-icon">EResolve<wbr>Mode</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-is-external">
-						<a href="../classes/_interfaces_.errnoexception.html" class="tsd-kind-icon">Errno<wbr>Exception</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
-						<a href="_interfaces_.ibaseoptions.html" class="tsd-kind-icon">IBase<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
-						<a href="_interfaces_.iconflictsettings.html" class="tsd-kind-icon">IConflict<wbr>Settings</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
-						<a href="_interfaces_.icopyoptions.html" class="tsd-kind-icon">ICopy<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
-						<a href="_interfaces_.ideleteoptions.html" class="tsd-kind-icon">IDelete<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
-						<a href="_interfaces_.iinspectoptions.html" class="tsd-kind-icon">IInspect<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
-						<a href="_interfaces_.inode.html" class="tsd-kind-icon">INode</a>
-					</li>
-				</ul>
-				<ul class="current">
-					<li class="current tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
-						<a href="_interfaces_.iprocessingnode.html" class="tsd-kind-icon">IProcessing<wbr>Node</a>
-						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_interfaces_.iprocessingnode.html#item" class="tsd-kind-icon">item</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_interfaces_.iprocessingnode.html#path" class="tsd-kind-icon">path</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
-								<a href="_interfaces_.iprocessingnode.html#status" class="tsd-kind-icon">status</a>
-							</li>
-						</ul>
-					</li>
-				</ul>
-				<ul class="after-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-external">
-						<a href="_interfaces_.iwriteoptions.html" class="tsd-kind-icon">IWrite<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
-						<a href="../modules/_interfaces_.html#itemprogresscallback" class="tsd-kind-icon">Item<wbr>Progress<wbr>Callback</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
-						<a href="../modules/_interfaces_.html#readwritedatatype" class="tsd-kind-icon">Read<wbr>Write<wbr>Data<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
-						<a href="../modules/_interfaces_.html#resolveconflictcallback" class="tsd-kind-icon">Resolve<wbr>Conflict<wbr>Callback</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
-						<a href="../modules/_interfaces_.html#writeprogresscallback" class="tsd-kind-icon">Write<wbr>Progress<wbr>Callback</a>
-					</li>
-					<li class=" tsd-kind-object-literal tsd-parent-kind-external-module tsd-is-external">
-						<a href="../modules/_interfaces_.html#eerror" class="tsd-kind-icon">EError</a>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-external">
+						<a href="_utils_strings_.html#normalizenfc" class="tsd-kind-icon">normalizeNFC</a>
 					</li>
 				</ul>
 			</nav>

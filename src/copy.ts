@@ -427,14 +427,8 @@ async function visitor(from: string, to: string, vars: any, item: ICopyTask): Pr
 			return vars.resolve();
 		}
 	};
-
 	if (isDone(vars.nodes)) {
 		return vars.resolve();
-	}
-
-	if (options && !options.filter(item.path)) {
-		done();
-		return;
 	}
 	vars.filesInProgress += 1;
 	// our main function after sanity checks

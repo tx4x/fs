@@ -448,10 +448,6 @@ function visitor(from, to, vars, item) {
         if (isDone(vars.nodes)) {
             return vars.resolve();
         }
-        if (options && !options.filter(item.path)) {
-            done();
-            return;
-        }
         vars.filesInProgress += 1;
         // our main function after sanity checks
         const checked = (subResolveSettings) => {

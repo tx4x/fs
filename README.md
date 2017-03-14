@@ -1,4 +1,5 @@
-fs-jetpack [![Build Status](https://travis-ci.org/xblox/fs.svg?branch=master)](https://travis-ci.org/xblox/fs) [![Build status](https://ci.appveyor.com/api/projects/status/7gjgoxnxi3t9dc29?svg=true)](https://ci.appveyor.com/project/xblox/fs) [![codecov](https://codecov.io/gh/xblox/fs/branch/master/graph/badge.svg)](https://codecov.io/gh/xblox/fs)
+![Engine](https://camo.githubusercontent.com/7bae0b99443921f1525afffbff807f7f54be3ec0/687474703a2f2f696d672e736869656c64732e696f2f6e6f64652f762f6b6f612e737667)
+[![Build Status](https://travis-ci.org/xblox/fs.svg?branch=master)](https://travis-ci.org/xblox/fs) [![Build status](https://ci.appveyor.com/api/projects/status/7gjgoxnxi3t9dc29?svg=true)](https://ci.appveyor.com/project/xblox/fs) [![codecov](https://codecov.io/gh/xblox/fs/branch/master/graph/badge.svg)](https://codecov.io/gh/xblox/fs)
 
 Check out [EXAMPLES](EXAMPLES.md) to see few snippets what it can do.
 

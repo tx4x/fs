@@ -1,6 +1,6 @@
 require('dts-generator').default({
-    name: '@gbaumgart/fs',
+    name: '@xblox/fs',
     project: './',
-    out: 'typings.d.ts',
+    out: 'index.d.ts',
     main:'jetpack.ts'
 });

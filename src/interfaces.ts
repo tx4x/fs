@@ -1,13 +1,15 @@
+import {isArray} from "@xblox/core/primitives";
+
 /////////////////////////////////////////////////////////
 //
 //  Enums
 //
 export enum ENodeType {
-	FILE = <any>'file',
-	DIR = <any>'dir',
-	SYMLINK = <any>'symlink',
-	OTHER = <any>'other',
-	BLOCK = <any>'block'
+	FILE = <any> 'file',
+	DIR = <any> 'dir',
+	SYMLINK = <any> 'symlink',
+	OTHER = <any> 'other',
+	BLOCK = <any> 'block'
 }
 
 /**

@@ -583,14 +583,13 @@ function async(from, to, options) {
                 reject: reject,
                 abort: false,
                 filesInProgress: 0,
-                allFilesDelivered: false,
                 resolveSettings: resolver,
                 options: options,
                 result: result,
-                nodes: null,
+                nodes: [],
                 onCopyErrorResolveSettings: null
             };
-            let nodes = [];
+            const nodes = visitorArgs.nodes;
             // a function called when the treeWalkerStream or visitor has been finished
             const process = function () {
                 visitorArgs.nodes = nodes;
@@ -611,15 +610,16 @@ function async(from, to, options) {
             iterator_1.async(from, {
                 filter: options.filter,
                 flags: flags
-            }).then((iteratorNodes) => {
-                iteratorNodes.map((node) => {
+            }).then((it) => {
+                let node = null;
+                while (node = it.next()) {
                     nodes.push({
                         path: node.path,
                         item: node.item,
                         dst: pathUtil.resolve(to, pathUtil.relative(from, node.path)),
                         status: interfaces_1.ENodeOperationStatus.COLLECTED
                     });
-                });
+                }
                 process();
             });
         }).catch(reject);

@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tree_walker_1 = require("./utils/tree_walker");
 const interfaces_1 = require("./interfaces");
 const matcher_1 = require("./utils/matcher");
+const iterator_1 = require("@xblox/core/iterator");
 function async(from, options) {
     return __awaiter(this, void 0, void 0, function* () {
         if (options && !options.filter) {
@@ -44,7 +45,7 @@ function async(from, options) {
                     mime: options ? options.flags & interfaces_1.EInspectFlags.MIME ? true : false : false
                 }
             }, collectorSync);
-            resolve(nodes);
+            resolve(new iterator_1.ArrayIterator(nodes));
         });
     });
 }

@@ -15,6 +15,7 @@ import { createItem } from './inspect';
 import { sync as rmSync } from './remove';
 import { promisify } from './promisify';
 import { async as iteratorAsync } from './iterator';
+import { ArrayIterator } from '@xblox/core/iterator';
 
 const promisedSymlink = promisify<string, string | Buffer, string, Function>(fs.symlink);
 const promisedReadlink = promisify(fs.readlink);
@@ -213,7 +214,7 @@ const checkAsync = (from: string, to: string, opts: ICopyOptions): Promise<IConf
 				if (opts.conflictCallback) {
 					const promise = opts.conflictCallback(to, createItem(to), EError.EXISTS);
 					promise.then((settings: IConflictSettings) => {
-						settings.error  = EError.EXISTS;
+						settings.error = EError.EXISTS;
 					});
 					return promise;
 				}
@@ -426,7 +427,6 @@ async function visitor(from: string, to: string, vars: IVisitorArgs, item: IProc
 	vars.filesInProgress += 1;
 	// our main function after sanity checks
 	const checked = (subResolveSettings: IConflictSettings) => {
-
 		item.status = ENodeOperationStatus.CHECKED;
 		// feature : report
 		if (options && options.flags && options.flags & ECopyFlags.REPORT) {
@@ -522,7 +522,6 @@ interface IVisitorArgs {
 	reject: Function;
 	abort: boolean;
 	filesInProgress: number;
-	allFilesDelivered: boolean;
 	resolveSettings: IConflictSettings;
 	options: ICopyOptions;
 	result: TCopyResult;
@@ -579,15 +578,13 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 				reject: reject,
 				abort: false,
 				filesInProgress: 0,
-				allFilesDelivered: false,
 				resolveSettings: resolver,
 				options: options,
 				result: result,
-				nodes: null,
+				nodes: [],
 				onCopyErrorResolveSettings: null
 			};
-			let nodes: IProcessingNode[] = [];
-
+			const nodes = visitorArgs.nodes;
 			// a function called when the treeWalkerStream or visitor has been finished
 			const process = function () {
 				visitorArgs.nodes = nodes;
@@ -609,15 +606,16 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 			iteratorAsync(from, {
 				filter: options.filter,
 				flags: flags
-			}).then((iteratorNodes: IProcessingNode[]) => {
-				iteratorNodes.map((node: IProcessingNode) => {
+			}).then((it: ArrayIterator<IProcessingNode>) => {
+				let node: IProcessingNode = null;
+				while (node = it.next()) {
 					nodes.push({
 						path: node.path,
 						item: node.item,
 						dst: pathUtil.resolve(to, pathUtil.relative(from, node.path)),
 						status: ENodeOperationStatus.COLLECTED
 					});
-				});
+				}
 				process();
 			});
 		}).catch(reject);

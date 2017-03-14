@@ -1,14 +1,14 @@
 {
   "name": "@xblox/fs",
   "description": "Simplified file system API in Typescript",
-  "version": "0.13.4",
+  "version": "0.13.5",
   "contributors": [
     {
       "name": "xblox"
     }
   ],
   "dependencies": {
-    "@xblox/core": "0.0.5",
+    "@xblox/core": "0.0.12",
     "denodeify": "^1.2.1",
     "errno": "^0.1.4",
     "mime": "^1.3.4",

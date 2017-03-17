@@ -1,15 +1,13 @@
-import {isArray} from "@xblox/core/primitives";
-
 /////////////////////////////////////////////////////////
 //
 //  Enums
 //
 export enum ENodeType {
-	FILE = <any> 'file',
-	DIR = <any> 'dir',
-	SYMLINK = <any> 'symlink',
-	OTHER = <any> 'other',
-	BLOCK = <any> 'block'
+	FILE = <any>'file',
+	DIR = <any>'dir',
+	SYMLINK = <any>'symlink',
+	OTHER = <any>'other',
+	BLOCK = <any>'block'
 }
 
 /**
@@ -209,8 +207,8 @@ export enum ENodeOperationStatus {
 	CHECKED,
 	// Node is in progress, before copy
 	PROCESSING,
-	// Node is in copy process
-	COPYING,
+	// Node is in process
+	PROCESS,
 	// Node is in conflict, and user is being asked what to do
 	ASKING,
 	// Node conflict has been resolved by user
@@ -231,6 +229,7 @@ export enum EResolveMode {
 	IF_SIZE_DIFFERS,
 	APPEND,
 	THROW,
+	RETRY,
 	ABORT
 }
 
@@ -384,7 +383,6 @@ export interface IConflictSettings {
 
 export type TCopyResult = void | INodeReport[];
 
-
 /////////////////////////////////////////////////////////
 //
 //  File operations : write
@@ -405,7 +403,16 @@ export interface IWriteOptions {
 //
 //  File operations : remove
 //
-
+export type TDeleteResult = void | INodeReport[];
+/**
+ * Additional flags for delete
+ *
+ * @export
+ * @enum {number}
+ */
+export enum EDeleteFlags {
+	REPORT = 16
+}
 /**
  * Delete options
  *
@@ -420,4 +427,48 @@ export interface IDeleteOptions {
 	 * @memberOf IDeleteOptions
 	 */
 	matching?: string[];
+	/**
+	 * A callback when a conflict or error occurs. This is being called only if the user
+	 * didn't provide conflictSettings.
+	 *
+	 * @type {ResolveConflictCallback}
+	 * @memberOf IDeleteOptions
+	 */
+	conflictCallback?: ResolveConflictCallback;
+	/**
+	 * Ability to set conflict resolver settings in advance, so that no callback will be called.
+	 *
+	 * @type {IConflictSettings}
+	 * @memberOf IDeleteOptions
+	 */
+	conflictSettings?: IConflictSettings;
+	/**
+	 *
+	 * A progress callback for any deleted item. Only excecuted in async.
+	 * @type {ItemProgressCallback}
+	 * @memberOf IDeleteOptions
+	 */
+	progress?: ItemProgressCallback;
+	/**
+	 * Print some messages.
+	 *
+	 * @type {boolean}
+	 * @memberOf IDeleteOptions
+	 */
+	debug?: boolean;
+	/**
+	 * A function called to reject or accept nodes to be copied. This is used only when matching
+	 * has been left empty.
+	 * @memberOf IDeleteOptions
+	 */
+	filter?: (from: string) => boolean;
+	/**
+	 * Move files to system's trash/recycle-bin
+	 *
+	 * @type {boolean}
+	 * @memberOf IDeleteOptions
+	 */
+	trash?: boolean;
+
+	flags?: EDeleteFlags;
 }

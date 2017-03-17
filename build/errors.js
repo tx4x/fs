@@ -4,7 +4,7 @@ const interfaces_1 = require("./interfaces");
 const errno = require('errno');
 Object.keys(errno.code).forEach(function (code) {
     const e = errno.code[code];
-    exports[code] = function (path) {
+    exports[code] = (path) => {
         let err = new Error(code + ', ' + e.description + (path ? ' \'' + path + '\'' : ''));
         err.errno = e.errno;
         err.code = code;
@@ -12,6 +12,16 @@ Object.keys(errno.code).forEach(function (code) {
         return err;
     };
 });
+function ErrNoFileOrDir(path) {
+    return new Error("Can't remove " + path + ' The path is not file nor directory');
+}
+exports.ErrNoFileOrDir = ErrNoFileOrDir;
+;
+function ErrCantDelete(path) {
+    return new Error("Can't remove " + path);
+}
+exports.ErrCantDelete = ErrCantDelete;
+;
 function ErrNotFile(path) {
     return new Error('Path ' + path + ' exists but is not a file.' +
         ' Halting jetpack.file() call for safety reasons.');

@@ -5,6 +5,7 @@
     "raw": "registry:npm/minimatch#3.0.0+20170119000329",
     "main": "minimatch.d.ts",
     "version": "3.0.0",
-    "name": "minimatch"
+    "name": "minimatch",
+    "type": "typings"
   }
 }

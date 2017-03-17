@@ -77,8 +77,8 @@ var ENodeOperationStatus;
     ENodeOperationStatus[ENodeOperationStatus["CHECKED"] = 1] = "CHECKED";
     // Node is in progress, before copy
     ENodeOperationStatus[ENodeOperationStatus["PROCESSING"] = 2] = "PROCESSING";
-    // Node is in copy process
-    ENodeOperationStatus[ENodeOperationStatus["COPYING"] = 3] = "COPYING";
+    // Node is in process
+    ENodeOperationStatus[ENodeOperationStatus["PROCESS"] = 3] = "PROCESS";
     // Node is in conflict, and user is being asked what to do
     ENodeOperationStatus[ENodeOperationStatus["ASKING"] = 4] = "ASKING";
     // Node conflict has been resolved by user
@@ -100,7 +100,8 @@ var EResolveMode;
     EResolveMode[EResolveMode["IF_SIZE_DIFFERS"] = 3] = "IF_SIZE_DIFFERS";
     EResolveMode[EResolveMode["APPEND"] = 4] = "APPEND";
     EResolveMode[EResolveMode["THROW"] = 5] = "THROW";
-    EResolveMode[EResolveMode["ABORT"] = 6] = "ABORT";
+    EResolveMode[EResolveMode["RETRY"] = 6] = "RETRY";
+    EResolveMode[EResolveMode["ABORT"] = 7] = "ABORT";
 })(EResolveMode = exports.EResolveMode || (exports.EResolveMode = {}));
 /**
  * Additional flags for copy
@@ -144,4 +145,14 @@ var EResolve;
      */
     EResolve[EResolve["THIS"] = 1] = "THIS";
 })(EResolve = exports.EResolve || (exports.EResolve = {}));
+/**
+ * Additional flags for delete
+ *
+ * @export
+ * @enum {number}
+ */
+var EDeleteFlags;
+(function (EDeleteFlags) {
+    EDeleteFlags[EDeleteFlags["REPORT"] = 16] = "REPORT";
+})(EDeleteFlags = exports.EDeleteFlags || (exports.EDeleteFlags = {}));
 //# sourceMappingURL=interfaces.js.map

@@ -98,7 +98,14 @@
 						<section class="tsd-index-section tsd-is-external">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.ideleteoptions.html#conflictcallback" class="tsd-kind-icon">conflict<wbr>Callback</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.ideleteoptions.html#conflictsettings" class="tsd-kind-icon">conflict<wbr>Settings</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.ideleteoptions.html#debug" class="tsd-kind-icon">debug</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.ideleteoptions.html#filter" class="tsd-kind-icon">filter</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.ideleteoptions.html#flags" class="tsd-kind-icon">flags</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.ideleteoptions.html#matching" class="tsd-kind-icon">matching</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.ideleteoptions.html#progress" class="tsd-kind-icon">progress</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-external"><a href="_interfaces_.ideleteoptions.html#trash" class="tsd-kind-icon">trash</a></li>
 							</ul>
 						</section>
 					</div>
@@ -107,12 +114,134 @@
 			<section class="tsd-panel-group tsd-member-group tsd-is-external">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+					<a name="conflictcallback" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> conflict<wbr>Callback</h3>
+					<div class="tsd-signature tsd-kind-icon">conflict<wbr>Callback<span class="tsd-signature-symbol">:</span> <a href="../modules/_interfaces_.html#resolveconflictcallback" class="tsd-signature-type">ResolveConflictCallback</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L437">interfaces.ts:437</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A callback when a conflict or error occurs. This is being called only if the user
+							didn&#39;t provide conflictSettings.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>type</dt>
+							<dd><p>{ResolveConflictCallback}</p>
+							</dd>
+							<dt>memberof</dt>
+							<dd><p>IDeleteOptions</p>
+							</dd>
+						</dl>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+					<a name="conflictsettings" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> conflict<wbr>Settings</h3>
+					<div class="tsd-signature tsd-kind-icon">conflict<wbr>Settings<span class="tsd-signature-symbol">:</span> <a href="_interfaces_.iconflictsettings.html" class="tsd-signature-type">IConflictSettings</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L444">interfaces.ts:444</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Ability to set conflict resolver settings in advance, so that no callback will be called.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>type</dt>
+							<dd><p>{IConflictSettings}</p>
+							</dd>
+							<dt>memberof</dt>
+							<dd><p>IDeleteOptions</p>
+							</dd>
+						</dl>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+					<a name="debug" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> debug</h3>
+					<div class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L458">interfaces.ts:458</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Print some messages.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>type</dt>
+							<dd><p>{boolean}</p>
+							</dd>
+							<dt>memberof</dt>
+							<dd><p>IDeleteOptions</p>
+							</dd>
+						</dl>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+					<a name="filter" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> filter</h3>
+					<div class="tsd-signature tsd-kind-icon">filter<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L464">interfaces.ts:464</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A function called to reject or accept nodes to be copied. This is used only when matching
+							has been left empty.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>memberof</dt>
+							<dd><p>IDeleteOptions</p>
+							</dd>
+						</dl>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter-siganture">
+								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-property tsd-is-not-exported">
+									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>from<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+								</ul>
+								<ul class="tsd-descriptions">
+									<li class="tsd-description">
+										<h4 class="tsd-parameters-title">Parameters</h4>
+										<ul class="tsd-parameters">
+											<li>
+												<h5>from: <span class="tsd-signature-type">string</span></h5>
+											</li>
+										</ul>
+										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+					<a name="flags" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> flags</h3>
+					<div class="tsd-signature tsd-kind-icon">flags<span class="tsd-signature-symbol">:</span> <a href="../enums/_interfaces_.edeleteflags.html" class="tsd-signature-type">EDeleteFlags</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L473">interfaces.ts:473</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
 					<a name="matching" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> matching</h3>
 					<div class="tsd-signature tsd-kind-icon">matching<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/a4b4e26/src/interfaces.ts#L422">interfaces.ts:422</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L429">interfaces.ts:429</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -122,6 +251,52 @@
 						<dl class="tsd-comment-tags">
 							<dt>type</dt>
 							<dd><p>{string[]}</p>
+							</dd>
+							<dt>memberof</dt>
+							<dd><p>IDeleteOptions</p>
+							</dd>
+						</dl>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+					<a name="progress" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> progress</h3>
+					<div class="tsd-signature tsd-kind-icon">progress<span class="tsd-signature-symbol">:</span> <a href="../modules/_interfaces_.html#itemprogresscallback" class="tsd-signature-type">ItemProgressCallback</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L451">interfaces.ts:451</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A progress callback for any deleted item. Only excecuted in async.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>type</dt>
+							<dd><p>{ItemProgressCallback}</p>
+							</dd>
+							<dt>memberof</dt>
+							<dd><p>IDeleteOptions</p>
+							</dd>
+						</dl>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+					<a name="trash" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> trash</h3>
+					<div class="tsd-signature tsd-kind-icon">trash<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L471">interfaces.ts:471</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Move files to system&#39;s trash/recycle-bin</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>type</dt>
+							<dd><p>{boolean}</p>
 							</dd>
 							<dt>memberof</dt>
 							<dd><p>IDeleteOptions</p>
@@ -149,6 +324,9 @@
 					</li>
 					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
 						<a href="../enums/_interfaces_.ecopyflags.html" class="tsd-kind-icon">ECopy<wbr>Flags</a>
+					</li>
+					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
+						<a href="../enums/_interfaces_.edeleteflags.html" class="tsd-kind-icon">EDelete<wbr>Flags</a>
 					</li>
 					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
 						<a href="../enums/_interfaces_.einspectflags.html" class="tsd-kind-icon">EInspect<wbr>Flags</a>
@@ -183,7 +361,28 @@
 						<a href="_interfaces_.ideleteoptions.html" class="tsd-kind-icon">IDelete<wbr>Options</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+								<a href="_interfaces_.ideleteoptions.html#conflictcallback" class="tsd-kind-icon">conflict<wbr>Callback</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+								<a href="_interfaces_.ideleteoptions.html#conflictsettings" class="tsd-kind-icon">conflict<wbr>Settings</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+								<a href="_interfaces_.ideleteoptions.html#debug" class="tsd-kind-icon">debug</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+								<a href="_interfaces_.ideleteoptions.html#filter" class="tsd-kind-icon">filter</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+								<a href="_interfaces_.ideleteoptions.html#flags" class="tsd-kind-icon">flags</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
 								<a href="_interfaces_.ideleteoptions.html#matching" class="tsd-kind-icon">matching</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+								<a href="_interfaces_.ideleteoptions.html#progress" class="tsd-kind-icon">progress</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-external">
+								<a href="_interfaces_.ideleteoptions.html#trash" class="tsd-kind-icon">trash</a>
 							</li>
 						</ul>
 					</li>
@@ -215,6 +414,9 @@
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
 						<a href="../modules/_interfaces_.html#tcopyresult" class="tsd-kind-icon">TCopy<wbr>Result</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
+						<a href="../modules/_interfaces_.html#tdeleteresult" class="tsd-kind-icon">TDelete<wbr>Result</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
 						<a href="../modules/_interfaces_.html#writeprogresscallback" class="tsd-kind-icon">Write<wbr>Progress<wbr>Callback</a>

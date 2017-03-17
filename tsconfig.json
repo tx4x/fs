@@ -8,13 +8,14 @@
     "outDir": "./build",
     "rootDir": "./src",
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
+	"emitDecoratorMetadata": true,
     "pretty": true,
     "moduleResolution": "node"
   },
-  "compileOnSave": false,
+  "compileOnSave": true,
   "filesGlob": [
-    "./src/**/*.ts"
+    "./src/**/*.ts",
+	"./tests/**/*.ts"
   ],
   "exclude": [
     "node_modules"

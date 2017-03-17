@@ -416,9 +416,6 @@ function isDone(nodes) {
     });
     return done;
 }
-process.on('unhandledRejection', (reason) => {
-    console.error('Unhandled rejection, reason: ', reason);
-});
 /**
  * A callback for treeWalkerStream. This is called when a node has been found.
  *
@@ -453,7 +450,7 @@ function visitor(from, to, vars, item) {
         const checked = (subResolveSettings) => {
             item.status = interfaces_1.ENodeOperationStatus.CHECKED;
             // feature : report
-            if (options && options.flags && options.flags & interfaces_1.ECopyFlags.REPORT) {
+            if (subResolveSettings && options && options.flags && options.flags & interfaces_1.ECopyFlags.REPORT) {
                 vars.result.push({
                     error: subResolveSettings.error,
                     node: item,
@@ -480,7 +477,7 @@ function visitor(from, to, vars, item) {
                     return;
                 }
             }
-            item.status = interfaces_1.ENodeOperationStatus.COPYING;
+            item.status = interfaces_1.ENodeOperationStatus.PROCESS;
             copyItemAsync(item.path, item.item, destPath, options).then(() => {
                 vars.filesInProgress -= 1;
                 if (options.progress) {

@@ -1,4 +1,5 @@
 /// <reference path="globals/@xblox/core/index.d.ts" />
+/// <reference path="globals/@xblox/fs/index.d.ts" />
 /// <reference path="modules/denodeify/index.d.ts" />
 /// <reference path="modules/minimatch/index.d.ts" />
 /// <reference path="modules/mkdirp/index.d.ts" />

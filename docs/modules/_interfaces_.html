@@ -75,6 +75,7 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-enum tsd-parent-kind-external-module tsd-is-external"><a href="../enums/_interfaces_.ebaseflags.html" class="tsd-kind-icon">EBase<wbr>Flags</a></li>
 								<li class="tsd-kind-enum tsd-parent-kind-external-module tsd-is-external"><a href="../enums/_interfaces_.ecopyflags.html" class="tsd-kind-icon">ECopy<wbr>Flags</a></li>
+								<li class="tsd-kind-enum tsd-parent-kind-external-module tsd-is-external"><a href="../enums/_interfaces_.edeleteflags.html" class="tsd-kind-icon">EDelete<wbr>Flags</a></li>
 								<li class="tsd-kind-enum tsd-parent-kind-external-module tsd-is-external"><a href="../enums/_interfaces_.einspectflags.html" class="tsd-kind-icon">EInspect<wbr>Flags</a></li>
 								<li class="tsd-kind-enum tsd-parent-kind-external-module tsd-is-external"><a href="../enums/_interfaces_.enodeoperationstatus.html" class="tsd-kind-icon">ENode<wbr>Operation<wbr>Status</a></li>
 								<li class="tsd-kind-enum tsd-parent-kind-external-module tsd-is-external"><a href="../enums/_interfaces_.enodetype.html" class="tsd-kind-icon">ENode<wbr>Type</a></li>
@@ -109,6 +110,7 @@
 								<li class="tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external"><a href="_interfaces_.html#readwritedatatype" class="tsd-kind-icon">Read<wbr>Write<wbr>Data<wbr>Type</a></li>
 								<li class="tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external"><a href="_interfaces_.html#resolveconflictcallback" class="tsd-kind-icon">Resolve<wbr>Conflict<wbr>Callback</a></li>
 								<li class="tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external"><a href="_interfaces_.html#tcopyresult" class="tsd-kind-icon">TCopy<wbr>Result</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external"><a href="_interfaces_.html#tdeleteresult" class="tsd-kind-icon">TDelete<wbr>Result</a></li>
 								<li class="tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external"><a href="_interfaces_.html#writeprogresscallback" class="tsd-kind-icon">Write<wbr>Progress<wbr>Callback</a></li>
 							</ul>
 						</section>
@@ -129,7 +131,7 @@
 					<div class="tsd-signature tsd-kind-icon">Item<wbr>Progress<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/a4b4e26/src/interfaces.ts#L171">interfaces.ts:171</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L169">interfaces.ts:169</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -191,7 +193,7 @@
 					<div class="tsd-signature tsd-kind-icon">Read<wbr>Write<wbr>Data<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/a4b4e26/src/interfaces.ts#L73">interfaces.ts:73</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L71">interfaces.ts:71</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -206,7 +208,7 @@
 					<div class="tsd-signature tsd-kind-icon">Resolve<wbr>Conflict<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/a4b4e26/src/interfaces.ts#L187">interfaces.ts:187</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L185">interfaces.ts:185</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -268,7 +270,17 @@
 					<div class="tsd-signature tsd-kind-icon">TCopy<wbr>Result<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_interfaces_.inodereport.html" class="tsd-signature-type">INodeReport</a><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/a4b4e26/src/interfaces.ts#L385">interfaces.ts:385</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L384">interfaces.ts:384</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
+					<a name="tdeleteresult" class="tsd-anchor"></a>
+					<h3>TDelete<wbr>Result</h3>
+					<div class="tsd-signature tsd-kind-icon">TDelete<wbr>Result<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">void</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_interfaces_.inodereport.html" class="tsd-signature-type">INodeReport</a><span class="tsd-signature-symbol">[]</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L406">interfaces.ts:406</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -278,7 +290,7 @@
 					<div class="tsd-signature tsd-kind-icon">Write<wbr>Progress<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/a4b4e26/src/interfaces.ts#L197">interfaces.ts:197</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L195">interfaces.ts:195</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -336,7 +348,7 @@
 					<div class="tsd-signature tsd-kind-icon">EError<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/xblox/fs/blob/a4b4e26/src/interfaces.ts#L19">interfaces.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L17">interfaces.ts:17</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -355,7 +367,7 @@
 						<div class="tsd-signature tsd-kind-icon">CROSS_<wbr>DEVICE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;EXDEV&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/xblox/fs/blob/a4b4e26/src/interfaces.ts#L24">interfaces.ts:24</a></li>
+								<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L22">interfaces.ts:22</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -365,7 +377,7 @@
 						<div class="tsd-signature tsd-kind-icon">EXISTS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;EEXIST&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/xblox/fs/blob/a4b4e26/src/interfaces.ts#L21">interfaces.ts:21</a></li>
+								<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L19">interfaces.ts:19</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -375,7 +387,7 @@
 						<div class="tsd-signature tsd-kind-icon">NOEXISTS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;ENOENT&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/xblox/fs/blob/a4b4e26/src/interfaces.ts#L23">interfaces.ts:23</a></li>
+								<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L21">interfaces.ts:21</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -385,7 +397,7 @@
 						<div class="tsd-signature tsd-kind-icon">NONE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;None&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/xblox/fs/blob/a4b4e26/src/interfaces.ts#L20">interfaces.ts:20</a></li>
+								<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L18">interfaces.ts:18</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -395,7 +407,7 @@
 						<div class="tsd-signature tsd-kind-icon">PERMISSION<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;EACCES&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/xblox/fs/blob/a4b4e26/src/interfaces.ts#L22">interfaces.ts:22</a></li>
+								<li>Defined in <a href="https://github.com/xblox/fs/blob/4fe757b/src/interfaces.ts#L20">interfaces.ts:20</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -420,6 +432,9 @@
 					</li>
 					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
 						<a href="../enums/_interfaces_.ecopyflags.html" class="tsd-kind-icon">ECopy<wbr>Flags</a>
+					</li>
+					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
+						<a href="../enums/_interfaces_.edeleteflags.html" class="tsd-kind-icon">EDelete<wbr>Flags</a>
 					</li>
 					<li class=" tsd-kind-enum tsd-parent-kind-external-module tsd-is-external">
 						<a href="../enums/_interfaces_.einspectflags.html" class="tsd-kind-icon">EInspect<wbr>Flags</a>
@@ -477,6 +492,9 @@
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
 						<a href="_interfaces_.html#tcopyresult" class="tsd-kind-icon">TCopy<wbr>Result</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
+						<a href="_interfaces_.html#tdeleteresult" class="tsd-kind-icon">TDelete<wbr>Result</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-external">
 						<a href="_interfaces_.html#writeprogresscallback" class="tsd-kind-icon">Write<wbr>Progress<wbr>Callback</a>

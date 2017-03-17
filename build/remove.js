@@ -14,8 +14,9 @@ const list_1 = require("./list");
 const pathUtil = require("path");
 const fs_1 = require("fs");
 const errors_1 = require("./errors");
-const matcher_1 = require("./utils/matcher");
 const interfaces_1 = require("./interfaces");
+const matcher_1 = require("./utils/matcher");
+const interfaces_2 = require("./interfaces");
 const inspect_2 = require("./inspect");
 const iterator_1 = require("./iterator");
 const errors_2 = require("./errors");
@@ -42,6 +43,7 @@ const parseOptions = (options, path) => {
     parsedOptions.conflictSettings = opts.conflictSettings;
     parsedOptions.debug = opts.debug;
     parsedOptions.trash = opts.trash;
+    parsedOptions.matching = opts.matching;
     if (!opts.filter) {
         if (opts.matching) {
             parsedOptions.filter = matcher_1.create(path, opts.matching);
@@ -96,7 +98,7 @@ const rmASync = (path, options) => {
 function isDone(nodes) {
     let done = true;
     nodes.forEach((element) => {
-        if (element.status !== interfaces_1.ENodeOperationStatus.DONE) {
+        if (element.status !== interfaces_2.ENodeOperationStatus.DONE) {
             done = false;
         }
     });
@@ -104,7 +106,7 @@ function isDone(nodes) {
 }
 function next(nodes) {
     for (let i = 0; i < nodes.length; i++) {
-        if (nodes[i].status === interfaces_1.ENodeOperationStatus.COLLECTED) {
+        if (nodes[i].status === interfaces_2.ENodeOperationStatus.COLLECTED) {
             return nodes[i];
         }
     }
@@ -113,15 +115,15 @@ function next(nodes) {
 // handle user side setting "THROW" and non enum values (null)
 const onConflict = (from, options, settings) => {
     switch (settings.overwrite) {
-        case interfaces_1.EResolveMode.THROW: {
+        case interfaces_2.EResolveMode.THROW: {
             throw errors_2.ErrCantDelete(from);
         }
-        case interfaces_1.EResolveMode.OVERWRITE:
-        case interfaces_1.EResolveMode.APPEND:
-        case interfaces_1.EResolveMode.IF_NEWER:
-        case interfaces_1.EResolveMode.ABORT:
-        case interfaces_1.EResolveMode.IF_SIZE_DIFFERS:
-        case interfaces_1.EResolveMode.SKIP: {
+        case interfaces_2.EResolveMode.OVERWRITE:
+        case interfaces_2.EResolveMode.APPEND:
+        case interfaces_2.EResolveMode.IF_NEWER:
+        case interfaces_2.EResolveMode.ABORT:
+        case interfaces_2.EResolveMode.IF_SIZE_DIFFERS:
+        case interfaces_2.EResolveMode.SKIP: {
             return settings.overwrite;
         }
     }
@@ -131,13 +133,13 @@ function resolveConflict(path, resolveMode) {
     if (resolveMode === undefined) {
         return true;
     }
-    if (resolveMode === interfaces_1.EResolveMode.SKIP) {
+    if (resolveMode === interfaces_2.EResolveMode.SKIP) {
         return false;
     }
-    else if (resolveMode === interfaces_1.EResolveMode.ABORT) {
+    else if (resolveMode === interfaces_2.EResolveMode.ABORT) {
         return false;
     }
-    else if (resolveMode === interfaces_1.EResolveMode.RETRY) {
+    else if (resolveMode === interfaces_2.EResolveMode.RETRY) {
         return true;
     }
     return false;
@@ -150,9 +152,9 @@ function visitor(path, vars, item) {
         if (!item) {
             return;
         }
-        item.status = interfaces_1.ENodeOperationStatus.PROCESSING;
+        item.status = interfaces_2.ENodeOperationStatus.PROCESSING;
         const done = () => {
-            item.status = interfaces_1.ENodeOperationStatus.DONE;
+            item.status = interfaces_2.ENodeOperationStatus.DONE;
             if (isDone(vars.nodes)) {
                 return vars.resolve(vars.result);
             }
@@ -181,7 +183,7 @@ function visitor(path, vars, item) {
                 const resolved = (settings) => {
                     settings.error = err.code;
                     // feature : report
-                    if (settings && options && options.flags && options.flags & interfaces_1.EDeleteFlags.REPORT) {
+                    if (settings && options && options.flags && options.flags & interfaces_2.EDeleteFlags.REPORT) {
                         vars.result.push({
                             error: settings.error,
                             node: item,
@@ -191,13 +193,13 @@ function visitor(path, vars, item) {
                     if (settings) {
                         // if the first resolve callback returned an individual resolve settings "THIS",
                         // ask the user again with the same item
-                        let always = settings.mode === interfaces_1.EResolve.ALWAYS;
+                        let always = settings.mode === interfaces_2.EResolve.ALWAYS;
                         if (always) {
                             options.conflictSettings = settings;
                         }
                         let how = settings.overwrite;
                         how = onConflict(item.path, options, settings);
-                        if (how === interfaces_1.EResolveMode.ABORT) {
+                        if (how === interfaces_2.EResolveMode.ABORT) {
                             vars.abort = true;
                         }
                         if (vars.abort) {
@@ -208,9 +210,9 @@ function visitor(path, vars, item) {
                             done();
                             return;
                         }
-                        item.status = interfaces_1.ENodeOperationStatus.PROCESS;
-                        if (settings.overwrite === interfaces_1.EResolveMode.RETRY) {
-                            item.status = interfaces_1.ENodeOperationStatus.COLLECTED;
+                        item.status = interfaces_2.ENodeOperationStatus.PROCESS;
+                        if (settings.overwrite === interfaces_2.EResolveMode.RETRY) {
+                            item.status = interfaces_2.ENodeOperationStatus.COLLECTED;
                             visitor(path, vars, item);
                         }
                     }
@@ -226,15 +228,32 @@ function visitor(path, vars, item) {
         });
     });
 }
+function collect(path, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            let all = [];
+            iterator_1.async(path, {
+                filter: options.filter
+            }).then((it) => {
+                let node = null;
+                while (node = it.next()) {
+                    all.push({
+                        path: node.path,
+                        item: node.item,
+                        status: interfaces_2.ENodeOperationStatus.COLLECTED
+                    });
+                }
+                resolve(all);
+            }).catch((err) => {
+                console.error('read error', err);
+            });
+        });
+    });
+}
 function async(path, options) {
-    options = parseOptions(options, path);
-    return new Promise((resolve, reject) => {
-        // Assume the path is a file and just try to remove it.
-        rmASync(path, options)
-            .then((res) => {
-            resolve();
-        })
-            .catch((err) => {
+    return __awaiter(this, void 0, void 0, function* () {
+        options = parseOptions(options, path);
+        const onError = (err, resolve, reject, nodes) => {
             if (err.code === 'EPERM' || err.code === 'EISDIR' || err.code === 'ENOTEMPTY') {
                 const proceed = () => {
                     // It's not a file, it's a directory.
@@ -251,8 +270,6 @@ function async(path, options) {
                         return fs_1.rmdir(path, (err) => {
                             if (err) {
                                 reject(err);
-                            }
-                            else {
                             }
                         });
                     })
@@ -271,7 +288,7 @@ function async(path, options) {
                         resolveSettings: null,
                         options: options,
                         result: result,
-                        nodes: []
+                        nodes: nodes || []
                     };
                     const process = () => {
                         visitorArgs.nodes = nodes;
@@ -285,22 +302,27 @@ function async(path, options) {
                             }
                         }
                     };
-                    let nodes = [];
-                    iterator_1.async(path, {
-                        filter: options.filter
-                    }).then((it) => {
-                        let node = null;
-                        while (node = it.next()) {
-                            nodes.push({
-                                path: node.path,
-                                item: node.item,
-                                status: interfaces_1.ENodeOperationStatus.COLLECTED
-                            });
-                        }
+                    if (!nodes) {
+                        let _nodes = visitorArgs.nodes;
+                        iterator_1.async(path, {
+                            filter: options.filter
+                        }).then((it) => {
+                            let node = null;
+                            while (node = it.next()) {
+                                _nodes.push({
+                                    path: node.path,
+                                    item: node.item,
+                                    status: interfaces_2.ENodeOperationStatus.COLLECTED
+                                });
+                            }
+                            process();
+                        }).catch((err) => {
+                            console.error('read error', err);
+                        });
+                    }
+                    else {
                         process();
-                    }).catch((err) => {
-                        console.error('read error', err);
-                    });
+                    }
                 }
                 else {
                     proceed();
@@ -314,7 +336,28 @@ function async(path, options) {
                 // Something unexpected happened. Rethrow original error.
                 reject(err);
             }
-        });
+        };
+        // if matching is set, its like rm somePath/*.ext
+        // in this case, we collect the inner matching nodes and proceed as it
+        // would be an error
+        if (options.matching) {
+            const nodes = yield collect(path, options);
+            let err = new interfaces_1.ErrnoException('dummy');
+            err.code = 'ENOTEMPTY';
+            return new Promise((resolve, reject) => {
+                onError(err, resolve, reject, nodes);
+            });
+        }
+        else {
+            return new Promise((resolve, reject) => {
+                // Assume the path is a file or directory and just try to remove it.
+                rmASync(path, options)
+                    .then((res) => {
+                    resolve();
+                })
+                    .catch((err) => { onError(err, resolve, reject); });
+            });
+        }
     });
 }
 exports.async = async;

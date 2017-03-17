@@ -34,6 +34,7 @@ const parseOptions = (options: any | null, path: string): IDeleteOptions => {
 	parsedOptions.conflictSettings = opts.conflictSettings;
 	parsedOptions.debug = opts.debug;
 	parsedOptions.trash = opts.trash;
+	parsedOptions.matching = opts.matching;
 	if (!opts.filter) {
 		if (opts.matching) {
 			parsedOptions.filter = matcher(path, opts.matching);
@@ -222,93 +223,130 @@ async function visitor(path: string, vars: IVisitorArgs, item: IProcessingNode):
 			}
 		});
 }
-export function async(path: string, options?: IDeleteOptions): Promise<TDeleteResult> {
-	options = parseOptions(options, path);
-	return new Promise<TDeleteResult>((resolve, reject) => {
-		// Assume the path is a file and just try to remove it.
-		rmASync(path, options)
-			.then((res: any) => {
-				resolve();
-			})
-			.catch((err: ErrnoException) => {
-				if (err.code === 'EPERM' || err.code === 'EISDIR' || err.code === 'ENOTEMPTY') {
-					const proceed = () => {
-						// It's not a file, it's a directory.
-						// Must delete everything inside first.
-						listAsync(path).then((filenamesInsideDir: string[]) => {
-							let promises = filenamesInsideDir.map((filename: string) => {
-								return async(pathUtil.join(path, filename));
-							});
-							return Promise.all(promises);
-						})
-							.then(() => {
-								// Everything inside directory has been removed,
-								// it's safe now to go for the directory itself.
-								return rmdir(path, (err: ErrnoException) => {
-									if (err) {
-										reject(err);
-									} else {
 
-									}
-								});
-							})
-							.then(resolve, reject);
-					};
-
-					// we have a user conflict callback,
-					// collect nodes and start asking
-					if (options.conflictCallback) {
-						let result: TDeleteResult = void 0;
-						// walker variables
-						const visitorArgs: IVisitorArgs = {
-							resolve: resolve,
-							reject: reject,
-							abort: false,
-							filesInProgress: 0,
-							resolveSettings: null,
-							options: options,
-							result: result,
-							nodes: []
-						};
-
-						const process = () => {
-							visitorArgs.nodes = nodes;
-							if (isDone(nodes)) {
-								return resolve(result);
-							}
-							if (nodes.length) {
-								const item = next(nodes);
-								if (item) {
-									visitor(item.path, visitorArgs, item);
-								}
-							}
-						};
-						let nodes: IProcessingNode[] = [];
-						iteratorAsync(path, {
-							filter: options.filter
-						}).then((it: ArrayIterator<IProcessingNode>) => {
-							let node: IProcessingNode = null;
-							while (node = it.next()) {
-								nodes.push({
-									path: node.path,
-									item: node.item,
-									status: ENodeOperationStatus.COLLECTED
-								});
-							}
-							process();
-						}).catch((err: Error) => {
-							console.error('read error', err);
-						});
-					} else {
-						proceed();
-					}
-				} else if (err.code === 'ENOENT') {
-					// File already doesn't exist. We're done.
-					resolve();
-				} else {
-					// Something unexpected happened. Rethrow original error.
-					reject(err);
-				}
-			});
+async function collect(path: string, options?: IDeleteOptions): Promise<IProcessingNode[]> {
+	return new Promise<IProcessingNode[]>((resolve, reject) => {
+		let all: IProcessingNode[] = [];
+		iteratorAsync(path, {
+			filter: options.filter
+		}).then((it: ArrayIterator<IProcessingNode>) => {
+			let node: IProcessingNode = null;
+			while (node = it.next()) {
+				all.push({
+					path: node.path,
+					item: node.item,
+					status: ENodeOperationStatus.COLLECTED
+				});
+			}
+			resolve(all);
+		}).catch((err: Error) => {
+			console.error('read error', err);
+		});
 	});
+}
+
+export async function async(path: string, options?: IDeleteOptions): Promise<TDeleteResult> {
+	options = parseOptions(options, path);
+	const onError = (err: ErrnoException, resolve: any, reject: any, nodes?: IProcessingNode[]) => {
+		if (err.code === 'EPERM' || err.code === 'EISDIR' || err.code === 'ENOTEMPTY') {
+			const proceed = () => {
+				// It's not a file, it's a directory.
+				// Must delete everything inside first.
+				listAsync(path).then((filenamesInsideDir: string[]) => {
+					let promises = filenamesInsideDir.map((filename: string) => {
+						return async(pathUtil.join(path, filename));
+					});
+					return Promise.all(promises);
+				})
+					.then(() => {
+						// Everything inside directory has been removed,
+						// it's safe now to go for the directory itself.
+						return rmdir(path, (err: ErrnoException) => {
+							if (err) {
+								reject(err);
+							}
+						});
+					})
+					.then(resolve, reject);
+			};
+			// we have a user conflict callback,
+			// collect nodes and start asking
+			if (options.conflictCallback) {
+				let result: TDeleteResult = void 0;
+				// walker variables
+				const visitorArgs: IVisitorArgs = {
+					resolve: resolve,
+					reject: reject,
+					abort: false,
+					filesInProgress: 0,
+					resolveSettings: null,
+					options: options,
+					result: result,
+					nodes: nodes || []
+				};
+
+				const process = () => {
+					visitorArgs.nodes = nodes;
+					if (isDone(nodes)) {
+						return resolve(result);
+					}
+					if (nodes.length) {
+						const item = next(nodes);
+						if (item) {
+							visitor(item.path, visitorArgs, item);
+						}
+					}
+				};
+				if (!nodes) {
+					let _nodes = visitorArgs.nodes;
+					iteratorAsync(path, {
+						filter: options.filter
+					}).then((it: ArrayIterator<IProcessingNode>) => {
+						let node: IProcessingNode = null;
+						while (node = it.next()) {
+							_nodes.push({
+								path: node.path,
+								item: node.item,
+								status: ENodeOperationStatus.COLLECTED
+							});
+						}
+						process();
+					}).catch((err: Error) => {
+						console.error('read error', err);
+					});
+				} else {
+					process();
+				}
+			} else {
+				proceed();
+			}
+		} else if (err.code === 'ENOENT') {
+			// File already doesn't exist. We're done.
+			resolve();
+		} else {
+			// Something unexpected happened. Rethrow original error.
+			reject(err);
+		}
+	};
+
+	// if matching is set, its like rm somePath/*.ext
+	// in this case, we collect the inner matching nodes and proceed as it
+	// would be an error
+	if (options.matching) {
+		const nodes = await collect(path, options);
+		let err = new ErrnoException('dummy');
+		err.code = 'ENOTEMPTY';
+		return new Promise<TDeleteResult>((resolve, reject) => {
+			onError(err, resolve, reject, nodes);
+		});
+	} else {
+		return new Promise<TDeleteResult>((resolve, reject) => {
+			// Assume the path is a file or directory and just try to remove it.
+			rmASync(path, options)
+				.then((res: any) => {
+					resolve();
+				})
+				.catch((err: ErrnoException) => { onError(err, resolve, reject); });
+		});
+	}
 };

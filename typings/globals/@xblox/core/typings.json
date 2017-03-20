@@ -1,0 +1,8 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/xblox/core/3946eb962706f1242d78506326a097e3b07e796a/index.d.ts",
+    "raw": "github:xblox/core/index.d.ts#3946eb962706f1242d78506326a097e3b07e796a",
+    "typings": "https://raw.githubusercontent.com/xblox/core/3946eb962706f1242d78506326a097e3b07e796a/index.d.ts"
+  }
+}

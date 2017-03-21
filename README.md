@@ -1,6 +1,6 @@
 ![Engine](https://camo.githubusercontent.com/7bae0b99443921f1525afffbff807f7f54be3ec0/687474703a2f2f696d672e736869656c64732e696f2f6e6f64652f762f6b6f612e737667)
 [![Build Status](https://travis-ci.org/xblox/fs.svg?branch=master)](https://travis-ci.org/xblox/fs) [![Build status](https://ci.appveyor.com/api/projects/status/7gjgoxnxi3t9dc29?svg=true)](https://ci.appveyor.com/project/xblox/fs) [![codecov](https://codecov.io/gh/xblox/fs/branch/master/graph/badge.svg)](https://codecov.io/gh/xblox/fs) [![npm version](https://badge.fury.io/js/%40xblox%2Ffs.svg)](https://badge.fury.io/js/%40xblox%2Ffs)
-![TypeScript](https://badges.frapsoft.com/typescript/version/typescript-next.svg?v=101)[!https://camo.githubusercontent.com/d25414161ebfbbdd0f69a4a3e6a188a76ae2e82a/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f65732d362d627269676874677265656e2e737667]
+![TypeScript](https://badges.frapsoft.com/typescript/version/typescript-next.svg?v=101)(https://github.com/ellerbrock/typescript-badges/)
 
 Check out [EXAMPLES](EXAMPLES.md) to see few snippets what it can do.
 

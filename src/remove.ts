@@ -244,7 +244,6 @@ async function collect(path: string, options?: IDeleteOptions): Promise<IProcess
 		});
 	});
 }
-
 export async function async(path: string, options?: IDeleteOptions): Promise<TDeleteResult> {
 	options = parseOptions(options, path);
 	const onError = (err: ErrnoException, resolve: any, reject: any, nodes?: IProcessingNode[]) => {

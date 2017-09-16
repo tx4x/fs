@@ -7,7 +7,7 @@ export interface Options {
   encoding?: string;
   flag?: string;
 }
-export function validateInput(methodName: string, path: string, data: any, options?: Options) {
+export const validateInput = (methodName: string, path: string, data: any, options?: Options) => {
   const methodSignature = methodName + '(path, data, [options])';
   validateArgument(methodSignature, 'path', path, ['string']);
   validateArgument(methodSignature, 'data', data, ['string', 'buffer']);
@@ -18,7 +18,7 @@ export function validateInput(methodName: string, path: string, data: any, optio
 // ---------------------------------------------------------
 // SYNC
 // ---------------------------------------------------------
-export function sync(path: string, data: any, options: Options): void {
+export const sync =(path: string, data: any, options: Options): void =>{
   try {
     fs.appendFileSync(path, data, options ? { encoding: options.encoding, mode: options.mode as string } : {});
   } catch (err) {
@@ -36,7 +36,7 @@ export function sync(path: string, data: any, options: Options): void {
 // ASYNC
 // ---------------------------------------------------------
 const promisedAppendFile = Q.denodeify(fs.appendFile);
-export function async(path: string, data: string | Buffer | Object, options?: Options): Promise<null> {
+export const async =(path: string, data: string | Buffer | Object, options?: Options): Promise<null> => {
   return new Promise((resolve, reject) => {
     promisedAppendFile(path, data, options)
       .then(resolve)

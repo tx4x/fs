@@ -17,14 +17,13 @@ import { promisify } from './promisify';
 import { async as iteratorAsync } from './iterator';
 import { ArrayIterator } from '@xblox/core/iterator';
 
-const promisedSymlink = promisify<string, string | Buffer, string, Function>(fs.symlink);
+const promisedSymlink = promisify(fs.symlink);
 const promisedReadlink = promisify(fs.readlink);
 const promisedUnlink = promisify(fs.unlink);
 const promisedMkdirp = promisify<string, any, Function>(mkdirp);
 
 const progress = require('progress-stream');
 const throttle = require('throttle');
-
 
 const CPROGRESS_THRESHOLD = 1048576 * 5; // minimum file size threshold to use write progress = 5MB
 
@@ -241,7 +240,7 @@ const copyFileAsync = (from: string, to: string, mode: any, options?: ICopyOptio
 					// Make retry attempt only once to prevent vicious infinite loop
 					// (when for some obscure reason I/O will keep returning ENOENT error).
 					// Passing retriedAttempt = true.
-					copyFileAsync(from, to, mode, true)
+					copyFileAsync(from, to, mode, null, true)
 						.then(resolve)
 						.catch(reject);
 				});
@@ -304,15 +303,15 @@ export function copySymlinkAsync(from: string, to: string) {
 	return promisedReadlink(from)
 		.then((symlinkPointsAt: string) => {
 			return new Promise((resolve, reject) => {
-				promisedSymlink(symlinkPointsAt, to, null)
+				promisedSymlink(symlinkPointsAt, to, null, null)
 					.then(resolve)
 					.catch((err: ErrnoException) => {
 						if (err.code === EError.EXISTS) {
 							// There is already file/symlink with this name on destination location.
 							// Must erase it manually, otherwise system won't allow us to place symlink there.
-							promisedUnlink(to)
+							promisedUnlink(to, null)
 								// Retry...
-								.then(() => { return promisedSymlink(symlinkPointsAt, to, null); })
+								.then(() => { return promisedSymlink(symlinkPointsAt, to, null, null); })
 								.then(resolve, reject);
 						} else {
 							reject(err);

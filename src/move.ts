@@ -81,7 +81,7 @@ function ensureDestinationPathExistsAsync(to: string): Promise<null> {
 
 export function async(from: string, to: string): Promise<null> {
 	return new Promise<null>((resolve, reject) => {
-		promisedRename(from, to)
+		promisedRename(from, to, null)
 			.then(resolve)
 			.catch(err => {
 				if (err.code !== EError.NOEXISTS) {
@@ -97,7 +97,7 @@ export function async(from: string, to: string): Promise<null> {
 							} else {
 								ensureDestinationPathExistsAsync(to)
 									// Retry the attempt
-									.then(() => { return promisedRename(from, to); })
+									.then(() => { return promisedRename(from, to, null); })
 									.then(resolve, reject);
 							}
 						})

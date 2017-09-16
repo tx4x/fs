@@ -32,7 +32,7 @@ export function sync(symlinkValue: string, path: string): void {
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-export function async(symlinkValue: string, path: string) {
+export function async(symlinkValue: string, path: string):Promise<void> {
   return new Promise((resolve, reject) => {
     promisedSymlink(symlinkValue, path)
       .then(resolve)

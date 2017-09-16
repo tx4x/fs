@@ -24,7 +24,7 @@ import { IWriteOptions } from './interfaces';
 import * as write from './write';
 import * as read from './read';
 import { ICopyOptions, INode, IInspectOptions } from './interfaces';
-import { ReadWriteDataType } from './interfaces';
+import { ReadWriteDataType, TCopyResult, ENodeType, TDeleteResult } from './interfaces';
 import { async as IteratorAsync } from './iterator';
 
 export interface IJetpack {
@@ -33,7 +33,7 @@ export interface IJetpack {
 	append(path: string, data: string | Buffer | Object, options?: AppendOptions): void;
 	appendAsync(path: string, data: string | Buffer | Object, options?: AppendOptions): Promise<null>;
 	copy(from: string, to: string, options?: ICopyOptions): void;
-	copyAsync(from: string, to: string, options?: ICopyOptions): Promise<void>;
+	copyAsync(from: string, to: string, options?: ICopyOptions): Promise<TCopyResult>;
 	createWriteStream(path: string, options?: {
 		flags?: string;
 		encoding?: string;
@@ -54,7 +54,7 @@ export interface IJetpack {
 	dir(path: string, criteria?: DirOptions): IJetpack;
 	dirAsync(path: string, criteria?: DirOptions): Promise<IJetpack>;
 	exists(path: string): boolean | string;
-	existsAsync(path: string): Promise<boolean | string>;
+	existsAsync(path: string): Promise<boolean | string | ENodeType>;
 	file(path: string, criteria?: FileOptions): void;
 	fileAsync(path: string, criteria?: FileOptions): Promise<null>;
 	find(startPath: string, options: FindOptions): string[];
@@ -70,11 +70,11 @@ export interface IJetpack {
 	read(path: string, returnAs?: string): ReadWriteDataType;
 	readAsync(path: string, returnAs?: string): Promise<ReadWriteDataType>;
 	remove(path: string): void;
-	removeAsync(path: string): Promise<null>;
+	removeAsync(path: string): Promise<TDeleteResult>;
 	rename(path: string, newName: string): void;
 	renameAsync(path: string, newName: string): Promise<null>;
 	symlink(symlinkValue: string, path: string): void;
-	symlinkAsync(symlinkValue: string, path: string): Promise<null>;
+	symlinkAsync(symlinkValue: string, path: string): Promise<void>;
 	write(path: string, data: string | Buffer | Object, options?: IWriteOptions): void;
 	writeAsync(path: string, data: string | Buffer | Object, options?: IWriteOptions): Promise<null>;
 }
@@ -184,7 +184,8 @@ export function jetpack(cwdPath?: string): IJetpack {
 			exists.validateInput('exists', path);
 			return exists.sync(resolvePath(path));
 		},
-		existsAsync: function (path: string): Promise<boolean | string> {
+
+		existsAsync: function (path: string): Promise<boolean | string | ENodeType> {
 			exists.validateInput('existsAsync', path);
 			return exists.async(resolvePath(path));
 		},
@@ -194,6 +195,7 @@ export function jetpack(cwdPath?: string): IJetpack {
 			file.sync(resolvePath(path), criteria);
 			return this;
 		},
+
 		fileAsync: function (path: string, criteria?: FileOptions) {
 			let deferred = Q.defer();
 			let that = this;
@@ -265,7 +267,7 @@ export function jetpack(cwdPath?: string): IJetpack {
 			read.validateInput('read', path, returnAs);
 			return read.sync(resolvePath(path), returnAs);
 		},
-		readAsync: function (path: string, returnAs?: string): Promise<string> {
+		readAsync: function (path: string, returnAs?: string): Promise<ReadWriteDataType> {
 			read.validateInput('readAsync', path, returnAs);
 			return read.async(resolvePath(path), returnAs);
 		},
@@ -275,7 +277,7 @@ export function jetpack(cwdPath?: string): IJetpack {
 			// If path not specified defaults to CWD
 			remove.sync(resolvePath(path || '.'));
 		},
-		removeAsync: function (path: string): Promise<null> {
+		removeAsync: function (path: string): Promise<TDeleteResult> {
 			remove.validateInput('removeAsync', path);
 			// If path not specified defaults to CWD
 			return remove.async(resolvePath(path || '.'));
@@ -294,7 +296,7 @@ export function jetpack(cwdPath?: string): IJetpack {
 			symlink.validateInput('symlink', symlinkValue, path);
 			symlink.sync(symlinkValue, resolvePath(path));
 		},
-		symlinkAsync: function (symlinkValue: string, path: string): Promise<null> {
+		symlinkAsync: function (symlinkValue: string, path: string): Promise<void> {
 			symlink.validateInput('symlinkAsync', symlinkValue, path);
 			return symlink.async(symlinkValue, resolvePath(path));
 		},

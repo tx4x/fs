@@ -1,4 +1,4 @@
-import { Stats, statSync, stat, lstat } from 'fs';
+import { Stats, statSync, lstat } from 'fs';
 import { validateArgument } from './utils/validate';
 import { ENodeType, ErrnoException } from './interfaces';
 

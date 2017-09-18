@@ -1,6 +1,6 @@
 import { readFile, readFileSync } from 'fs';
 
-import { json, file } from './imports';
+import { json } from './imports';
 import { validateArgument } from './utils/validate';
 import { ReadWriteDataType } from './interfaces';
 const Q = require('q');
@@ -87,6 +87,6 @@ export function async(path: string, returnAs?: string): Promise<ReadWriteDataTyp
           reject(ErrJson(path, err));
         }
       })
-      .catch((err:any) => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
+      .catch((err: any) => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
   });
 };

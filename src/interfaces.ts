@@ -64,7 +64,6 @@ export interface INodeReport {
 	resolved: IConflictSettings;
 }
 
-
 /**
  * The accepted types for write and read as union.
  */
@@ -79,11 +78,11 @@ export type ReadWriteDataType = string | Buffer | Object;
  * @extends {Error}
  */
 export class ErrnoException extends Error {
-	errno?: number;
-	code?: string;
-	path?: string;
-	syscall?: string;
-	stack?: string;
+	public errno?: number;
+	public code?: string;
+	public path?: string;
+	public syscall?: string;
+	public stack?: string;
 }
 
 /**

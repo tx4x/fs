@@ -1,4 +1,4 @@
-import * as  pathUtil from "path";
+import * as  pathUtil from 'path';
 import * as fs from 'fs';
 import { symlinkSync, readFileSync, createReadStream, createWriteStream } from 'fs';
 import * as mkdirp from 'mkdirp';
@@ -58,7 +58,9 @@ const parseOptions = (options: any | null, from: string): ICopyOptions => {
 		if (opts.matching) {
 			parsedOptions.filter = matcher(from, opts.matching);
 		} else {
-			parsedOptions.filter = () => { return true; };
+			parsedOptions.filter = () => {
+				return true;
+			};
 		}
 	}
 	return parsedOptions;
@@ -82,14 +84,14 @@ async function copyFileSyncWithProgress(from: string, to: string, options?: ICop
 		let cbCalled = false;
 		let elapsed = Date.now();
 		let speed = 0;
-		let done = (err?: any) => {
+		const done = (err?: any) => {
 			if (!cbCalled) {
 				cbCalled = true;
 				resolve();
 			}
 		};
 		const rd = createReadStream(from).
-			on("error", (err: Error) => done(err));
+			on('error', (err: Error) => done(err));
 
 		const str = progress({
 			length: fs.statSync(from).size,
@@ -101,8 +103,8 @@ async function copyFileSyncWithProgress(from: string, to: string, options?: ICop
 		});
 
 		const wr = createWriteStream(to);
-		wr.on("error", (err: Error) => done(err));
-		wr.on("close", done);
+		wr.on('error', (err: Error) => done(err));
+		wr.on('close', done);
 
 		rd.pipe(str).pipe(wr);
 	});
@@ -149,7 +151,7 @@ async function copyItemSync(from: string, inspectData: INode, to: string, option
 export function sync(from: string, to: string, options?: ICopyOptions): void {
 	const opts = parseOptions(options, from);
 	checksBeforeCopyingSync(from, to, opts);
-	let nodes: IProcessingNode[] = [];
+	const nodes: IProcessingNode[] = [];
 	let sizeTotal = 0;
 	if (options && options.flags & ECopyFlags.EMPTY) {
 		const dstStat = fs.statSync(to);
@@ -254,12 +256,14 @@ const copyFileAsync = (from: string, to: string, mode: any, options?: ICopyOptio
 			if (options && options.flags & ECopyFlags.PRESERVE_TIMES) {
 				const sourceStat = fs.statSync(from);
 				fs.open(to, 'w', (err: ErrnoException, fd: number) => {
-					if (err) { throw err; };
-					fs.futimes(fd, sourceStat.atime, sourceStat.mtime, (err) => {
-						if (err) {
-							throw err;
+					if (err) {
+						throw err;
+					};
+					fs.futimes(fd, sourceStat.atime, sourceStat.mtime, (err2) => {
+						if (err2) {
+							throw err2;
 						};
-						fs.close(fd,null);
+						fs.close(fd, null);
 						resolve();
 					});
 				});
@@ -311,7 +315,9 @@ export function copySymlinkAsync(from: string, to: string) {
 							// Must erase it manually, otherwise system won't allow us to place symlink there.
 							promisedUnlink(to, null)
 								// Retry...
-								.then(() => { return promisedSymlink(symlinkPointsAt, to, null); })
+								.then(() => {
+									return promisedSymlink(symlinkPointsAt, to, null);
+								})
 								.then(resolve, reject);
 						} else {
 							reject(err);
@@ -347,8 +353,10 @@ const onConflict = (from: string, to: string, options: ICopyOptions, settings: I
 		case EResolveMode.SKIP: {
 			return settings.overwrite;
 		}
+		default: {
+			return undefined;
+		}
 	}
-	return undefined;
 };
 
 export function resolveConflict(from: string, to: string, options: ICopyOptions, resolveMode: EResolveMode): boolean {
@@ -435,7 +443,7 @@ async function visitor(from: string, to: string, vars: IVisitorArgs, item: IProc
 		if (subResolveSettings) {
 			// if the first resolve callback returned an individual resolve settings "THIS",
 			// ask the user again with the same item
-			let always = subResolveSettings.mode === EResolve.ALWAYS;
+			const always = subResolveSettings.mode === EResolve.ALWAYS;
 			if (always) {
 				options.conflictSettings = subResolveSettings;
 			}

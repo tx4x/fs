@@ -12,10 +12,9 @@ import { async as iteratorAsync } from './iterator';
 import { ArrayIterator } from '@xblox/core/iterator';
 import { ErrCantDelete } from './errors';
 
+// tslint:disable-next-line:no-require-imports
+// tslint:disable-next-line:no-var-requires
 const trash = require('trash');
-process.on('unhandledRejection', (reason: string) => {
-	console.error('Unhandled rejection, reason: ', reason);
-});
 
 export function validateInput(methodName: string, path: string) {
 	const methodSignature = methodName + '([path])';
@@ -35,12 +34,13 @@ const parseOptions = (options: any | null, path: string): IDeleteOptions => {
 		if (opts.matching) {
 			parsedOptions.filter = matcher(path, opts.matching);
 		} else {
-			parsedOptions.filter = () => { return true; };
+			parsedOptions.filter = () => {
+				return true;
+			};
 		}
 	}
 	return parsedOptions;
 };
-
 
 // ---------------------------------------------------------
 // Sync
@@ -96,7 +96,7 @@ const isDone = (nodes: IProcessingNode[]) => {
 		}
 	});
 	return done;
-}
+};
 const next = (nodes: IProcessingNode[]): IProcessingNode => {
 	for (let i = 0; i < nodes.length; i++) {
 		if (nodes[i].status === ENodeOperationStatus.COLLECTED) {
@@ -104,7 +104,7 @@ const next = (nodes: IProcessingNode[]): IProcessingNode => {
 		}
 	}
 	return null;
-}
+};
 // handle user side setting "THROW" and non enum values (null)
 const onConflict = (from: string, options: IDeleteOptions, settings: IConflictSettings): EResolveMode | undefined => {
 	switch (settings.overwrite) {
@@ -119,8 +119,10 @@ const onConflict = (from: string, options: IDeleteOptions, settings: IConflictSe
 		case EResolveMode.SKIP: {
 			return settings.overwrite;
 		}
+		default: {
+			return undefined;
+		}
 	}
-	return undefined;
 };
 export function resolveConflict(path: string, resolveMode: EResolveMode): boolean {
 	if (resolveMode === undefined) {
@@ -128,11 +130,9 @@ export function resolveConflict(path: string, resolveMode: EResolveMode): boolea
 	}
 	if (resolveMode === EResolveMode.SKIP) {
 		return false;
-	}
-	else if (resolveMode === EResolveMode.ABORT) {
+	} else if (resolveMode === EResolveMode.ABORT) {
 		return false;
-	}
-	else if (resolveMode === EResolveMode.RETRY) {
+	} else if (resolveMode === EResolveMode.RETRY) {
 		return true;
 	}
 	return false;
@@ -150,9 +150,9 @@ const visitor = (path: string, vars: IVisitorArgs, item: IProcessingNode): Promi
 			return vars.resolve(vars.result);
 		} else {
 			if (vars.nodes.length) {
-				const item = next(vars.nodes);
-				if (item) {
-					visitor(item.path, vars, item);
+				const itemInner = next(vars.nodes);
+				if (itemInner) {
+					visitor(itemInner.path, vars, itemInner);
 				} else {
 					vars.resolve(vars.result);
 				}
@@ -184,7 +184,7 @@ const visitor = (path: string, vars: IVisitorArgs, item: IProcessingNode): Promi
 					if (settings) {
 						// if the first resolve callback returned an individual resolve settings "THIS",
 						// ask the user again with the same item
-						let always = settings.mode === EResolve.ALWAYS;
+						const always = settings.mode === EResolve.ALWAYS;
 						if (always) {
 							options.conflictSettings = settings;
 						}
@@ -218,11 +218,11 @@ const visitor = (path: string, vars: IVisitorArgs, item: IProcessingNode): Promi
 				}
 			}
 		});
-}
+};
 
 async function collect(path: string, options?: IDeleteOptions): Promise<IProcessingNode[]> {
 	return new Promise<IProcessingNode[]>((resolve, reject) => {
-		let all: IProcessingNode[] = [];
+		const all: IProcessingNode[] = [];
 		iteratorAsync(path, {
 			filter: options.filter
 		}).then((it: ArrayIterator<IProcessingNode>) => {
@@ -248,16 +248,16 @@ export async function async(path: string, options?: IDeleteOptions): Promise<TDe
 				// It's not a file, it's a directory.
 				// Must delete everything inside first.
 				listAsync(path).then((filenamesInsideDir: string[]) => {
-					let promises = filenamesInsideDir.map((filename: string) => {
+					const promises = filenamesInsideDir.map((filename: string) => {
 						return async(pathUtil.join(path, filename), options);
 					});
 					return Promise.all(promises);
 				}).then(() => {
 					// Everything inside directory has been removed,
 					// it's safe now to go for the directory itself.
-					return rmdir(path, (err: ErrnoException) => {
-						if (err) {
-							reject(err);
+					return rmdir(path, (err2: ErrnoException) => {
+						if (err2) {
+							reject(err2);
 						}
 					});
 				})
@@ -266,7 +266,7 @@ export async function async(path: string, options?: IDeleteOptions): Promise<TDe
 			// we have a user conflict callback,
 			// collect nodes and start asking
 			if (options.conflictCallback) {
-				let result: TDeleteResult = void 0;
+				const result: TDeleteResult = void 0;
 				// walker variables
 				const visitorArgs: IVisitorArgs = {
 					resolve: resolve,
@@ -292,7 +292,7 @@ export async function async(path: string, options?: IDeleteOptions): Promise<TDe
 					}
 				};
 				if (!nodes) {
-					let _nodes = visitorArgs.nodes;
+					const _nodes = visitorArgs.nodes;
 					iteratorAsync(path, {
 						filter: options.filter
 					}).then((it: ArrayIterator<IProcessingNode>) => {
@@ -305,8 +305,8 @@ export async function async(path: string, options?: IDeleteOptions): Promise<TDe
 							});
 						}
 						process();
-					}).catch((err: Error) => {
-						console.error('read error', err);
+					}).catch((err2: Error) => {
+						console.error('read error', err2);
 					});
 				} else {
 					process();
@@ -328,7 +328,7 @@ export async function async(path: string, options?: IDeleteOptions): Promise<TDe
 	// would be an error
 	if (options.matching) {
 		const nodes = await collect(path, options);
-		let err = new ErrnoException('dummy');
+		const err = new ErrnoException('dummy');
 		err.code = 'ENOTEMPTY';
 		return new Promise<TDeleteResult>((resolve, reject) => {
 			onError(err, resolve, reject, nodes);
@@ -338,7 +338,9 @@ export async function async(path: string, options?: IDeleteOptions): Promise<TDe
 			// Assume the path is a file or directory and just try to remove it.
 			rmASync(path, options)
 				.then((res: any) => resolve())
-				.catch((err: ErrnoException) => { onError(err, resolve, reject); });
+				.catch((err: ErrnoException) => {
+					onError(err, resolve, reject);
+				});
 		});
 	}
 };

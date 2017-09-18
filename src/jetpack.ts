@@ -1,5 +1,5 @@
 import * as util from 'util';
-import * as  pathUtil from "path";
+import * as  pathUtil from 'path';
 const Q = require('q');
 import * as append from './append';
 import { Options as AppendOptions } from './append';
@@ -25,7 +25,6 @@ import * as write from './write';
 import * as read from './read';
 import { ICopyOptions, INode, IInspectOptions } from './interfaces';
 import { ReadWriteDataType, TCopyResult, ENodeType, TDeleteResult } from './interfaces';
-import { async as IteratorAsync } from './iterator';
 
 export interface IJetpack {
 	cwd(w?: any): IJetpack | string;
@@ -82,11 +81,11 @@ export interface IJetpack {
 // It provides the public API, and resolves all paths regarding to
 // passed cwdPath, or default process.cwd() if cwdPath was not specified.
 export function jetpack(cwdPath?: string): IJetpack {
-	let getCwdPath = function () {
+	const getCwdPath = function () {
 		return cwdPath || process.cwd();
 	};
 
-	let cwd = function (w?: any): IJetpack | string {
+	const cwd = function (w?: any): IJetpack | string {
 		let args;
 		let pathParts;
 
@@ -103,23 +102,22 @@ export function jetpack(cwdPath?: string): IJetpack {
 	};
 
 	// resolves path to inner CWD path of this jetpack instance
-	let resolvePath = function (path: string): string {
+	const resolvePath = function (path: string): string {
 		return pathUtil.resolve(getCwdPath(), path);
 	};
 
-	let getPath = function (): string {
+	const getPath = function (): string {
 		// add CWD base path as first element of arguments array
 		Array.prototype.unshift.call(arguments, getCwdPath());
 		return pathUtil.resolve.apply(null, arguments);
 	};
 
-	let normalizeOptions = function (options: { cwd?: string }): any {
-		let opts = options || { cwd: getCwdPath() };
-		return opts;
+	const normalizeOptions = function (options: { cwd?: string }): any {
+		return options || { cwd: getCwdPath() };
 	};
 
 	// API
-	let api: IJetpack = {
+	const api: IJetpack = {
 		cwd: cwd,
 		path: getPath,
 		append: function (path: string, data: string | Buffer | Object, options?: AppendOptions): void {
@@ -197,8 +195,8 @@ export function jetpack(cwdPath?: string): IJetpack {
 		},
 
 		fileAsync: function (path: string, criteria?: FileOptions) {
-			let deferred = Q.defer();
-			let that = this;
+			const deferred = Q.defer();
+			const that = this;
 			file.validateInput('fileAsync', path, criteria);
 			file.async(resolvePath(path), criteria)
 				.then(function () {

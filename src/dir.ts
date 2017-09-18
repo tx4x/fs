@@ -1,9 +1,8 @@
 import * as pathUtil from 'path';
-import { Stats, stat, statSync, chmodSync, readdirSync, readdir, PathLike } from 'fs';
-import { chmod } from 'fs';
+import { Stats, stat, statSync, readdirSync, readdir } from 'fs';
 import { promisify } from 'util';
 import * as fs from 'fs';
-import {sync as removeSync, async as removeAsync} from './remove';
+import { sync as removeSync, async as removeAsync } from './remove';
 import { normalizeFileMode as modeUtil } from './utils/mode';
 import { validateArgument, validateOptions } from './utils/validate';
 import { ErrNoDirectory } from './errors';
@@ -15,8 +14,8 @@ export interface IOptions {
 	mode?: number | string;
 }
 
-export const validateInput = function (methodName: string, path: string, options?: IOptions) {
-	let methodSignature = methodName + '(path, [criteria])';
+export const validateInput = (methodName: string, path: string, options?: IOptions) => {
+	const methodSignature = methodName + '(path, [criteria])';
 	validateArgument(methodSignature, 'path', path, ['string']);
 	validateOptions(methodSignature, 'criteria', options, {
 		empty: ['boolean'],
@@ -62,7 +61,6 @@ function mkdirSync(path: string, criteria: IOptions) {
 
 function checkDirSync(path: string, stat: Stats, options: IOptions) {
 	const checkMode = function () {
-		const mode = modeUtil(stat.mode);
 		if (options.mode !== undefined) {
 			fs.chmodSync(path, options.mode);
 		}
@@ -82,8 +80,8 @@ function checkDirSync(path: string, stat: Stats, options: IOptions) {
 };
 
 export const sync = (path: string, options?: IOptions) => {
-	let criteria = defaults(options);
-	let stat = dirStatsSync(path);
+	const criteria = defaults(options);
+	const stat = dirStatsSync(path);
 	if (stat) {
 		checkDirSync(path, stat, criteria);
 	} else {
@@ -96,8 +94,7 @@ export const sync = (path: string, options?: IOptions) => {
 // ---------------------------------------------------------
 const promisedStat = promisify(stat);
 const promisedReaddir = promisify(readdir);
-const promisedMkdirp = promisify(mkdirp);
-function dirStatAsync(path: string): Promise<Stats> {
+const dirStatAsync = (path: string): Promise<Stats> => {
 	return new Promise<Stats>((resolve, reject) => {
 		promisedStat(path)
 			.then((stat: any) => {
@@ -133,7 +130,6 @@ const emptyAsync = (path: string) => {
 };
 
 const checkMode = function (criteria: IOptions, stat: Stats, path: string): Promise<any> {
-	const mode = modeUtil(stat.mode);
 	if (criteria.mode !== undefined) {
 		return promisify(fs.chmod)(path, criteria.mode);
 	}
@@ -157,7 +153,7 @@ const checkDirAsync = (path: string, stat: Stats, options: IOptions) => {
 const mkdirAsync = (path: string, criteria: IOptions): Promise<any> => {
 	const options = criteria || {};
 	return new Promise((resolve, reject) => {
-		promisify(fs.mkdir)(path,options.mode)
+		promisify(fs.mkdir)(path, options.mode)
 			.then(resolve)
 			.catch((err) => {
 				if (err.code === 'ENOENT') {
@@ -165,7 +161,7 @@ const mkdirAsync = (path: string, criteria: IOptions): Promise<any> => {
 					mkdirAsync(pathUtil.dirname(path), options)
 						.then(() => {
 							// Now retry creating this directory.
-							return promisify(fs.mkdir)(path,options.mode);
+							return promisify(fs.mkdir)(path, options.mode);
 						})
 						.then(resolve)
 						.catch((err2) => {
@@ -199,4 +195,4 @@ export const async = (path: string, passedCriteria?: IOptions) => {
 			})
 			.then(resolve, reject);
 	});
-}
+};

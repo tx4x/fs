@@ -1,4 +1,4 @@
-import * as  pathUtil from "path";
+import * as  pathUtil from 'path';
 import { rename, renameSync } from 'fs';
 import { async as existsAsync, sync as existsSync } from './exists';
 import { validateArgument } from './utils/validate';
@@ -59,7 +59,7 @@ export const sync = (from: string, to: string): void => {
 // Async
 // ---------------------------------------------------------
 
-const ensureDestinationPathExistsAsync = (to: string): Promise<any> =>{
+const ensureDestinationPathExistsAsync = (to: string): Promise<any> => {
 	return new Promise<any>((resolve, reject) => {
 		const destDir: string = pathUtil.dirname(to);
 		existsAsync(destDir)

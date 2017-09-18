@@ -1,7 +1,7 @@
 {
   "name": "@xblox/fs",
   "description": "Simplified file system API in Typescript",
-  "version": "0.13.7",
+  "version": "0.13.9",
   "contributors": [
     {
       "name": "xblox"
@@ -42,7 +42,7 @@
     "ts-node": "^2.1.0",
     "tslint": "^4.5.1",
     "tslint-presets": "^2.0.0",
-    "typescript": "^2.2.1"
+    "typescript": "^2.5.2"
   },
   "scripts": {
     "test": "mocha --full-trace mocha \"spec/**/*.spec.js\"",

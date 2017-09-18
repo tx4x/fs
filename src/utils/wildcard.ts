@@ -9,9 +9,9 @@ function WildcardMatcher(text, separator) {
 
 WildcardMatcher.prototype.match = (input) => {
 	let matches: boolean | Object | Array<any> = true;
-	let parts = this.parts;
+	const parts = this.parts;
 	let ii;
-	let partsCount = parts.length;
+	const partsCount = parts.length;
 	let testParts;
 
 	if (typeof input === 'string' || input instanceof String) {
@@ -32,8 +32,7 @@ WildcardMatcher.prototype.match = (input) => {
 			// If matches, then return the component parts
 			matches = matches && testParts;
 		}
-	}
-	else if (typeof input.splice === 'function') {
+	}else if (typeof input.splice === 'function') {
 		matches = [];
 
 		for (ii = input.length; ii--;) {
@@ -41,8 +40,7 @@ WildcardMatcher.prototype.match = (input) => {
 				matches[(matches as String[]).length] = input[ii];
 			}
 		}
-	}
-	else if (typeof input === 'object') {
+	}else if (typeof input === 'object') {
 		matches = {};
 
 		for (let key in input) {
@@ -56,7 +54,7 @@ WildcardMatcher.prototype.match = (input) => {
 };
 
 export default function (text: string, test: string, separator?: string | RegExp) {
-	let matcher = new WildcardMatcher(text, separator || /[\/\.]/);
+	const matcher = new WildcardMatcher(text, separator || /[\/\.]/);
 	if (typeof test !== 'undefined') {
 		return matcher.match(test);
 	}

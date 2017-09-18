@@ -84,7 +84,7 @@ let validateArray = function (argumentValue: any, typeToCheck: string): boolean 
   });
 };
 
-export function validateArgument(methodName: string, argumentName: string, argumentValue: string|any, argumentMustBe: any): boolean {
+export function validateArgument(methodName: string, argumentName: string, argumentValue: string | any, argumentMustBe: any): boolean {
   let isOneOfAllowedTypes = argumentMustBe.some(function (type: any) {
     if (!isValidTypeDefinition(type)) {
       throw new Error('Unknown type "' + type + '"');

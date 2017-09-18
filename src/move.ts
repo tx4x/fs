@@ -1,6 +1,5 @@
 import * as  pathUtil from "path";
 import { rename, renameSync } from 'fs';
-import * as denodeify from 'denodeify';
 import { async as existsAsync, sync as existsSync } from './exists';
 import { validateArgument } from './utils/validate';
 import { ErrDoesntExists } from './errors';
@@ -9,7 +8,8 @@ import { sync as copySync } from './copy';
 import { sync as removeSync } from './remove';
 import { promisify } from 'util';
 import { async as mkdirAsync, sync as dirSync } from './dir';
-export function validateInput(methodName: string, from: string, to: string) {
+
+export const validateInput = (methodName: string, from: string, to: string) => {
 	const methodSignature: string = methodName + '(from, to)';
 	validateArgument(methodSignature, 'from', from, ['string']);
 	validateArgument(methodSignature, 'to', to, ['string']);
@@ -18,7 +18,7 @@ export function validateInput(methodName: string, from: string, to: string) {
 // Sync
 // ---------------------------------------------------------
 
-export function sync(from: string, to: string): void {
+export const sync = (from: string, to: string): void => {
 	try {
 		renameSync(from, to);
 	} catch (err) {
@@ -59,8 +59,6 @@ export function sync(from: string, to: string): void {
 // Async
 // ---------------------------------------------------------
 
-const promisedRename = promisify(rename);
-
 const ensureDestinationPathExistsAsync = (to: string): Promise<any> =>{
 	return new Promise<any>((resolve, reject) => {
 		const destDir: string = pathUtil.dirname(to);
@@ -77,9 +75,9 @@ const ensureDestinationPathExistsAsync = (to: string): Promise<any> =>{
 	});
 };
 
-export function async(from: string, to: string): Promise<any> {
+export const async = (from: string, to: string): Promise<any> => {
 	return new Promise<any>((resolve, reject) => {
-		promisedRename(from, to)
+		promisify(rename)(from, to)
 			.then(resolve)
 			.catch(err => {
 				if (err.code !== EError.NOEXISTS) {
@@ -95,7 +93,7 @@ export function async(from: string, to: string): Promise<any> {
 							} else {
 								ensureDestinationPathExistsAsync(to)
 									// Retry the attempt
-									.then(() => { return promisedRename(from, to); })
+									.then(() => promisify(rename)(from, to))
 									.then(resolve, reject);
 							}
 						})

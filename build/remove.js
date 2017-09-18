@@ -20,15 +20,9 @@ const interfaces_2 = require("./interfaces");
 const inspect_2 = require("./inspect");
 const iterator_1 = require("./iterator");
 const errors_2 = require("./errors");
+// tslint:disable-next-line:no-require-imports
+// tslint:disable-next-line:no-var-requires
 const trash = require('trash');
-/*
-function twiddle(mode, mask) {
-    return !!(mask & parseInt((mode & parseInt("777", 8)).toString(8)[0]));
-}
-function write(path) {
-    return twiddle(statSync(path).mode, 2);
-}
-*/
 function validateInput(methodName, path) {
     const methodSignature = methodName + '([path])';
     validate_1.validateArgument(methodSignature, 'path', path, ['string', 'undefined']);
@@ -49,7 +43,9 @@ const parseOptions = (options, path) => {
             parsedOptions.filter = matcher_1.create(path, opts.matching);
         }
         else {
-            parsedOptions.filter = () => { return true; };
+            parsedOptions.filter = () => {
+                return true;
+            };
         }
     }
     return parsedOptions;
@@ -95,7 +91,7 @@ const rmASync = (path, options) => {
         });
     });
 };
-function isDone(nodes) {
+const isDone = (nodes) => {
     let done = true;
     nodes.forEach((element) => {
         if (element.status !== interfaces_2.ENodeOperationStatus.DONE) {
@@ -103,15 +99,15 @@ function isDone(nodes) {
         }
     });
     return done;
-}
-function next(nodes) {
+};
+const next = (nodes) => {
     for (let i = 0; i < nodes.length; i++) {
         if (nodes[i].status === interfaces_2.ENodeOperationStatus.COLLECTED) {
             return nodes[i];
         }
     }
     return null;
-}
+};
 // handle user side setting "THROW" and non enum values (null)
 const onConflict = (from, options, settings) => {
     switch (settings.overwrite) {
@@ -126,8 +122,10 @@ const onConflict = (from, options, settings) => {
         case interfaces_2.EResolveMode.SKIP: {
             return settings.overwrite;
         }
+        default: {
+            return undefined;
+        }
     }
-    return undefined;
 };
 function resolveConflict(path, resolveMode) {
     if (resolveMode === undefined) {
@@ -146,92 +144,90 @@ function resolveConflict(path, resolveMode) {
 }
 exports.resolveConflict = resolveConflict;
 ;
-function visitor(path, vars, item) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const options = vars.options;
-        if (!item) {
-            return;
-        }
-        item.status = interfaces_2.ENodeOperationStatus.PROCESSING;
-        const done = () => {
-            item.status = interfaces_2.ENodeOperationStatus.DONE;
-            if (isDone(vars.nodes)) {
-                return vars.resolve(vars.result);
-            }
-            else {
-                if (vars.nodes.length) {
-                    const item = next(vars.nodes);
-                    if (item) {
-                        visitor(item.path, vars, item);
-                    }
-                    else {
-                        vars.resolve(vars.result);
-                    }
-                }
-            }
-        };
+const visitor = (path, vars, item) => {
+    const options = vars.options;
+    if (!item) {
+        return;
+    }
+    item.status = interfaces_2.ENodeOperationStatus.PROCESSING;
+    const done = () => {
+        item.status = interfaces_2.ENodeOperationStatus.DONE;
         if (isDone(vars.nodes)) {
             return vars.resolve(vars.result);
         }
-        vars.filesInProgress += 1;
-        rmASync(path, options)
-            .then((res) => {
-            done();
-        })
-            .catch((err) => {
-            if (err.code === 'EACCES' || err.code === 'EPERM' || err.code === 'EISDIR' || err.code === 'ENOTEMPTY') {
-                const resolved = (settings) => {
-                    settings.error = err.code;
-                    // feature : report
-                    if (settings && options && options.flags && options.flags & interfaces_2.EDeleteFlags.REPORT) {
-                        vars.result.push({
-                            error: settings.error,
-                            node: item,
-                            resolved: settings
-                        });
-                    }
-                    if (settings) {
-                        // if the first resolve callback returned an individual resolve settings "THIS",
-                        // ask the user again with the same item
-                        let always = settings.mode === interfaces_2.EResolve.ALWAYS;
-                        if (always) {
-                            options.conflictSettings = settings;
-                        }
-                        let how = settings.overwrite;
-                        how = onConflict(item.path, options, settings);
-                        if (how === interfaces_2.EResolveMode.ABORT) {
-                            vars.abort = true;
-                        }
-                        if (vars.abort) {
-                            done();
-                            return;
-                        }
-                        if (!resolveConflict(item.path, how)) {
-                            done();
-                            return;
-                        }
-                        item.status = interfaces_2.ENodeOperationStatus.PROCESS;
-                        if (settings.overwrite === interfaces_2.EResolveMode.RETRY) {
-                            item.status = interfaces_2.ENodeOperationStatus.COLLECTED;
-                            visitor(path, vars, item);
-                        }
-                    }
-                };
-                if (!options.conflictSettings) {
-                    const promise = options.conflictCallback(path, inspect_2.createItem(path), err.code);
-                    promise.then(resolved);
+        else {
+            if (vars.nodes.length) {
+                const itemInner = next(vars.nodes);
+                if (itemInner) {
+                    visitor(itemInner.path, vars, itemInner);
                 }
                 else {
-                    resolved(options.conflictSettings);
+                    vars.resolve(vars.result);
                 }
             }
-        });
+        }
+    };
+    if (isDone(vars.nodes)) {
+        return vars.resolve(vars.result);
+    }
+    vars.filesInProgress += 1;
+    rmASync(path, options)
+        .then((res) => {
+        done();
+    })
+        .catch((err) => {
+        if (err.code === 'EACCES' || err.code === 'EPERM' || err.code === 'EISDIR' || err.code === 'ENOTEMPTY') {
+            const resolved = (settings) => {
+                settings.error = err.code;
+                // feature : report
+                if (settings && options && options.flags && options.flags & interfaces_2.EDeleteFlags.REPORT) {
+                    vars.result.push({
+                        error: settings.error,
+                        node: item,
+                        resolved: settings
+                    });
+                }
+                if (settings) {
+                    // if the first resolve callback returned an individual resolve settings "THIS",
+                    // ask the user again with the same item
+                    const always = settings.mode === interfaces_2.EResolve.ALWAYS;
+                    if (always) {
+                        options.conflictSettings = settings;
+                    }
+                    let how = settings.overwrite;
+                    how = onConflict(item.path, options, settings);
+                    if (how === interfaces_2.EResolveMode.ABORT) {
+                        vars.abort = true;
+                    }
+                    if (vars.abort) {
+                        done();
+                        return;
+                    }
+                    if (!resolveConflict(item.path, how)) {
+                        done();
+                        return;
+                    }
+                    item.status = interfaces_2.ENodeOperationStatus.PROCESS;
+                    if (settings.overwrite === interfaces_2.EResolveMode.RETRY) {
+                        item.status = interfaces_2.ENodeOperationStatus.COLLECTED;
+                        visitor(path, vars, item);
+                    }
+                }
+            };
+            if (!options.conflictSettings) {
+                const promise = options.conflictCallback(path, inspect_2.createItem(path), err.code);
+                promise.then(resolved);
+            }
+            else {
+                resolved(options.conflictSettings);
+            }
+        }
     });
-}
+};
 function collect(path, options) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
-            let all = [];
+            const all = [];
             iterator_1.async(path, {
                 filter: options.filter
             }).then((it) => {
@@ -259,17 +255,16 @@ function async(path, options) {
                     // It's not a file, it's a directory.
                     // Must delete everything inside first.
                     list_1.async(path).then((filenamesInsideDir) => {
-                        let promises = filenamesInsideDir.map((filename) => {
-                            return async(pathUtil.join(path, filename));
+                        const promises = filenamesInsideDir.map((filename) => {
+                            return async(pathUtil.join(path, filename), options);
                         });
                         return Promise.all(promises);
-                    })
-                        .then(() => {
+                    }).then(() => {
                         // Everything inside directory has been removed,
                         // it's safe now to go for the directory itself.
-                        return fs_1.rmdir(path, (err) => {
-                            if (err) {
-                                reject(err);
+                        return fs_1.rmdir(path, (err2) => {
+                            if (err2) {
+                                reject(err2);
                             }
                         });
                     })
@@ -278,7 +273,7 @@ function async(path, options) {
                 // we have a user conflict callback,
                 // collect nodes and start asking
                 if (options.conflictCallback) {
-                    let result = void 0;
+                    const result = void 0;
                     // walker variables
                     const visitorArgs = {
                         resolve: resolve,
@@ -303,7 +298,7 @@ function async(path, options) {
                         }
                     };
                     if (!nodes) {
-                        let _nodes = visitorArgs.nodes;
+                        const _nodes = visitorArgs.nodes;
                         iterator_1.async(path, {
                             filter: options.filter
                         }).then((it) => {
@@ -316,8 +311,8 @@ function async(path, options) {
                                 });
                             }
                             process();
-                        }).catch((err) => {
-                            console.error('read error', err);
+                        }).catch((err2) => {
+                            console.error('read error', err2);
                         });
                     }
                     else {
@@ -342,7 +337,7 @@ function async(path, options) {
         // would be an error
         if (options.matching) {
             const nodes = yield collect(path, options);
-            let err = new interfaces_1.ErrnoException('dummy');
+            const err = new interfaces_1.ErrnoException('dummy');
             err.code = 'ENOTEMPTY';
             return new Promise((resolve, reject) => {
                 onError(err, resolve, reject, nodes);
@@ -352,10 +347,10 @@ function async(path, options) {
             return new Promise((resolve, reject) => {
                 // Assume the path is a file or directory and just try to remove it.
                 rmASync(path, options)
-                    .then((res) => {
-                    resolve();
-                })
-                    .catch((err) => { onError(err, resolve, reject); });
+                    .then((res) => resolve())
+                    .catch((err) => {
+                    onError(err, resolve, reject);
+                });
             });
         }
     });

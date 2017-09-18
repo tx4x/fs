@@ -1,24 +1,17 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const pathUtil = require("path");
 const fs_1 = require("fs");
-const rimraf = require("rimraf");
+const util_1 = require("util");
+const fs = require("fs");
+const remove_1 = require("./remove");
 const mode_1 = require("./utils/mode");
 const validate_1 = require("./utils/validate");
 const errors_1 = require("./errors");
 const interfaces_1 = require("./interfaces");
-const promisify_1 = require("./promisify");
 const mkdirp = require("mkdirp");
-exports.validateInput = function (methodName, path, options) {
-    let methodSignature = methodName + '(path, [criteria])';
+exports.validateInput = (methodName, path, options) => {
+    const methodSignature = methodName + '(path, [criteria])';
     validate_1.validateArgument(methodSignature, 'path', path, ['string']);
     validate_1.validateOptions(methodSignature, 'criteria', options, {
         empty: ['boolean'],
@@ -60,9 +53,8 @@ function mkdirSync(path, criteria) {
 ;
 function checkDirSync(path, stat, options) {
     const checkMode = function () {
-        const mode = mode_1.normalizeFileMode(stat.mode);
-        if (options.mode !== undefined && options.mode !== mode) {
-            fs_1.chmodSync(path, options.mode);
+        if (options.mode !== undefined) {
+            fs.chmodSync(path, options.mode);
         }
     };
     const checkEmptiness = function () {
@@ -71,7 +63,7 @@ function checkDirSync(path, stat, options) {
             // Delete everything inside this directory
             list = fs_1.readdirSync(path);
             list.forEach(function (filename) {
-                rimraf.sync(pathUtil.resolve(path, filename));
+                remove_1.sync(pathUtil.resolve(path, filename));
             });
         }
     };
@@ -79,45 +71,37 @@ function checkDirSync(path, stat, options) {
     checkEmptiness();
 }
 ;
-function sync(path, options) {
-    let criteria = defaults(options);
-    let stat = dirStatsSync(path);
+exports.sync = (path, options) => {
+    const criteria = defaults(options);
+    const stat = dirStatsSync(path);
     if (stat) {
         checkDirSync(path, stat, criteria);
     }
     else {
         mkdirSync(path, criteria);
     }
-}
-exports.sync = sync;
-;
+};
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-const promisedStat = promisify_1.promisify(fs_1.stat);
-const promisedChmod = promisify_1.promisify(fs_1.chmod);
-const promisedReaddir = promisify_1.promisify(fs_1.readdir);
-const promisedRimraf = promisify_1.promisify(rimraf);
-const promisedMkdirp = promisify_1.promisify(mkdirp);
-function dirStatAsync(path) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise((resolve, reject) => {
-            promisedStat(path)
-                .then(function (stat) {
-                if (stat.isDirectory()) {
-                    resolve(stat);
-                }
-                else {
-                    reject(errors_1.ErrNoDirectory(path));
-                }
-            })
-                .catch((err) => (err.code === interfaces_1.EError.NOEXISTS ? resolve(undefined) : reject(err)));
-        });
+const promisedStat = util_1.promisify(fs_1.stat);
+const promisedReaddir = util_1.promisify(fs_1.readdir);
+const dirStatAsync = (path) => {
+    return new Promise((resolve, reject) => {
+        promisedStat(path)
+            .then((stat) => {
+            if (stat.isDirectory()) {
+                resolve(stat);
+            }
+            else {
+                reject(errors_1.ErrNoDirectory(path));
+            }
+        })
+            .catch((err) => (err.code === interfaces_1.EError.NOEXISTS ? resolve(undefined) : reject(err)));
     });
-}
-;
+};
 // Delete all files and directores inside given directory
-function emptyAsync(path) {
+const emptyAsync = (path) => {
     return new Promise((resolve, reject) => {
         promisedReaddir(path)
             .then(function (list) {
@@ -128,21 +112,17 @@ function emptyAsync(path) {
                 }
                 else {
                     subPath = pathUtil.resolve(path, list[index]);
-                    promisedRimraf(subPath).then(function () {
-                        doOne(index + 1);
-                    });
+                    remove_1.async(subPath).then(() => doOne(index + 1));
                 }
             };
             doOne(0);
         })
             .catch(reject);
     });
-}
-;
+};
 const checkMode = function (criteria, stat, path) {
-    const mode = mode_1.normalizeFileMode(stat.mode);
-    if (criteria.mode !== undefined && criteria.mode !== mode) {
-        return promisedChmod(path, criteria.mode);
+    if (criteria.mode !== undefined) {
+        return util_1.promisify(fs.chmod)(path, criteria.mode);
     }
     return Promise.resolve(null);
 };
@@ -160,9 +140,41 @@ const checkDirAsync = (path, stat, options) => {
     });
 };
 const mkdirAsync = (path, criteria) => {
-    return promisedMkdirp(path, { mode: criteria.mode });
+    const options = criteria || {};
+    return new Promise((resolve, reject) => {
+        util_1.promisify(fs.mkdir)(path, options.mode)
+            .then(resolve)
+            .catch((err) => {
+            if (err.code === 'ENOENT') {
+                // Parent directory doesn't exist. Need to create it first.
+                mkdirAsync(pathUtil.dirname(path), options)
+                    .then(() => {
+                    // Now retry creating this directory.
+                    return util_1.promisify(fs.mkdir)(path, options.mode);
+                })
+                    .then(resolve)
+                    .catch((err2) => {
+                    if (err2.code === 'EEXIST') {
+                        // Hmm, something other have already created the directory?
+                        // No problem for us.
+                        resolve();
+                    }
+                    else {
+                        reject(err2);
+                    }
+                });
+            }
+            else if (err.code === 'EEXIST') {
+                // The path already exists. We're fine.
+                resolve();
+            }
+            else {
+                reject(err);
+            }
+        });
+    });
 };
-function async(path, passedCriteria) {
+exports.async = (path, passedCriteria) => {
     const criteria = defaults(passedCriteria);
     return new Promise((resolve, reject) => {
         dirStatAsync(path)
@@ -174,6 +186,5 @@ function async(path, passedCriteria) {
         })
             .then(resolve, reject);
     });
-}
-exports.async = async;
+};
 //# sourceMappingURL=dir.js.map

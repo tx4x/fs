@@ -2,25 +2,23 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const pathUtil = require("path");
 const fs_1 = require("fs");
-const denodeify = require("denodeify");
-const mkdirp = require("mkdirp");
 const exists_1 = require("./exists");
 const validate_1 = require("./utils/validate");
 const errors_1 = require("./errors");
 const interfaces_1 = require("./interfaces");
 const copy_1 = require("./copy");
 const remove_1 = require("./remove");
-function validateInput(methodName, from, to) {
+const util_1 = require("util");
+const dir_1 = require("./dir");
+exports.validateInput = (methodName, from, to) => {
     const methodSignature = methodName + '(from, to)';
     validate_1.validateArgument(methodSignature, 'from', from, ['string']);
     validate_1.validateArgument(methodSignature, 'to', to, ['string']);
-}
-exports.validateInput = validateInput;
-;
+};
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-function sync(from, to) {
+exports.sync = (from, to) => {
     try {
         fs_1.renameSync(from, to);
     }
@@ -53,28 +51,23 @@ function sync(from, to) {
             }
             if (!exists_1.sync(to)) {
                 // Some parent directory doesn't exist. Create it.
-                mkdirp.sync(pathUtil.dirname(to));
+                dir_1.sync(pathUtil.dirname(to));
                 // Retry the attempt
                 fs_1.renameSync(from, to);
             }
         }
     }
-}
-exports.sync = sync;
-;
+};
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-const promisedRename = denodeify(fs_1.rename);
-const promisedMkdirp = denodeify(mkdirp);
-function ensureDestinationPathExistsAsync(to) {
+const ensureDestinationPathExistsAsync = (to) => {
     return new Promise((resolve, reject) => {
         const destDir = pathUtil.dirname(to);
         exists_1.async(destDir)
             .then(dstExists => {
             if (!dstExists) {
-                promisedMkdirp(destDir)
-                    .then(resolve, reject);
+                dir_1.async(destDir).then(resolve, reject);
             }
             else {
                 // Hah, no idea.
@@ -83,11 +76,10 @@ function ensureDestinationPathExistsAsync(to) {
         })
             .catch(reject);
     });
-}
-;
-function async(from, to) {
+};
+exports.async = (from, to) => {
     return new Promise((resolve, reject) => {
-        promisedRename(from, to)
+        util_1.promisify(fs_1.rename)(from, to)
             .then(resolve)
             .catch(err => {
             if (err.code !== interfaces_1.EError.NOEXISTS) {
@@ -104,7 +96,7 @@ function async(from, to) {
                     }
                     else {
                         ensureDestinationPathExistsAsync(to)
-                            .then(() => { return promisedRename(from, to); })
+                            .then(() => util_1.promisify(fs_1.rename)(from, to))
                             .then(resolve, reject);
                     }
                 })
@@ -112,7 +104,5 @@ function async(from, to) {
             }
         });
     });
-}
-exports.async = async;
-;
+};
 //# sourceMappingURL=move.js.map

@@ -12,47 +12,33 @@ Object.keys(errno.code).forEach(function (code) {
         return err;
     };
 });
-function ErrNoFileOrDir(path) {
+exports.ErrNoFileOrDir = (path) => {
     return new Error("Can't remove " + path + ' The path is not file nor directory');
-}
-exports.ErrNoFileOrDir = ErrNoFileOrDir;
-;
-function ErrCantDelete(path) {
+};
+exports.ErrCantDelete = (path) => {
     return new Error("Can't remove " + path);
-}
-exports.ErrCantDelete = ErrCantDelete;
-;
-function ErrNotFile(path) {
+};
+exports.ErrNotFile = (path) => {
     return new Error('Path ' + path + ' exists but is not a file.' +
         ' Halting jetpack.file() call for safety reasons.');
-}
-exports.ErrNotFile = ErrNotFile;
-;
-function ErrNoDirectory(path) {
+};
+exports.ErrNoDirectory = (path) => {
     return new Error('Path ' + path + ' exists but is not a directory.' +
         ' Halting jetpack.dir() call for safety reasons.');
-}
-exports.ErrNoDirectory = ErrNoDirectory;
-;
-function ErrDoesntExists(path) {
+};
+exports.ErrDoesntExists = (path) => {
     const err = new Error("Path to copy doesn't exist " + path);
     err.code = 'ENOENT';
     return err;
-}
-exports.ErrDoesntExists = ErrDoesntExists;
-;
-function ErrDestinationExists(path) {
+};
+exports.ErrDestinationExists = (path) => {
     const err = new Error('Destination path already exists ' + path);
     err.code = 'EEXIST';
     return err;
-}
-exports.ErrDestinationExists = ErrDestinationExists;
-;
-function ErrIsNotDirectory(path) {
+};
+exports.ErrIsNotDirectory = (path) => {
     const err = new interfaces_1.ErrnoException('Path you want to find stuff in must be a directory ' + path);
     err.code = 'ENOTDIR';
     return err;
-}
-exports.ErrIsNotDirectory = ErrIsNotDirectory;
-;
+};
 //# sourceMappingURL=errors.js.map

@@ -23,10 +23,10 @@ const read = require("./read");
 // It provides the public API, and resolves all paths regarding to
 // passed cwdPath, or default process.cwd() if cwdPath was not specified.
 function jetpack(cwdPath) {
-    let getCwdPath = function () {
+    const getCwdPath = function () {
         return cwdPath || process.cwd();
     };
-    let cwd = function (w) {
+    const cwd = function (w) {
         let args;
         let pathParts;
         // return current CWD if no arguments specified...
@@ -40,20 +40,19 @@ function jetpack(cwdPath) {
         return res;
     };
     // resolves path to inner CWD path of this jetpack instance
-    let resolvePath = function (path) {
+    const resolvePath = function (path) {
         return pathUtil.resolve(getCwdPath(), path);
     };
-    let getPath = function () {
+    const getPath = function () {
         // add CWD base path as first element of arguments array
         Array.prototype.unshift.call(arguments, getCwdPath());
         return pathUtil.resolve.apply(null, arguments);
     };
-    let normalizeOptions = function (options) {
-        let opts = options || { cwd: getCwdPath() };
-        return opts;
+    const normalizeOptions = function (options) {
+        return options || { cwd: getCwdPath() };
     };
     // API
-    let api = {
+    const api = {
         cwd: cwd,
         path: getPath,
         append: function (path, data, options) {
@@ -110,8 +109,8 @@ function jetpack(cwdPath) {
             return this;
         },
         fileAsync: function (path, criteria) {
-            let deferred = Q.defer();
-            let that = this;
+            const deferred = Q.defer();
+            const that = this;
             file.validateInput('fileAsync', path, criteria);
             file.async(resolvePath(path), criteria)
                 .then(function () {

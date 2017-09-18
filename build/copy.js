@@ -65,7 +65,9 @@ const parseOptions = (options, from) => {
             parsedOptions.filter = matcher_1.create(from, opts.matching);
         }
         else {
-            parsedOptions.filter = () => { return true; };
+            parsedOptions.filter = () => {
+                return true;
+            };
         }
     }
     return parsedOptions;
@@ -88,14 +90,14 @@ function copyFileSyncWithProgress(from, to, options) {
             let cbCalled = false;
             let elapsed = Date.now();
             let speed = 0;
-            let done = (err) => {
+            const done = (err) => {
                 if (!cbCalled) {
                     cbCalled = true;
                     resolve();
                 }
             };
             const rd = fs_1.createReadStream(from).
-                on("error", (err) => done(err));
+                on('error', (err) => done(err));
             const str = progress({
                 length: fs.statSync(from).size,
                 time: 100
@@ -105,8 +107,8 @@ function copyFileSyncWithProgress(from, to, options) {
                 options.writeProgress(from, e.transferred, e.length);
             });
             const wr = fs_1.createWriteStream(to);
-            wr.on("error", (err) => done(err));
-            wr.on("close", done);
+            wr.on('error', (err) => done(err));
+            wr.on('close', done);
             rd.pipe(str).pipe(wr);
         });
     });
@@ -163,7 +165,7 @@ function copyItemSync(from, inspectData, to, options) {
 function sync(from, to, options) {
     const opts = parseOptions(options, from);
     checksBeforeCopyingSync(from, to, opts);
-    let nodes = [];
+    const nodes = [];
     let sizeTotal = 0;
     if (options && options.flags & interfaces_1.ECopyFlags.EMPTY) {
         const dstStat = fs.statSync(to);
@@ -251,7 +253,7 @@ const copyFileAsync = (from, to, mode, options, retriedAttempt) => {
                     // Make retry attempt only once to prevent vicious infinite loop
                     // (when for some obscure reason I/O will keep returning ENOENT error).
                     // Passing retriedAttempt = true.
-                    copyFileAsync(from, to, mode, true)
+                    copyFileAsync(from, to, mode, null, true)
                         .then(resolve)
                         .catch(reject);
                 });
@@ -269,12 +271,12 @@ const copyFileAsync = (from, to, mode, options, retriedAttempt) => {
                         throw err;
                     }
                     ;
-                    fs.futimes(fd, sourceStat.atime, sourceStat.mtime, (err) => {
-                        if (err) {
-                            throw err;
+                    fs.futimes(fd, sourceStat.atime, sourceStat.mtime, (err2) => {
+                        if (err2) {
+                            throw err2;
                         }
                         ;
-                        fs.close(fd);
+                        fs.close(fd, null);
                         resolve();
                     });
                 });
@@ -326,8 +328,10 @@ function copySymlinkAsync(from, to) {
                 if (err.code === interfaces_1.EError.EXISTS) {
                     // There is already file/symlink with this name on destination location.
                     // Must erase it manually, otherwise system won't allow us to place symlink there.
-                    promisedUnlink(to)
-                        .then(() => { return promisedSymlink(symlinkPointsAt, to, null); })
+                    promisedUnlink(to, null)
+                        .then(() => {
+                        return promisedSymlink(symlinkPointsAt, to, null);
+                    })
                         .then(resolve, reject);
                 }
                 else {
@@ -367,8 +371,10 @@ const onConflict = (from, to, options, settings) => {
         case interfaces_1.EResolveMode.SKIP: {
             return settings.overwrite;
         }
+        default: {
+            return undefined;
+        }
     }
-    return undefined;
 };
 function resolveConflict(from, to, options, resolveMode) {
     if (resolveMode === undefined) {
@@ -460,7 +466,7 @@ function visitor(from, to, vars, item) {
             if (subResolveSettings) {
                 // if the first resolve callback returned an individual resolve settings "THIS",
                 // ask the user again with the same item
-                let always = subResolveSettings.mode === interfaces_1.EResolve.ALWAYS;
+                const always = subResolveSettings.mode === interfaces_1.EResolve.ALWAYS;
                 if (always) {
                     options.conflictSettings = subResolveSettings;
                 }

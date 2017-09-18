@@ -13,14 +13,10 @@ import { ArrayIterator } from '@xblox/core/iterator';
 import { ErrCantDelete } from './errors';
 
 const trash = require('trash');
-/*
-function twiddle(mode, mask) {
-	return !!(mask & parseInt((mode & parseInt("777", 8)).toString(8)[0]));
-}
-function write(path) {
-	return twiddle(statSync(path).mode, 2);
-}
-*/
+process.on('unhandledRejection', (reason: string) => {
+	console.error('Unhandled rejection, reason: ', reason);
+});
+
 export function validateInput(methodName: string, path: string) {
 	const methodSignature = methodName + '([path])';
 	validateArgument(methodSignature, 'path', path, ['string', 'undefined']);
@@ -92,7 +88,7 @@ interface IVisitorArgs {
 	result: TDeleteResult;
 	nodes: IProcessingNode[];
 }
-function isDone(nodes: IProcessingNode[]) {
+const isDone = (nodes: IProcessingNode[]) => {
 	let done = true;
 	nodes.forEach((element: IProcessingNode) => {
 		if (element.status !== ENodeOperationStatus.DONE) {
@@ -101,7 +97,7 @@ function isDone(nodes: IProcessingNode[]) {
 	});
 	return done;
 }
-function next(nodes: IProcessingNode[]): IProcessingNode {
+const next = (nodes: IProcessingNode[]): IProcessingNode => {
 	for (let i = 0; i < nodes.length; i++) {
 		if (nodes[i].status === ENodeOperationStatus.COLLECTED) {
 			return nodes[i];
@@ -141,7 +137,7 @@ export function resolveConflict(path: string, resolveMode: EResolveMode): boolea
 	}
 	return false;
 };
-async function visitor(path: string, vars: IVisitorArgs, item: IProcessingNode): Promise<void> {
+const visitor = (path: string, vars: IVisitorArgs, item: IProcessingNode): Promise<void> => {
 	const options = vars.options;
 
 	if (!item) {
@@ -253,19 +249,18 @@ export async function async(path: string, options?: IDeleteOptions): Promise<TDe
 				// Must delete everything inside first.
 				listAsync(path).then((filenamesInsideDir: string[]) => {
 					let promises = filenamesInsideDir.map((filename: string) => {
-						return async(pathUtil.join(path, filename));
+						return async(pathUtil.join(path, filename), options);
 					});
 					return Promise.all(promises);
+				}).then(() => {
+					// Everything inside directory has been removed,
+					// it's safe now to go for the directory itself.
+					return rmdir(path, (err: ErrnoException) => {
+						if (err) {
+							reject(err);
+						}
+					});
 				})
-					.then(() => {
-						// Everything inside directory has been removed,
-						// it's safe now to go for the directory itself.
-						return rmdir(path, (err: ErrnoException) => {
-							if (err) {
-								reject(err);
-							}
-						});
-					})
 					.then(resolve, reject);
 			};
 			// we have a user conflict callback,
@@ -342,9 +337,7 @@ export async function async(path: string, options?: IDeleteOptions): Promise<TDe
 		return new Promise<TDeleteResult>((resolve, reject) => {
 			// Assume the path is a file or directory and just try to remove it.
 			rmASync(path, options)
-				.then((res: any) => {
-					resolve();
-				})
+				.then((res: any) => resolve())
 				.catch((err: ErrnoException) => { onError(err, resolve, reject); });
 		});
 	}

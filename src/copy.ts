@@ -259,7 +259,7 @@ const copyFileAsync = (from: string, to: string, mode: any, options?: ICopyOptio
 						if (err) {
 							throw err;
 						};
-						fs.close(fd);
+						fs.close(fd,null);
 						resolve();
 					});
 				});
@@ -303,7 +303,7 @@ export function copySymlinkAsync(from: string, to: string) {
 	return promisedReadlink(from)
 		.then((symlinkPointsAt: string) => {
 			return new Promise((resolve, reject) => {
-				promisedSymlink(symlinkPointsAt, to, null, null)
+				promisedSymlink(symlinkPointsAt, to, null)
 					.then(resolve)
 					.catch((err: ErrnoException) => {
 						if (err.code === EError.EXISTS) {
@@ -311,7 +311,7 @@ export function copySymlinkAsync(from: string, to: string) {
 							// Must erase it manually, otherwise system won't allow us to place symlink there.
 							promisedUnlink(to, null)
 								// Retry...
-								.then(() => { return promisedSymlink(symlinkPointsAt, to, null, null); })
+								.then(() => { return promisedSymlink(symlinkPointsAt, to, null); })
 								.then(resolve, reject);
 						} else {
 							reject(err);

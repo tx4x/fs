@@ -1,6 +1,9 @@
 import * as pathUtil from 'path';
 import { sync as moveSync, async as moveASync } from './move';
 import { validateArgument } from './utils/validate';
+process.on('unhandledRejection', (reason: string) => {
+		console.error('Unhandled rejection, reason: ', reason);
+	});
 
 export function validateInput(methodName: string, path: string, newName: string): void {
   const methodSignature = methodName + '(path, newName)';

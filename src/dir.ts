@@ -1,11 +1,13 @@
 import * as pathUtil from 'path';
-import { Stats, stat, statSync, chmod, chmodSync, readdirSync, readdir } from 'fs';
-import * as rimraf from 'rimraf';
+import { Stats, stat, statSync, chmodSync, readdirSync, readdir, PathLike } from 'fs';
+import { chmod } from 'fs';
+import { promisify } from 'util';
+import * as fs from 'fs';
+import {sync as removeSync, async as removeAsync} from './remove';
 import { normalizeFileMode as modeUtil } from './utils/mode';
 import { validateArgument, validateOptions } from './utils/validate';
 import { ErrNoDirectory } from './errors';
 import { EError } from './interfaces';
-import { promisify } from './promisify';
 import * as  mkdirp from 'mkdirp';
 
 export interface IOptions {
@@ -61,8 +63,8 @@ function mkdirSync(path: string, criteria: IOptions) {
 function checkDirSync(path: string, stat: Stats, options: IOptions) {
 	const checkMode = function () {
 		const mode = modeUtil(stat.mode);
-		if (options.mode !== undefined && options.mode !== mode) {
-			chmodSync(path, options.mode as string);
+		if (options.mode !== undefined) {
+			fs.chmodSync(path, options.mode);
 		}
 	};
 	const checkEmptiness = function () {
@@ -71,7 +73,7 @@ function checkDirSync(path: string, stat: Stats, options: IOptions) {
 			// Delete everything inside this directory
 			list = readdirSync(path);
 			list.forEach(function (filename) {
-				rimraf.sync(pathUtil.resolve(path, filename));
+				removeSync(pathUtil.resolve(path, filename));
 			});
 		}
 	};
@@ -92,14 +94,10 @@ export const sync = (path: string, options?: IOptions) => {
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
-
 const promisedStat = promisify(stat);
-const promisedChmod = promisify(chmod);
 const promisedReaddir = promisify(readdir);
-const promisedRimraf = promisify(rimraf);
 const promisedMkdirp = promisify(mkdirp);
-
-async function dirStatAsync(path: string): Promise<Stats> {
+function dirStatAsync(path: string): Promise<Stats> {
 	return new Promise<Stats>((resolve, reject) => {
 		promisedStat(path)
 			.then((stat: any) => {
@@ -125,7 +123,7 @@ const emptyAsync = (path: string) => {
 						resolve();
 					} else {
 						subPath = pathUtil.resolve(path, list[index]);
-						promisedRimraf(subPath, null, null).then(() => doOne(index + 1));
+						removeAsync(subPath).then(() => doOne(index + 1));
 					}
 				};
 				doOne(0);
@@ -133,17 +131,18 @@ const emptyAsync = (path: string) => {
 			.catch(reject);
 	});
 };
+
 const checkMode = function (criteria: IOptions, stat: Stats, path: string): Promise<any> {
 	const mode = modeUtil(stat.mode);
-	if (criteria.mode !== undefined && criteria.mode !== mode) {
-		return promisedChmod(path, criteria.mode as string, null);
+	if (criteria.mode !== undefined) {
+		return promisify(fs.chmod)(path, criteria.mode);
 	}
 	return Promise.resolve(null);
 };
 
 const checkDirAsync = (path: string, stat: Stats, options: IOptions) => {
-	return new Promise((resolve, reject) => {		
-		const checkEmptiness = function ():Promise<any> {
+	return new Promise((resolve, reject) => {
+		const checkEmptiness = function (): Promise<any> {
 			if (options.empty) {
 				return emptyAsync(path);
 			}
@@ -156,7 +155,36 @@ const checkDirAsync = (path: string, stat: Stats, options: IOptions) => {
 };
 
 const mkdirAsync = (path: string, criteria: IOptions): Promise<any> => {
-	return promisedMkdirp(path);
+	const options = criteria || {};
+	return new Promise((resolve, reject) => {
+		promisify(fs.mkdir)(path,options.mode)
+			.then(resolve)
+			.catch((err) => {
+				if (err.code === 'ENOENT') {
+					// Parent directory doesn't exist. Need to create it first.
+					mkdirAsync(pathUtil.dirname(path), options)
+						.then(() => {
+							// Now retry creating this directory.
+							return promisify(fs.mkdir)(path,options.mode);
+						})
+						.then(resolve)
+						.catch((err2) => {
+							if (err2.code === 'EEXIST') {
+								// Hmm, something other have already created the directory?
+								// No problem for us.
+								resolve();
+							} else {
+								reject(err2);
+							}
+						});
+				} else if (err.code === 'EEXIST') {
+					// The path already exists. We're fine.
+					resolve();
+				} else {
+					reject(err);
+				}
+			});
+	});
 };
 
 export const async = (path: string, passedCriteria?: IOptions) => {

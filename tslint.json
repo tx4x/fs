@@ -1,11 +1,20 @@
 {
+	"extends": [
+		"tslint-presets"
+	],
 	"rules": {
 		"no-unused-expression": true,
 		"no-duplicate-variable": true,
 		"curly": true,
 		"class-name": true,
 		"no-var-keyword": true,
-		"semicolon": ["always"],
-		"triple-equals": true
+		"triple-equals": true,
+		"semicolon":true,
+		"indent":false,
+		"no-require-imports":false,
+		"no-conditional-assignment":false,
+		"no-bitwise":false,
+		"no-var-requires":false,
+		"only-arrow-functions": false
 	}
 }

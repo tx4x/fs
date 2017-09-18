@@ -6,7 +6,9 @@ var fse = require('fs-extra');
 
 var originalCwd = process.cwd();
 var createdDirectories = [];
-
+process.on('unhandledRejection', (reason) => {
+	console.error('Unhandled rejection, reason2: ', reason);
+});
 process.on('exit', function () {
   // In case something went wrong and some temp
   // directories are still on the disk.

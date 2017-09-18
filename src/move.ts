@@ -1,14 +1,14 @@
 import * as  pathUtil from "path";
 import { rename, renameSync } from 'fs';
 import * as denodeify from 'denodeify';
-import * as mkdirp from 'mkdirp';
 import { async as existsAsync, sync as existsSync } from './exists';
 import { validateArgument } from './utils/validate';
 import { ErrDoesntExists } from './errors';
 import { EError } from './interfaces';
 import { sync as copySync } from './copy';
 import { sync as removeSync } from './remove';
-
+import { promisify } from 'util';
+import { async as mkdirAsync, sync as dirSync } from './dir';
 export function validateInput(methodName: string, from: string, to: string) {
 	const methodSignature: string = methodName + '(from, to)';
 	validateArgument(methodSignature, 'from', from, ['string']);
@@ -47,7 +47,7 @@ export function sync(from: string, to: string): void {
 			}
 			if (!existsSync(to)) {
 				// Some parent directory doesn't exist. Create it.
-				mkdirp.sync(pathUtil.dirname(to));
+				dirSync(pathUtil.dirname(to));
 				// Retry the attempt
 				renameSync(from, to);
 			}
@@ -59,17 +59,15 @@ export function sync(from: string, to: string): void {
 // Async
 // ---------------------------------------------------------
 
-const promisedRename = denodeify(rename);
-const promisedMkdirp = denodeify(mkdirp);
+const promisedRename = promisify(rename);
 
-function ensureDestinationPathExistsAsync(to: string): Promise<null> {
-	return new Promise<null>((resolve, reject) => {
+const ensureDestinationPathExistsAsync = (to: string): Promise<any> =>{
+	return new Promise<any>((resolve, reject) => {
 		const destDir: string = pathUtil.dirname(to);
 		existsAsync(destDir)
 			.then(dstExists => {
 				if (!dstExists) {
-					promisedMkdirp(destDir)
-						.then(resolve, reject);
+					mkdirAsync(destDir).then(resolve, reject);
 				} else {
 					// Hah, no idea.
 					reject();
@@ -79,9 +77,9 @@ function ensureDestinationPathExistsAsync(to: string): Promise<null> {
 	});
 };
 
-export function async(from: string, to: string): Promise<null> {
-	return new Promise<null>((resolve, reject) => {
-		promisedRename(from, to, null)
+export function async(from: string, to: string): Promise<any> {
+	return new Promise<any>((resolve, reject) => {
+		promisedRename(from, to)
 			.then(resolve)
 			.catch(err => {
 				if (err.code !== EError.NOEXISTS) {
@@ -97,7 +95,7 @@ export function async(from: string, to: string): Promise<null> {
 							} else {
 								ensureDestinationPathExistsAsync(to)
 									// Retry the attempt
-									.then(() => { return promisedRename(from, to, null); })
+									.then(() => { return promisedRename(from, to); })
 									.then(resolve, reject);
 							}
 						})

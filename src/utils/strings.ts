@@ -1,6 +1,6 @@
 export let canNormalize = typeof ((<any> '').normalize) === 'function';
 const nonAsciiCharactersPattern = /[^\u0000-\u0080]/;
-export function normalizeNFC(str: string): string {
+export const normalizeNFC = (str: string): string => {
 	if (!canNormalize || !str) {
 		return str;
 	}

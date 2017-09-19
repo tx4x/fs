@@ -10,8 +10,8 @@ const reMimePartSplit = /[\/\+\.]/;
  * @returns
  */
 export default function (target: string, pattern: string) {
-	const test = (pattern) => {
-		let result = wildcard(pattern, target, reMimePartSplit);
+	const test = (_pattern) => {
+		const result = wildcard(_pattern, target, reMimePartSplit);
 		// ensure that we have a valid mime type (should have two parts)
 		return result && result.length >= 2;
 	};

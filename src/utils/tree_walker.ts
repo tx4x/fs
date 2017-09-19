@@ -1,9 +1,8 @@
 import { Readable } from 'stream';
-import * as  pathUtil from "path";
+import * as  pathUtil from 'path';
 import { sync as inspectSync, async as inspectASync } from '../inspect';
 import { ENodeType, IInspectOptions, INode } from '../interfaces';
 import { sync as listSync, async as listASync } from '../list';
-
 
 export interface IOptions {
 	inspectOptions: IInspectOptions;
@@ -53,7 +52,9 @@ export function stream(path: string, options: IOptions) {
 	};
 	let running = false;
 	let readSome: any;
-	const error = (err: Error) => { rs.emit('error', err); };
+	const error = (err: Error) => {
+		rs.emit('error', err);
+	};
 	const findNextUnprocessedNode = (node: IPrivateNode): IPrivateNode => {
 		if (node.nextSibling) {
 			return node.nextSibling;
@@ -64,7 +65,7 @@ export function stream(path: string, options: IOptions) {
 	};
 
 	const pushAndContinueMaybe = (data: { path: string, item: INode }) => {
-		let theyWantMore = rs.push(data);
+		const theyWantMore = rs.push(data);
 		running = false;
 		if (!nextTreeNode) {
 			// Previous was the last node. The job is done.

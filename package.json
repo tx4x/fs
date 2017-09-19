@@ -23,7 +23,6 @@
   },
   "typings": "index.d.ts",
   "devDependencies": {
-    "@types/grunt": "^0.4.21",
     "@types/mime": "0.0.29",
     "@types/mkdirp": "^0.3.29",
     "@types/node": "^8.0.28",

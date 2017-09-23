@@ -39,7 +39,9 @@ function stream(path, options) {
     };
     let running = false;
     let readSome;
-    const error = (err) => { rs.emit('error', err); };
+    const error = (err) => {
+        rs.emit('error', err);
+    };
     const findNextUnprocessedNode = (node) => {
         if (node.nextSibling) {
             return node.nextSibling;
@@ -50,7 +52,7 @@ function stream(path, options) {
         return undefined;
     };
     const pushAndContinueMaybe = (data) => {
-        let theyWantMore = rs.push(data);
+        const theyWantMore = rs.push(data);
         running = false;
         if (!nextTreeNode) {
             // Previous was the last node. The job is done.

@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-let prettyPrintTypes = function (types) {
+const prettyPrintTypes = function (types) {
     const addArticle = (str) => {
-        let vowels = ['a', 'e', 'i', 'o', 'u'];
+        const vowels = ['a', 'e', 'i', 'o', 'u'];
         if (vowels.indexOf(str[0]) !== -1) {
             return 'an ' + str;
         }
@@ -10,14 +10,14 @@ let prettyPrintTypes = function (types) {
     };
     return types.map(addArticle).join(' or ');
 };
-let isArrayOfNotation = function (typeDefinition) {
+const isArrayOfNotation = function (typeDefinition) {
     return /array of /.test(typeDefinition);
 };
-let extractTypeFromArrayOfNotation = function (typeDefinition) {
+const extractTypeFromArrayOfNotation = function (typeDefinition) {
     // The notation is e.g. 'array of string'
     return typeDefinition.split(' of ')[1];
 };
-let isValidTypeDefinition = (typeStr) => {
+const isValidTypeDefinition = (typeStr) => {
     if (isArrayOfNotation(typeStr)) {
         return isValidTypeDefinition(extractTypeFromArrayOfNotation(typeStr));
     }
@@ -50,7 +50,7 @@ const detectType = function (value) {
 const onlyUniqueValuesInArrayFilter = function (value, index, self) {
     return self.indexOf(value) === index;
 };
-let detectTypeDeep = function (value) {
+const detectTypeDeep = (value) => {
     let type = detectType(value);
     let typesInArray;
     if (type === 'array') {
@@ -63,8 +63,8 @@ let detectTypeDeep = function (value) {
     }
     return type;
 };
-let validateArray = function (argumentValue, typeToCheck) {
-    let allowedTypeInArray = extractTypeFromArrayOfNotation(typeToCheck);
+const validateArray = (argumentValue, typeToCheck) => {
+    const allowedTypeInArray = extractTypeFromArrayOfNotation(typeToCheck);
     if (detectType(argumentValue) !== 'array') {
         return false;
     }
@@ -73,7 +73,7 @@ let validateArray = function (argumentValue, typeToCheck) {
     });
 };
 function validateArgument(methodName, argumentName, argumentValue, argumentMustBe) {
-    let isOneOfAllowedTypes = argumentMustBe.some(function (type) {
+    const isOneOfAllowedTypes = argumentMustBe.some(function (type) {
         if (!isValidTypeDefinition(type)) {
             throw new Error('Unknown type "' + type + '"');
         }
@@ -94,7 +94,7 @@ function validateOptions(methodName, optionsObjName, obj, allowedOptions) {
     if (obj !== undefined) {
         validateArgument(methodName, optionsObjName, obj, ['object']);
         Object.keys(obj).forEach(function (key) {
-            let argName = optionsObjName + '.' + key;
+            const argName = optionsObjName + '.' + key;
             if (allowedOptions.hasOwnProperty(key)) {
                 validateArgument(methodName, argName, obj[key], allowedOptions[key]);
             }

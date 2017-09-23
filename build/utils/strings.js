@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.canNormalize = typeof (''.normalize) === 'function';
 const nonAsciiCharactersPattern = /[^\u0000-\u0080]/;
-function normalizeNFC(str) {
+exports.normalizeNFC = (str) => {
     if (!exports.canNormalize || !str) {
         return str;
     }
@@ -14,6 +14,5 @@ function normalizeNFC(str) {
         res = str;
     }
     return res;
-}
-exports.normalizeNFC = normalizeNFC;
+};
 //# sourceMappingURL=strings.js.map

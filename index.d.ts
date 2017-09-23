@@ -455,64 +455,9 @@ declare module '@xblox/fs/append' {
 	    encoding?: string;
 	    flag?: string;
 	}
-	export function validateInput(methodName: string, path: string, data: any, options?: Options): void;
-	export function sync(path: string, data: any, options: Options): void;
-	export function async(path: string, data: string | Buffer | Object, options?: Options): Promise<null>;
-
-}
-declare module '@xblox/fs/utils/mode' {
-	export function normalizeFileMode(mode: string | number): string;
-
-}
-declare module '@xblox/fs/errors' {
-	export function ErrNoFileOrDir(path: string): Error;
-	export function ErrCantDelete(path: string): Error;
-	export function ErrNotFile(path: string): Error;
-	export function ErrNoDirectory(path: string): Error;
-	export function ErrDoesntExists(path: string): Error;
-	export function ErrDestinationExists(path: string): Error;
-	export function ErrIsNotDirectory(path: string): Error;
-
-}
-declare module '@xblox/fs/promisify' {
-	export function promisify<T>(f: (cb: (err: any, res: T) => void) => void, thisContext?: any): () => Promise<T>;
-	export function promisify<A, T>(f: (arg: A, cb: (err: any, res: T) => void) => void, thisContext?: any): (arg: A) => Promise<T>;
-	export function promisify<A, A2, T>(f: (arg: A, arg2: A2, cb: (err: any, res: T) => void) => void, thisContext?: any): (arg: A, arg2: A2) => Promise<T>;
-	export function promisify<A, A2, A3, T>(f: (arg: A, arg2: A2, arg3: A3, cb: (err: any, res: T) => void) => void, thisContext?: any): (arg: A, arg2: A2, arg3: A3) => Promise<T>;
-	export function promisify<A, A2, A3, A4, T>(f: (arg: A, arg2: A2, arg3: A3, arg4: A4, cb: (err: any, res: T) => void) => void, thisContext?: any): (arg: A, arg2: A2, arg3: A3, arg4: A4) => Promise<T>;
-	export function promisify<A, A2, A3, A4, A5, T>(f: (arg: A, arg2: A2, arg3: A3, arg4: A4, arg5: A5, cb: (err: any, res: T) => void) => void, thisContext?: any): (arg: A, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => Promise<T>;
-	export function map<T, U>(elts: PromiseLike<PromiseLike<T>[]>, f: (t: T) => U | PromiseLike<U>): Promise<U[]>;
-	export function map<T, U>(elts: PromiseLike<T[]>, f: (t: T) => U | PromiseLike<U>): Promise<U[]>;
-	export function map<T, U>(elts: PromiseLike<T>[], f: (t: T) => U | PromiseLike<U>): Promise<U[]>;
-	export function map<T, U>(elts: T[], f: (t: T) => U | PromiseLike<U>): Promise<U[]>;
-	export function _try<T>(f: () => T): Promise<T>;
-	export function _try<T>(f: (arg: any) => T, arg: any): Promise<T>;
-	export function _try<T>(f: (arg: any, arg2: any) => T, arg: any, arg2: any): Promise<T>;
-	export function _try<T>(f: (arg: any, arg2: any, arg3: any) => T, arg: any, arg2: any, arg3: any): Promise<T>;
-	export function _try<T>(f: (arg: any, arg2: any, arg3: any, arg4: any) => T, arg: any, arg2: any, arg3: any, arg4: any): Promise<T>;
-
-}
-declare module '@xblox/fs/dir' {
-	export interface IOptions {
-	    empty?: boolean;
-	    mode?: number | string;
-	}
-	export const validateInput: (methodName: string, path: string, options?: IOptions) => void;
-	export function sync(path: string, options?: IOptions): void;
-	export function async(path: string, passedCriteria?: IOptions): Promise<{}>;
-
-}
-declare module '@xblox/fs/file' {
-	/// <reference types="node" />
-	export interface IOptions {
-	    content: string | Buffer | Object | Array<any>;
-	    jsonIndent: number;
-	    mode: string;
-	}
-	export function validateInput(methodName: string, path: string, options?: IOptions): void;
-	export function defaults(passedCriteria: IOptions | null): IOptions;
-	export function sync(path: string, options: IOptions): void;
-	export function async(path: string, options: IOptions): Promise<{}>;
+	export const validateInput: (methodName: string, path: string, data: any, options?: Options) => void;
+	export const sync: (path: string, data: any, options: Options) => void;
+	export const async: (path: string, data: string | Object | Buffer, options?: Options) => Promise<null>;
 
 }
 declare module '@xblox/fs/inspect' {
@@ -545,7 +490,7 @@ declare module '@xblox/fs/utils/platform' {
 }
 declare module '@xblox/fs/utils/strings' {
 	export let canNormalize: boolean;
-	export function normalizeNFC(str: string): string;
+	export const normalizeNFC: (str: string) => string;
 
 }
 declare module '@xblox/fs/list' {
@@ -553,6 +498,25 @@ declare module '@xblox/fs/list' {
 	export function _readdirSync(path: string): string[];
 	export function sync(path: string): string[];
 	export function async(path: string): Promise<string[]>;
+
+}
+declare module '@xblox/fs/errors' {
+	export const ErrNoFileOrDir: (path: string) => Error;
+	export const ErrCantDelete: (path: string) => Error;
+	export const ErrNotFile: (path: string) => Error;
+	export const ErrNoDirectory: (path: string) => Error;
+	export const ErrDoesntExists: (path: string) => Error;
+	export const ErrDestinationExists: (path: string) => Error;
+	export const ErrIsNotDirectory: (path: string) => Error;
+
+}
+declare module '@xblox/fs/utils/matcher' {
+	export interface IOptions {
+	    matchBase: boolean;
+	    nocomment: boolean;
+	    dot: boolean;
+	}
+	export function create(basePath: string, patterns: string[], options?: IOptions): (absolutePath: string) => boolean;
 
 }
 declare module '@xblox/fs/utils/tree_walker' {
@@ -568,13 +532,46 @@ declare module '@xblox/fs/utils/tree_walker' {
 	export function stream(path: string, options: IOptions): Readable;
 
 }
-declare module '@xblox/fs/utils/matcher' {
+declare module '@xblox/fs/iterator' {
+	import { IProcessingNode, IBaseOptions } from '@xblox/fs/interfaces';
+	import { ArrayIterator } from '@xblox/core/iterator';
+	export function async(from: string, options: IBaseOptions): Promise<ArrayIterator<IProcessingNode>>;
+
+}
+declare module '@xblox/fs/remove' {
+	import { IDeleteOptions } from '@xblox/fs/interfaces';
+	import { TDeleteResult, EResolveMode } from '@xblox/fs/interfaces';
+	export function validateInput(methodName: string, path: string): void;
+	export function sync(path: string, options?: IDeleteOptions): void;
+	export function resolveConflict(path: string, resolveMode: EResolveMode): boolean;
+	export function async(path: string, options?: IDeleteOptions): Promise<TDeleteResult>;
+
+}
+declare module '@xblox/fs/utils/mode' {
+	export const normalizeFileMode: (mode: string | number) => string;
+
+}
+declare module '@xblox/fs/dir' {
 	export interface IOptions {
-	    matchBase: boolean;
-	    nocomment: boolean;
-	    dot: boolean;
+	    empty?: boolean;
+	    mode?: number | string;
 	}
-	export function create(basePath: string, patterns: string[], options?: IOptions): (absolutePath: string) => boolean;
+	export const validateInput: (methodName: string, path: string, options?: IOptions) => void;
+	export const sync: (path: string, options?: IOptions) => void;
+	export const async: (path: string, passedCriteria?: IOptions) => Promise<{}>;
+
+}
+declare module '@xblox/fs/file' {
+	/// <reference types="node" />
+	export interface IOptions {
+	    content: string | Buffer | Object | Array<any>;
+	    jsonIndent: number;
+	    mode: string;
+	}
+	export function validateInput(methodName: string, path: string, options?: IOptions): void;
+	export function defaults(passedCriteria: IOptions | null): IOptions;
+	export function sync(path: string, options: IOptions): void;
+	export function async(path: string, options: IOptions): Promise<{}>;
 
 }
 declare module '@xblox/fs/find' {
@@ -603,31 +600,35 @@ declare module '@xblox/fs/inspect_tree' {
 
 }
 declare module '@xblox/fs/exists' {
+	import { ENodeType } from '@xblox/fs/interfaces';
 	export function validateInput(methodName: string, path: string): void;
 	export function sync(path: string): boolean | string;
-	export function async(path: string): Promise<boolean | string>;
+	export function async(path: string): Promise<boolean | string | ENodeType>;
 
 }
-declare module '@xblox/fs/iterator' {
-	import { IProcessingNode, IBaseOptions } from '@xblox/fs/interfaces';
-	import { ArrayIterator } from '@xblox/core/iterator';
-	export function async(from: string, options: IBaseOptions): Promise<ArrayIterator<IProcessingNode>>;
-
-}
-declare module '@xblox/fs/remove' {
-	import { IDeleteOptions } from '@xblox/fs/interfaces';
-	import { TDeleteResult, EResolveMode } from '@xblox/fs/interfaces';
-	export function validateInput(methodName: string, path: string): void;
-	export function sync(path: string, options?: IDeleteOptions): void;
-	export function resolveConflict(path: string, resolveMode: EResolveMode): boolean;
-	export function async(path: string, options?: IDeleteOptions): Promise<TDeleteResult>;
+declare module '@xblox/fs/promisify' {
+	export function promisify<T>(f: (cb: (err: any, res: T) => void) => void, thisContext?: any): () => Promise<T>;
+	export function promisify<A, T>(f: (arg: A, cb: (err: any, res: T) => void) => void, thisContext?: any): (arg: A) => Promise<T>;
+	export function promisify<A, A2, T>(f: (arg: A, arg2: A2, cb: (err: any, res: T) => void) => void, thisContext?: any): (arg: A, arg2: A2) => Promise<T>;
+	export function promisify<A, A2, A3, T>(f: (arg: A, arg2: A2, arg3: A3, cb: (err: any, res: T) => void) => void, thisContext?: any): (arg: A, arg2: A2, arg3: A3) => Promise<T>;
+	export function promisify<A, A2, A3, A4, T>(f: (arg: A, arg2: A2, arg3: A3, arg4: A4, cb: (err: any, res: T) => void) => void, thisContext?: any): (arg: A, arg2: A2, arg3: A3, arg4: A4) => Promise<T>;
+	export function promisify<A, A2, A3, A4, A5, T>(f: (arg: A, arg2: A2, arg3: A3, arg4: A4, arg5: A5, cb: (err: any, res: T) => void) => void, thisContext?: any): (arg: A, arg2: A2, arg3: A3, arg4: A4, arg5: A5) => Promise<T>;
+	export function map<T, U>(elts: PromiseLike<PromiseLike<T>[]>, f: (t: T) => U | PromiseLike<U>): Promise<U[]>;
+	export function map<T, U>(elts: PromiseLike<T[]>, f: (t: T) => U | PromiseLike<U>): Promise<U[]>;
+	export function map<T, U>(elts: PromiseLike<T>[], f: (t: T) => U | PromiseLike<U>): Promise<U[]>;
+	export function map<T, U>(elts: T[], f: (t: T) => U | PromiseLike<U>): Promise<U[]>;
+	export function _try<T>(f: () => T): Promise<T>;
+	export function _try<T>(f: (arg: any) => T, arg: any): Promise<T>;
+	export function _try<T>(f: (arg: any, arg2: any) => T, arg: any, arg2: any): Promise<T>;
+	export function _try<T>(f: (arg: any, arg2: any, arg3: any) => T, arg: any, arg2: any, arg3: any): Promise<T>;
+	export function _try<T>(f: (arg: any, arg2: any, arg3: any, arg4: any) => T, arg: any, arg2: any, arg3: any, arg4: any): Promise<T>;
 
 }
 declare module '@xblox/fs/copy' {
 	import { ICopyOptions, EResolveMode, TCopyResult } from '@xblox/fs/interfaces';
 	export function validateInput(methodName: string, from: string, to: string, options?: ICopyOptions): void;
 	export function sync(from: string, to: string, options?: ICopyOptions): void;
-	export function copySymlinkAsync(from: string, to: string): Promise<string>;
+	export function copySymlinkAsync(from: string, to: string): Promise<{}>;
 	export function resolveConflict(from: string, to: string, options: ICopyOptions, resolveMode: EResolveMode): boolean;
 	/**
 	 * Final async copy function.
@@ -641,9 +642,9 @@ declare module '@xblox/fs/copy' {
 
 }
 declare module '@xblox/fs/move' {
-	export function validateInput(methodName: string, from: string, to: string): void;
-	export function sync(from: string, to: string): void;
-	export function async(from: string, to: string): Promise<null>;
+	export const validateInput: (methodName: string, from: string, to: string) => void;
+	export const sync: (from: string, to: string) => void;
+	export const async: (from: string, to: string) => Promise<any>;
 
 }
 declare module '@xblox/fs/rename' {
@@ -655,7 +656,7 @@ declare module '@xblox/fs/rename' {
 declare module '@xblox/fs/symlink' {
 	export function validateInput(methodName: string, symlinkValue: string, path: string): void;
 	export function sync(symlinkValue: string, path: string): void;
-	export function async(symlinkValue: string, path: string): Promise<{}>;
+	export function async(symlinkValue: string, path: string): Promise<void>;
 
 }
 declare module '@xblox/fs/streams' {
@@ -679,14 +680,14 @@ declare module '@xblox/fs/jetpack' {
 	import { Options as InspectTreeOptions } from '@xblox/fs/inspect_tree';
 	import { IWriteOptions } from '@xblox/fs/interfaces';
 	import { ICopyOptions, INode, IInspectOptions } from '@xblox/fs/interfaces';
-	import { ReadWriteDataType } from '@xblox/fs/interfaces';
+	import { ReadWriteDataType, TCopyResult, ENodeType, TDeleteResult } from '@xblox/fs/interfaces';
 	export interface IJetpack {
 	    cwd(w?: any): IJetpack | string;
 	    path(): string;
 	    append(path: string, data: string | Buffer | Object, options?: AppendOptions): void;
 	    appendAsync(path: string, data: string | Buffer | Object, options?: AppendOptions): Promise<null>;
 	    copy(from: string, to: string, options?: ICopyOptions): void;
-	    copyAsync(from: string, to: string, options?: ICopyOptions): Promise<void>;
+	    copyAsync(from: string, to: string, options?: ICopyOptions): Promise<TCopyResult>;
 	    createWriteStream(path: string, options?: {
 	        flags?: string;
 	        encoding?: string;
@@ -707,7 +708,7 @@ declare module '@xblox/fs/jetpack' {
 	    dir(path: string, criteria?: DirOptions): IJetpack;
 	    dirAsync(path: string, criteria?: DirOptions): Promise<IJetpack>;
 	    exists(path: string): boolean | string;
-	    existsAsync(path: string): Promise<boolean | string>;
+	    existsAsync(path: string): Promise<boolean | string | ENodeType>;
 	    file(path: string, criteria?: FileOptions): void;
 	    fileAsync(path: string, criteria?: FileOptions): Promise<null>;
 	    find(startPath: string, options: FindOptions): string[];
@@ -723,11 +724,11 @@ declare module '@xblox/fs/jetpack' {
 	    read(path: string, returnAs?: string): ReadWriteDataType;
 	    readAsync(path: string, returnAs?: string): Promise<ReadWriteDataType>;
 	    remove(path: string): void;
-	    removeAsync(path: string): Promise<null>;
+	    removeAsync(path: string): Promise<TDeleteResult>;
 	    rename(path: string, newName: string): void;
 	    renameAsync(path: string, newName: string): Promise<null>;
 	    symlink(symlinkValue: string, path: string): void;
-	    symlinkAsync(symlinkValue: string, path: string): Promise<null>;
+	    symlinkAsync(symlinkValue: string, path: string): Promise<void>;
 	    write(path: string, data: string | Buffer | Object, options?: IWriteOptions): void;
 	    writeAsync(path: string, data: string | Buffer | Object, options?: IWriteOptions): Promise<null>;
 	}

@@ -15,6 +15,7 @@
 		"no-conditional-assignment":false,
 		"no-bitwise":false,
 		"no-var-requires":false,
-		"only-arrow-functions": false
+		"only-arrow-functions": false,
+		"no-console": false
 	}
 }

@@ -42,7 +42,7 @@ export function validateInput(methodName: string, from: string, to: string, opti
 		debug: ['boolean'],
 		flags: ['number']
 	});
-};
+}
 const parseOptions = (options: any | null, from: string): ICopyOptions => {
 	const opts: ICopyOptions = options || {} as ICopyOptions;
 	const parsedOptions: ICopyOptions = {};
@@ -68,7 +68,7 @@ const parseOptions = (options: any | null, from: string): ICopyOptions => {
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-const checksBeforeCopyingSync = (from: string, to: string, options?: ICopyOptions) => {
+const checksBeforeCopyingSync = (from: string, to: string, options: ICopyOptions = {} ) => {
 	if (!existsSync(from)) {
 		throw ErrDoesntExists(from);
 	}
@@ -78,7 +78,7 @@ const checksBeforeCopyingSync = (from: string, to: string, options?: ICopyOption
 	}
 };
 
-async function copyFileSyncWithProgress(from: string, to: string, options?: ICopyOptions) {
+async function copyFileSyncWithProgress(from: string, to: string, options: ICopyOptions= {}) {
 	return new Promise((resolve, reject) => {
 		const started = Date.now();
 		let cbCalled = false;
@@ -108,7 +108,7 @@ async function copyFileSyncWithProgress(from: string, to: string, options?: ICop
 
 		rd.pipe(str).pipe(wr);
 	});
-};
+}
 
 async function copyFileSync(from: string, to: string, mode: string, options?: ICopyOptions) {
 	const data = readFileSync(from);
@@ -120,7 +120,7 @@ async function copyFileSync(from: string, to: string, mode: string, options?: IC
 	} else {
 		writeSync(to, data, writeOptions);
 	}
-};
+}
 const copySymlinkSync = (from: string, to: string) => {
 	const symlinkPointsAt = fs.readlinkSync(from);
 	try {
@@ -147,7 +147,7 @@ async function copyItemSync(from: string, inspectData: INode, to: string, option
 	} else if (inspectData.type === ENodeType.SYMLINK) {
 		copySymlinkSync(from, to);
 	}
-};
+}
 export function sync(from: string, to: string, options?: ICopyOptions): void {
 	const opts = parseOptions(options, from);
 	checksBeforeCopyingSync(from, to, opts);
@@ -160,6 +160,7 @@ export function sync(from: string, to: string, options?: ICopyOptions): void {
 		}
 	}
 
+	// tslint:disable-next-line:no-shadowed-variable
 	const visitor = (path: string, inspectData: INode) => {
 		if (opts.filter(path)) {
 			nodes.push({
@@ -184,7 +185,7 @@ export function sync(from: string, to: string, options?: ICopyOptions): void {
 			opts.progress(item.path, current, nodes.length, item.item);
 		}
 	}));
-};
+}
 
 // ---------------------------------------------------------
 // Async
@@ -258,11 +259,11 @@ const copyFileAsync = (from: string, to: string, mode: any, options?: ICopyOptio
 				fs.open(to, 'w', (err: ErrnoException, fd: number) => {
 					if (err) {
 						throw err;
-					};
+					}
 					fs.futimes(fd, sourceStat.atime, sourceStat.mtime, (err2) => {
 						if (err2) {
 							throw err2;
-						};
+						}
 						fs.close(fd, null);
 						resolve();
 					});
@@ -325,7 +326,7 @@ export function copySymlinkAsync(from: string, to: string) {
 					});
 			});
 		});
-};
+}
 
 const copyItemAsync = (from: string, inspectData: INode, to: string, options: ICopyOptions): Promise<any> => {
 	const mode = fileMode(inspectData.mode);
@@ -388,7 +389,7 @@ export function resolveConflict(from: string, to: string, options: ICopyOptions,
 	} else if (resolveMode === EResolveMode.ABORT) {
 		return false;
 	}
-};
+}
 
 function isDone(nodes: IProcessingNode[]) {
 	let done = true;
@@ -624,4 +625,4 @@ export function async(from: string, to: string, options?: ICopyOptions): Promise
 			});
 		}).catch(reject);
 	});
-};
+}

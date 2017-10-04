@@ -1,13 +1,13 @@
-import { Stats, readlinkSync, statSync, lstatSync, stat, lstat, readlink, createReadStream, readFileSync, readdir, readdirSync } from 'fs';
-import { lookup as mime } from "mime";
-import * as  pathUtil from "path";
+import { Stats, readlinkSync, statSync, lstatSync, stat as fstat, lstat, readlink, createReadStream, readFileSync, readdir, readdirSync } from 'fs';
+import { getType } from 'mime';
+import * as  pathUtil from 'path';
 import { validateArgument, validateOptions } from './utils/validate';
 import { createHash } from 'crypto';
 import { ENodeType, INode, IInspectOptions } from './interfaces';
 const Q = require('q');
 import * as denodeify from 'denodeify';
 export const supportedChecksumAlgorithms: string[] = ['md5', 'sha1', 'sha256', 'sha512'];
-const promisedStat = denodeify(stat);
+const promisedStat = denodeify(fstat);
 const promisedLstat = denodeify(lstat);
 const promisedReadlink = denodeify(readlink);
 /*
@@ -121,10 +121,10 @@ export function validateInput(methodName: string, path: string, options?: IInspe
 		throw new Error('Argument "options.checksum" passed to ' + methodSignature
 			+ ' must have one of values: ' + supportedChecksumAlgorithms.join(', '));
 	}
-};
+}
 
 const createInspectObj = (path: string, options: IInspectOptions, stat: Stats): INode => {
-	let obj: INode = {} as INode;
+	const obj: INode = {} as INode;
 	obj.name = pathUtil.basename(path);
 
 	if (stat.isFile()) {
@@ -144,14 +144,19 @@ const createInspectObj = (path: string, options: IInspectOptions, stat: Stats): 
 
 	if (options.mime) {
 		if (stat.isDirectory()) {
-			obj.mime = "inode/directory";
-		} else if (stat.isBlockDevice()) { obj.mime = "inode/blockdevice"; }
-		else if (stat.isCharacterDevice()) { obj.mime = "inode/chardevice"; }
-		else if (stat.isSymbolicLink()) { obj.mime = "inode/symlink"; }
-		else if (stat.isFIFO()) { obj.mime = "inode/fifo"; }
-		else if (stat.isSocket()) { obj.mime = "inode/socket"; }
-		else {
-			obj.mime = mime(path);
+			obj.mime = 'inode/directory';
+		} else if (stat.isBlockDevice()) {
+			obj.mime = 'inode/blockdevice';
+		} else if (stat.isCharacterDevice()) {
+			obj.mime = 'inode/chardevice';
+		} else if (stat.isSymbolicLink()) {
+			obj.mime = 'inode/symlink';
+		} else if (stat.isFIFO()) {
+			obj.mime = 'inode/fifo';
+		} else if (stat.isSocket()) {
+			obj.mime = 'inode/socket';
+		} else {
+			obj.mime = getType(path);
 		}
 	}
 
@@ -170,7 +175,7 @@ export function createItem(path: string, options?: IInspectOptions): INode {
 	options = options || DefaultInspectOptions();
 	const stat = (options.symlinks ? lstatSync : statSync)(path);
 	return createInspectObj(path, options, stat);
-};
+}
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
@@ -204,7 +209,7 @@ export function sync(path: string, options?: IInspectOptions): INode {
 		throw err;
 	}
 	return addExtraFieldsSync(path, createInspectObj(path, options, stat), options);
-};
+}
 
 // ---------------------------------------------------------
 // Async
@@ -217,7 +222,7 @@ async function fileChecksumAsync(path: string, algo: string): Promise<string> {
 	s.on('end', () => deferred.resolve(hash.digest('hex')));
 	s.on('error', (e: Error) => deferred.reject(e));
 	return deferred.promise;
-};
+}
 
 const addExtraFieldsAsync = (path: string, inspectObj: INode, options: IInspectOptions) => {
 	if (inspectObj.type === ENodeType.FILE && options.checksum) {
@@ -240,7 +245,9 @@ export function async(path: string, options?: IInspectOptions): Promise<INode> {
 	return new Promise((resolve, reject) => {
 		options = options || {} as IInspectOptions;
 		(options.symlinks ? promisedLstat : promisedStat)(path)
-			.then((stat: Stats) => { addExtraFieldsAsync(path, createInspectObj(path, options, stat), options).then(resolve, reject); })
+			.then((stat: Stats) => {
+				addExtraFieldsAsync(path, createInspectObj(path, options, stat), options).then(resolve, reject);
+			})
 			.catch(err => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
 	});
 }

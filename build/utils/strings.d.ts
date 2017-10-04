@@ -1,2 +1,2 @@
 export declare let canNormalize: boolean;
-export declare function normalizeNFC(str: string): string;
+export declare const normalizeNFC: (str: string) => string;

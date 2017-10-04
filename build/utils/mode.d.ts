@@ -1,1 +1,1 @@
-export declare function normalizeFileMode(mode: string | number): string;
+export declare const normalizeFileMode: (mode: string | number) => string;

@@ -48,7 +48,6 @@ function validateInput(methodName, from, to, options) {
     });
 }
 exports.validateInput = validateInput;
-;
 const parseOptions = (options, from) => {
     const opts = options || {};
     const parsedOptions = {};
@@ -75,7 +74,7 @@ const parseOptions = (options, from) => {
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
-const checksBeforeCopyingSync = (from, to, options) => {
+const checksBeforeCopyingSync = (from, to, options = {}) => {
     if (!exists_1.sync(from)) {
         throw errors_1.ErrDoesntExists(from);
     }
@@ -83,7 +82,7 @@ const checksBeforeCopyingSync = (from, to, options) => {
         throw errors_1.ErrDestinationExists(to);
     }
 };
-function copyFileSyncWithProgress(from, to, options) {
+function copyFileSyncWithProgress(from, to, options = {}) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
             const started = Date.now();
@@ -113,7 +112,6 @@ function copyFileSyncWithProgress(from, to, options) {
         });
     });
 }
-;
 function copyFileSync(from, to, mode, options) {
     return __awaiter(this, void 0, void 0, function* () {
         const data = fs_1.readFileSync(from);
@@ -128,7 +126,6 @@ function copyFileSync(from, to, mode, options) {
         }
     });
 }
-;
 const copySymlinkSync = (from, to) => {
     const symlinkPointsAt = fs.readlinkSync(from);
     try {
@@ -161,7 +158,6 @@ function copyItemSync(from, inspectData, to, options) {
         }
     });
 }
-;
 function sync(from, to, options) {
     const opts = parseOptions(options, from);
     checksBeforeCopyingSync(from, to, opts);
@@ -173,6 +169,7 @@ function sync(from, to, options) {
             remove_1.sync(to);
         }
     }
+    // tslint:disable-next-line:no-shadowed-variable
     const visitor = (path, inspectData) => {
         if (opts.filter(path)) {
             nodes.push({
@@ -197,7 +194,6 @@ function sync(from, to, options) {
     })));
 }
 exports.sync = sync;
-;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
@@ -270,12 +266,10 @@ const copyFileAsync = (from, to, mode, options, retriedAttempt) => {
                     if (err) {
                         throw err;
                     }
-                    ;
                     fs.futimes(fd, sourceStat.atime, sourceStat.mtime, (err2) => {
                         if (err2) {
                             throw err2;
                         }
-                        ;
                         fs.close(fd, null);
                         resolve();
                     });
@@ -342,7 +336,6 @@ function copySymlinkAsync(from, to) {
     });
 }
 exports.copySymlinkAsync = copySymlinkAsync;
-;
 const copyItemAsync = (from, inspectData, to, options) => {
     const mode = mode_1.normalizeFileMode(inspectData.mode);
     if (inspectData.type === interfaces_1.ENodeType.DIR) {
@@ -412,7 +405,6 @@ function resolveConflict(from, to, options, resolveMode) {
     }
 }
 exports.resolveConflict = resolveConflict;
-;
 function isDone(nodes) {
     let done = true;
     nodes.forEach((element) => {
@@ -629,5 +621,4 @@ function async(from, to, options) {
     });
 }
 exports.async = async;
-;
 //# sourceMappingURL=copy.js.map

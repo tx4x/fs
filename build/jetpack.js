@@ -1,4 +1,7 @@
 "use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
 Object.defineProperty(exports, "__esModule", { value: true });
 const util = require("util");
 const pathUtil = require("path");
@@ -19,10 +22,14 @@ const symlink = require("./symlink");
 const streams = require("./streams");
 const write = require("./write");
 const read = require("./read");
+__export(require("./interfaces"));
+var exists_1 = require("./exists");
+exports.sync = exists_1.sync;
+exports.async = exists_1.async;
 // The Jetpack Context object.
 // It provides the public API, and resolves all paths regarding to
 // passed cwdPath, or default process.cwd() if cwdPath was not specified.
-function jetpack(cwdPath) {
+exports.jetpack = (cwdPath) => {
     const getCwdPath = function () {
         return cwdPath || process.cwd();
     };
@@ -36,7 +43,7 @@ function jetpack(cwdPath) {
         // ...create new CWD context otherwise
         args = Array.prototype.slice.call(arguments);
         pathParts = [getCwdPath()].concat(args);
-        const res = jetpack(pathUtil.resolve.apply(null, pathParts));
+        const res = exports.jetpack(pathUtil.resolve.apply(null, pathParts));
         return res;
     };
     // resolves path to inner CWD path of this jetpack instance
@@ -222,14 +229,5 @@ function jetpack(cwdPath) {
         };
     }
     return api;
-}
-exports.jetpack = jetpack;
-;
-// inspectTreeTest();
-// testCollisionDirectory();
-// testCollisionFile();
-// prepareSymlink();
-// testCopySymlink();
-// testBig();
-// testManyWithProgress();
+};
 //# sourceMappingURL=jetpack.js.map

@@ -133,9 +133,8 @@ function validateInput(methodName, path, options) {
     }
 }
 exports.validateInput = validateInput;
-;
 const createInspectObj = (path, options, stat) => {
-    let obj = {};
+    const obj = {};
     obj.name = pathUtil.basename(path);
     if (stat.isFile()) {
         obj.type = interfaces_1.ENodeType.FILE;
@@ -155,25 +154,25 @@ const createInspectObj = (path, options, stat) => {
     }
     if (options.mime) {
         if (stat.isDirectory()) {
-            obj.mime = "inode/directory";
+            obj.mime = 'inode/directory';
         }
         else if (stat.isBlockDevice()) {
-            obj.mime = "inode/blockdevice";
+            obj.mime = 'inode/blockdevice';
         }
         else if (stat.isCharacterDevice()) {
-            obj.mime = "inode/chardevice";
+            obj.mime = 'inode/chardevice';
         }
         else if (stat.isSymbolicLink()) {
-            obj.mime = "inode/symlink";
+            obj.mime = 'inode/symlink';
         }
         else if (stat.isFIFO()) {
-            obj.mime = "inode/fifo";
+            obj.mime = 'inode/fifo';
         }
         else if (stat.isSocket()) {
-            obj.mime = "inode/socket";
+            obj.mime = 'inode/socket';
         }
         else {
-            obj.mime = mime_1.lookup(path);
+            obj.mime = mime_1.getType(path);
         }
     }
     if (options.times) {
@@ -192,7 +191,6 @@ function createItem(path, options) {
     return createInspectObj(path, options, stat);
 }
 exports.createItem = createItem;
-;
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
@@ -228,7 +226,6 @@ function sync(path, options) {
     return addExtraFieldsSync(path, createInspectObj(path, options, stat), options);
 }
 exports.sync = sync;
-;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
@@ -243,7 +240,6 @@ function fileChecksumAsync(path, algo) {
         return deferred.promise;
     });
 }
-;
 const addExtraFieldsAsync = (path, inspectObj, options) => {
     if (inspectObj.type === interfaces_1.ENodeType.FILE && options.checksum) {
         return fileChecksumAsync(path, options.checksum)
@@ -265,7 +261,9 @@ function async(path, options) {
     return new Promise((resolve, reject) => {
         options = options || {};
         (options.symlinks ? promisedLstat : promisedStat)(path)
-            .then((stat) => { addExtraFieldsAsync(path, createInspectObj(path, options, stat), options).then(resolve, reject); })
+            .then((stat) => {
+            addExtraFieldsAsync(path, createInspectObj(path, options, stat), options).then(resolve, reject);
+        })
             .catch(err => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
     });
 }

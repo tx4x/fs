@@ -7,6 +7,8 @@ import { Options as InspectTreeOptions } from './inspect_tree';
 import { IWriteOptions } from './interfaces';
 import { ICopyOptions, INode, IInspectOptions } from './interfaces';
 import { ReadWriteDataType, TCopyResult, ENodeType, TDeleteResult } from './interfaces';
+export * from './interfaces';
+export { sync, async } from './exists';
 export interface IJetpack {
     cwd(w?: any): IJetpack | string;
     path(): string;
@@ -58,4 +60,4 @@ export interface IJetpack {
     write(path: string, data: string | Buffer | Object, options?: IWriteOptions): void;
     writeAsync(path: string, data: string | Buffer | Object, options?: IWriteOptions): Promise<null>;
 }
-export declare function jetpack(cwdPath?: string): IJetpack;
+export declare const jetpack: (cwdPath?: string) => IJetpack;

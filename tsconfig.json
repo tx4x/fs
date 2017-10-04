@@ -3,14 +3,16 @@
     "module": "commonjs",
     "target": "es6",
     "allowJs": false,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "sourceMap": true,
     "outDir": "./build",
     "rootDir": "./src",
     "experimentalDecorators": true,
 	"emitDecoratorMetadata": true,
     "pretty": true,
-    "moduleResolution": "node"
+	"moduleResolution": "node",
+	"suppressImplicitAnyIndexErrors": true
+
   },
   "compileOnSave": true,
   "filesGlob": [
@@ -25,6 +27,6 @@
   },
   "files": [
     "./typings/index.d.ts",
-    "./src/jetpack.ts"
+    "./src/index.ts"
   ]
 }

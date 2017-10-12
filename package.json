@@ -49,8 +49,8 @@
     "dev": "nodemon -w src -x ts-node src/playground.ts",
     "build": "tsc",
     "typings": "tsc --declaration",
-	"dev-test-watch": "mocha-typescript-watch",
-	"postinstall": "tsc --declaration --outDir . "
+    "dev-test-watch": "mocha-typescript-watch",
+    "postinstall": "tsc --declaration --outDir . "
   },
   "homepage": "https://github.com/xblox/fs",
   "repository": {

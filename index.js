@@ -223,7 +223,6 @@ exports.fs = (cwdPath) => {
     }
     return api;
 };
-exports.test = () => {
-    return 2;
-};
+// tslint:disable-next-line:no-default-export
+exports.default = exports.fs;
 //# sourceMappingURL=index.js.map

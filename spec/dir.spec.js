@@ -19,7 +19,7 @@ describe('dir', function () {
       jetpack.dir('x');
       expectations();
     });
-    
+
 
     it('async', function (done) {
       jetpack.dirAsync('x').then(function () {

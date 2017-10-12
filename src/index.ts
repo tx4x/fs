@@ -320,6 +320,5 @@ export const fs = (cwdPath?: string): IJetpack => {
 	return api;
 };
 
-export const test = () => {
-	return 2;
-};
+// tslint:disable-next-line:no-default-export
+export default fs;

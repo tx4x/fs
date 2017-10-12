@@ -5,7 +5,7 @@
     "allowJs": false,
     "noImplicitAny": false,
     "sourceMap": true,
-    "outDir": "./build",
+    "outDir": "./.",
     "rootDir": "./src",
     "experimentalDecorators": true,
 	"emitDecoratorMetadata": true,

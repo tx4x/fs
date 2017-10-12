@@ -1,7 +1,7 @@
 {
   "name": "@xblox/fs",
   "description": "Simplified file system API in Typescript",
-  "version": "0.13.14",
+  "version": "0.13.15",
   "main": "index.js",
   "typings": "index.d.ts",
   "dependencies": {
@@ -49,8 +49,7 @@
     "dev": "nodemon -w src -x ts-node src/playground.ts",
     "build": "tsc",
     "typings": "tsc --declaration",
-    "dev-test-watch": "mocha-typescript-watch",
-    "postinstall": "tsc --declaration --outDir . "
+    "dev-test-watch": "mocha-typescript-watch"
   },
   "homepage": "https://github.com/xblox/fs",
   "repository": {

@@ -1,4 +1,4 @@
-import * as pathUtil from "path";
+import * as pathUtil from 'path';
 import * as fs from 'fs';
 import { writeFileSync } from 'fs';
 const Q = require('q');
@@ -6,7 +6,6 @@ import * as mkdirp from 'mkdirp';
 import { json, file } from './imports';
 import { IWriteOptions, ReadWriteDataType } from './interfaces';
 import { validateArgument, validateOptions } from './utils/validate';
-
 
 // Temporary file extensions used for atomic file overwriting.
 const newExt = '.__new__';
@@ -20,7 +19,7 @@ export function validateInput(methodName: string, path: string, data: ReadWriteD
 		jsonIndent: ['number'],
 		progress: ['function']
 	});
-};
+}
 
 const toJson = (data: ReadWriteDataType, jsonIndent: number): string => {
 	if (typeof data === 'object'
@@ -57,7 +56,7 @@ export function sync(path: string, data: ReadWriteDataType, options?: IWriteOpti
 	const processedData = toJson(data, opts.jsonIndent);
 	const writeStrategy = opts.atomic ? writeAtomicSync : _writeFileSync;
 	writeStrategy(path, processedData, { mode: opts.mode });
-};
+}
 
 // ---------------------------------------------------------
 // ASYNC
@@ -84,9 +83,9 @@ function writeFileAsync(path: string, data: string, options?: IWriteOptions): Pr
 				}
 			});
 	});
-};
+}
 export function async(path: string, data: ReadWriteDataType, options?: IWriteOptions): Promise<null> {
 	const opts: any = options || {};
 	const processedData: string = toJson(data, opts.jsonIndent);
 	return (opts.atomic ? promisedAtomic : writeFileAsync)(path, processedData, { mode: opts.mode });
-};
+}

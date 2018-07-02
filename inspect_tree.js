@@ -21,14 +21,12 @@ function validateInput(methodName, path, options) {
     }
 }
 exports.validateInput = validateInput;
-;
 function generateTreeNodeRelativePath(parent, path) {
     if (!parent) {
         return '.';
     }
     return parent.relativePath + '/' + pathUtil.basename(path);
 }
-;
 // Creates checksum of a directory by using
 // checksums and names of all its children inside.
 const checksumOfDir = (inspectList, algo) => {
@@ -50,11 +48,11 @@ function inspectTreeNodeSync(path, options, parent) {
         if (treeBranch.type === interfaces_1.ENodeType.DIR /*|| (options.symlinks && treeBranch.type === 'symlink')*/) {
             treeBranch.size = 0;
             treeBranch.children = (list_1.sync(path) || []).map(function (filename) {
-                let subBranchPath = pathUtil.join(path, filename);
-                let treeSubBranch = inspectTreeNodeSync(subBranchPath, options, treeBranch);
+                const subBranchPath = pathUtil.join(path, filename);
+                const treeSubBranch = inspectTreeNodeSync(subBranchPath, options, treeBranch);
                 // Add together all childrens' size to get directory combined size.
                 treeBranch.size += treeSubBranch.size || 0;
-                //treeBranch.total += treeSubBranch.total;
+                // treeBranch.total += treeSubBranch.total;
                 return treeSubBranch;
             });
             if (options.checksum) {
@@ -64,14 +62,12 @@ function inspectTreeNodeSync(path, options, parent) {
     }
     return treeBranch;
 }
-;
 function sync(path, options) {
     options = options || {};
     options.symlinks = true;
     return inspectTreeNodeSync(path, options, undefined);
 }
 exports.sync = sync;
-;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
@@ -129,12 +125,10 @@ function inspectTreeNodeAsync(path, options, parent) {
             .catch(reject);
     });
 }
-;
 function async(path, options) {
     options = options || {};
     options.symlinks = true;
     return inspectTreeNodeAsync(path, options);
 }
 exports.async = async;
-;
 //# sourceMappingURL=inspect_tree.js.map

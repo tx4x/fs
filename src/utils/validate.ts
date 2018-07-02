@@ -100,7 +100,7 @@ export function validateArgument(methodName: string, argumentName: string, argum
       + prettyPrintTypes(argumentMustBe) + '. Received ' + detectTypeDeep(argumentValue));
   }
   return false;
-};
+}
 
 export function validateOptions(methodName: string, optionsObjName: string, obj: any, allowedOptions: any) {
   if (obj !== undefined) {
@@ -114,4 +114,4 @@ export function validateOptions(methodName: string, optionsObjName: string, obj:
       }
     });
   }
-};
+}

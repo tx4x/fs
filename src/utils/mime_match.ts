@@ -9,6 +9,7 @@ const reMimePartSplit = /[\/\+\.]/;
  * @param {string} pattern
  * @returns
  */
+// tslint:disable-next-line:no-default-export
 export default function (target: string, pattern: string) {
 	const test = (_pattern) => {
 		const result = wildcard(_pattern, target, reMimePartSplit);
@@ -16,4 +17,4 @@ export default function (target: string, pattern: string) {
 		return result && result.length >= 2;
 	};
 	return pattern ? test(pattern.split(';')[0]) : test;
-};
+}

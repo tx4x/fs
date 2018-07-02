@@ -28,7 +28,6 @@ function validateInput(methodName, path) {
     validate_1.validateArgument(methodSignature, 'path', path, ['string', 'undefined']);
 }
 exports.validateInput = validateInput;
-;
 const parseOptions = (options, path) => {
     const opts = options || {};
     const parsedOptions = {};
@@ -72,7 +71,6 @@ function sync(path, options) {
     }
 }
 exports.sync = sync;
-;
 const rmTrash = (path) => {
     return trash([path]);
 };
@@ -143,7 +141,6 @@ function resolveConflict(path, resolveMode) {
     return false;
 }
 exports.resolveConflict = resolveConflict;
-;
 const visitor = (path, vars, item) => {
     const options = vars.options;
     if (!item) {
@@ -356,5 +353,4 @@ function async(path, options) {
     });
 }
 exports.async = async;
-;
 //# sourceMappingURL=remove.js.map

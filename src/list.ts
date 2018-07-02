@@ -6,7 +6,7 @@ import { normalizeNFC } from './utils/strings';
 export function validateInput(methodName: string, path: string) {
 	const methodSignature = methodName + '(path)';
 	validateArgument(methodSignature, 'path', path, ['string', 'undefined']);
-};
+}
 
 export function _readdirSync(path: string): string[] {
 	// Mac: uses NFD unicode form on disk, but we want NFC
@@ -30,7 +30,7 @@ export function sync(path: string): string[] {
 		}
 		throw err;
 	}
-};
+}
 
 // ---------------------------------------------------------
 // Async
@@ -63,4 +63,4 @@ export function async(path: string): Promise<string[]> {
 			.then((list) => resolve(list))
 			.catch(err => (err.code === 'ENOENT' ? resolve(undefined) : reject(err)));
 	});
-};
+}

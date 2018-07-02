@@ -9,7 +9,6 @@ function validateInput(methodName, path, newName) {
     validate_1.validateArgument(methodSignature, 'newName', newName, ['string']);
 }
 exports.validateInput = validateInput;
-;
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------

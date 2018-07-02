@@ -20,7 +20,6 @@ function validateInput(methodName, path, data, options) {
     });
 }
 exports.validateInput = validateInput;
-;
 const toJson = (data, jsonIndent) => {
     if (typeof data === 'object'
         && !Buffer.isBuffer(data)
@@ -57,7 +56,6 @@ function sync(path, data, options) {
     writeStrategy(path, processedData, { mode: opts.mode });
 }
 exports.sync = sync;
-;
 // ---------------------------------------------------------
 // ASYNC
 // ---------------------------------------------------------
@@ -84,12 +82,10 @@ function writeFileAsync(path, data, options) {
         });
     });
 }
-;
 function async(path, data, options) {
     const opts = options || {};
     const processedData = toJson(data, opts.jsonIndent);
     return (opts.atomic ? promisedAtomic : writeFileAsync)(path, processedData, { mode: opts.mode });
 }
 exports.async = async;
-;
 //# sourceMappingURL=write.js.map

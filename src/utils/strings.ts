@@ -12,4 +12,4 @@ export const normalizeNFC = (str: string): string => {
 		res = str;
 	}
 	return res;
-}
+};

@@ -1,5 +1,4 @@
 // Adater module exposing all `fs` methods with promises instead of callbacks.
-
 import * as fs from 'fs';
 const promisify = require('./promisify');
 

@@ -4,18 +4,18 @@ const errno = require('errno');
 Object.keys(errno.code).forEach(function (code) {
 	const e = errno.code[code];
 	exports[code] = (path: string) => {
-		let err = new Error(code + ', ' + e.description + (path ? ' \'' + path + '\'' : '')) as ErrnoException;
+		const err = new Error(code + ', ' + e.description + (path ? ' \'' + path + '\'' : '')) as ErrnoException;
 		err.errno = e.errno;
 		err.code = code;
 		err.path = path;
 		return err;
 	};
 });
-export const ErrNoFileOrDir = (path: string): Error =>{
-	return new Error("Can't remove " + path + ' The path is not file nor directory');
+export const ErrNoFileOrDir = (path: string): Error => {
+	return new Error('Can\'t remove ' + path + ' The path is not file nor directory');
 };
 export const ErrCantDelete = (path: string): Error => {
-	return new Error("Can't remove " + path);
+	return new Error('Can\'t remove ' + path);
 };
 export const ErrNotFile = (path: string): Error => {
 	return new Error('Path ' + path + ' exists but is not a file.' +
@@ -27,7 +27,7 @@ export const ErrNoDirectory = (path: string): Error => {
 };
 
 export const ErrDoesntExists = (path: string): Error => {
-	const err: any = new Error("Path to copy doesn't exist " + path);
+	const err: any = new Error('Path to copy doesn\'t exist ' + path);
 	err.code = 'ENOENT';
 	return err;
 };

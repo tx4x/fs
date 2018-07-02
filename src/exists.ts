@@ -5,7 +5,7 @@ import { ENodeType, ErrnoException } from './interfaces';
 export function validateInput(methodName: string, path: string) {
 	const methodSignature = methodName + '(path)';
 	validateArgument(methodSignature, 'path', path, ['string']);
-};
+}
 
 // ---------------------------------------------------------
 // Sync
@@ -26,7 +26,7 @@ export function sync(path: string): boolean | string {
 		}
 	}
 	return false;
-};
+}
 
 // ---------------------------------------------------------
 // Async
@@ -49,4 +49,4 @@ export function async(path: string): Promise<boolean | string | ENodeType> {
 			}
 		});
 	});
-};
+}

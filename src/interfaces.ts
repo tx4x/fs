@@ -3,11 +3,11 @@
 //  Enums
 //
 export enum ENodeType {
-	FILE = <any>'file',
-	DIR = <any>'dir',
-	SYMLINK = <any>'symlink',
-	OTHER = <any>'other',
-	BLOCK = <any>'block'
+	FILE = 'file',
+	DIR = 'dir',
+	SYMLINK = 'symlink',
+	OTHER = 'other',
+	BLOCK = 'block'
 }
 
 /**

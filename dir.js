@@ -32,9 +32,9 @@ const defaults = (options) => {
 // Sync
 // ---------------------------------------------------------
 const dirStatsSync = (path) => {
-    let stat;
+    let _stat;
     try {
-        stat = fs_1.statSync(path);
+        _stat = fs_1.statSync(path);
     }
     catch (err) {
         // Detection if path already exists
@@ -42,17 +42,16 @@ const dirStatsSync = (path) => {
             throw err;
         }
     }
-    if (stat && !stat.isDirectory()) {
+    if (_stat && !_stat.isDirectory()) {
         throw errors_1.ErrNoDirectory(path);
     }
-    return stat;
+    return _stat;
 };
 function mkdirSync(path, criteria) {
     mkdirp.sync(path, { mode: criteria.mode, fs: null });
 }
-;
-function checkDirSync(path, stat, options) {
-    const checkMode = function () {
+function checkDirSync(path, _stat, options) {
+    const check = function () {
         if (options.mode !== undefined) {
             fs.chmodSync(path, options.mode);
         }
@@ -67,15 +66,14 @@ function checkDirSync(path, stat, options) {
             });
         }
     };
-    checkMode();
+    check();
     checkEmptiness();
 }
-;
 exports.sync = (path, options) => {
     const criteria = defaults(options);
-    const stat = dirStatsSync(path);
-    if (stat) {
-        checkDirSync(path, stat, criteria);
+    const _stat = dirStatsSync(path);
+    if (_stat) {
+        checkDirSync(path, _stat, criteria);
     }
     else {
         mkdirSync(path, criteria);
@@ -89,9 +87,9 @@ const promisedReaddir = util_1.promisify(fs_1.readdir);
 const dirStatAsync = (path) => {
     return new Promise((resolve, reject) => {
         promisedStat(path)
-            .then((stat) => {
-            if (stat.isDirectory()) {
-                resolve(stat);
+            .then((_stat) => {
+            if (_stat.isDirectory()) {
+                resolve(_stat);
             }
             else {
                 reject(errors_1.ErrNoDirectory(path));
@@ -120,13 +118,13 @@ const emptyAsync = (path) => {
             .catch(reject);
     });
 };
-const checkMode = function (criteria, stat, path) {
+const checkMode = function (criteria, _stat, path) {
     if (criteria.mode !== undefined) {
         return util_1.promisify(fs.chmod)(path, criteria.mode);
     }
     return Promise.resolve(null);
 };
-const checkDirAsync = (path, stat, options) => {
+const checkDirAsync = (path, _stat, options) => {
     return new Promise((resolve, reject) => {
         const checkEmptiness = function () {
             if (options.empty) {
@@ -134,7 +132,7 @@ const checkDirAsync = (path, stat, options) => {
             }
             return Promise.resolve();
         };
-        checkMode(options, stat, path)
+        checkMode(options, _stat, path)
             .then(checkEmptiness)
             .then(resolve, reject);
     });
@@ -178,9 +176,9 @@ exports.async = (path, passedCriteria) => {
     const criteria = defaults(passedCriteria);
     return new Promise((resolve, reject) => {
         dirStatAsync(path)
-            .then((stat) => {
-            if (stat !== undefined) {
-                return checkDirAsync(path, stat, criteria);
+            .then((_stat) => {
+            if (_stat !== undefined) {
+                return checkDirAsync(path, _stat, criteria);
             }
             return mkdirAsync(path, criteria);
         })

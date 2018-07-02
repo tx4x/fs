@@ -27,7 +27,6 @@ function validateInput(methodName, path, options) {
     });
 }
 exports.validateInput = validateInput;
-;
 function defaults(passedCriteria) {
     const criteria = passedCriteria || {};
     if (criteria.mode !== undefined) {
@@ -36,7 +35,6 @@ function defaults(passedCriteria) {
     return criteria;
 }
 exports.defaults = defaults;
-;
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
@@ -95,7 +93,6 @@ function sync(path, options) {
     }
 }
 exports.sync = sync;
-;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
@@ -113,7 +110,6 @@ function isFileAsync(path) {
             .catch((err) => (err.code === interfaces_1.EError.NOEXISTS ? resolve(undefined) : reject(err)));
     });
 }
-;
 const checkModeAsync = (path, mode, options) => {
     if (options.mode !== undefined && options.mode !== mode) {
         return promisedChmod(path, options.mode);
@@ -146,7 +142,6 @@ function writeAsync(path, stat, options) {
         });
     });
 }
-;
 const touchAsync = (path, options) => {
     return write_1.async(path, options.content !== undefined ? options.content : '', {
         mode: options.mode,
@@ -169,5 +164,4 @@ function async(path, options) {
     });
 }
 exports.async = async;
-;
 //# sourceMappingURL=file.js.map

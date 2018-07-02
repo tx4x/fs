@@ -76,4 +76,4 @@ export function create(basePath: string, patterns: string[], options?: IOptions)
 
 		return weHaveMatch;
 	};
-};
+}

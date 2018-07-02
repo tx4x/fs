@@ -19,7 +19,7 @@ function async(from, options) {
                 options.filter = matcher_1.create(from, options.matching);
             }
             else {
-                options.filter = () => { return true; };
+                options.filter = () => true;
             }
         }
         const collectorSync = function (path, item) {
@@ -34,7 +34,7 @@ function async(from, options) {
                 });
             }
         };
-        let nodes = [];
+        const nodes = [];
         return new Promise((resolve, reject) => {
             tree_walker_1.sync(from, {
                 inspectOptions: {

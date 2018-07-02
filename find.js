@@ -18,9 +18,8 @@ function validateInput(methodName, path, options) {
     });
 }
 exports.validateInput = validateInput;
-;
 const defaults = (options) => {
-    let opts = options || {};
+    const opts = options || {};
     // defaults:
     if (opts.files === undefined) {
         opts.files = true;
@@ -59,7 +58,6 @@ function findSync(path, options) {
     });
     return processFoundObjects(foundInspectObjects, options.cwd);
 }
-;
 function sync(path, options) {
     const entryPointInspect = inspect_1.sync(path);
     if (entryPointInspect === undefined) {
@@ -71,7 +69,6 @@ function sync(path, options) {
     return findSync(path, defaults(options));
 }
 exports.sync = sync;
-;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
@@ -100,7 +97,6 @@ function findAsync(path, options) {
         });
     });
 }
-;
 function async(path, options) {
     return inspect_1.async(path)
         .then(entryPointInspect => {
@@ -114,5 +110,4 @@ function async(path, options) {
     });
 }
 exports.async = async;
-;
 //# sourceMappingURL=find.js.map

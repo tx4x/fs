@@ -3,7 +3,6 @@
  */
 export const sep = '/';
 
-
 /**
  * The native path separator depending on the OS.
  */

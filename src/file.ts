@@ -24,7 +24,7 @@ export function validateInput(methodName: string, path: string, options?: IOptio
 		jsonIndent: ['number'],
 		mode: ['string', 'number']
 	});
-};
+}
 
 export function defaults(passedCriteria: IOptions | null): IOptions {
 	const criteria: any = passedCriteria || {};
@@ -32,7 +32,7 @@ export function defaults(passedCriteria: IOptions | null): IOptions {
 		criteria.mode = normalizeFileMode(criteria.mode);
 	}
 	return criteria;
-};
+}
 
 // ---------------------------------------------------------
 // Sync
@@ -96,7 +96,7 @@ export function sync(path: string, options: IOptions) {
 	} else {
 		touch(path, options);
 	}
-};
+}
 
 // ---------------------------------------------------------
 // Async
@@ -114,7 +114,7 @@ function isFileAsync(path: string): Promise<Stats> {
 			})
 			.catch((err: any) => (err.code === EError.NOEXISTS ? resolve(undefined) : reject(err)));
 	});
-};
+}
 const checkModeAsync = (path: string, mode: string, options: IOptions) => {
 	if (options.mode !== undefined && options.mode !== mode) {
 		return promisedChmod(path, options.mode);
@@ -143,7 +143,7 @@ async function writeAsync(path: string, stat: Stats, options: IOptions): Promise
 			}
 			return undefined;
 		});
-};
+}
 
 const touchAsync = (path: string, options: IOptions) => {
 	return writeASync(path, options.content !== undefined ? options.content : '', {
@@ -164,4 +164,4 @@ export async function async(path: string, options: IOptions) {
 			})
 			.then(resolve, reject);
 	});
-};
+}

@@ -43,7 +43,7 @@ WildcardMatcher.prototype.match = (input) => {
 	}else if (typeof input === 'object') {
 		matches = {};
 
-		for (let key in input) {
+		for (const key in input) {
 			if (this.match(key)) {
 				matches[key] = input[key];
 			}
@@ -53,6 +53,7 @@ WildcardMatcher.prototype.match = (input) => {
 	return matches;
 };
 
+// tslint:disable-next-line:no-default-export
 export default function (text: string, test: string, separator?: string | RegExp) {
 	const matcher = new WildcardMatcher(text, separator || /[\/\.]/);
 	if (typeof test !== 'undefined') {
@@ -60,4 +61,4 @@ export default function (text: string, test: string, separator?: string | RegExp
 	}
 
 	return matcher;
-};
+}

@@ -6,11 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 //
 var ENodeType;
 (function (ENodeType) {
-    ENodeType[ENodeType["FILE"] = 'file'] = "FILE";
-    ENodeType[ENodeType["DIR"] = 'dir'] = "DIR";
-    ENodeType[ENodeType["SYMLINK"] = 'symlink'] = "SYMLINK";
-    ENodeType[ENodeType["OTHER"] = 'other'] = "OTHER";
-    ENodeType[ENodeType["BLOCK"] = 'block'] = "BLOCK";
+    ENodeType["FILE"] = "file";
+    ENodeType["DIR"] = "dir";
+    ENodeType["SYMLINK"] = "symlink";
+    ENodeType["OTHER"] = "other";
+    ENodeType["BLOCK"] = "block";
 })(ENodeType = exports.ENodeType || (exports.ENodeType = {}));
 /**
  * Native errors.

@@ -8,7 +8,6 @@ function validateInput(methodName, path) {
     validate_1.validateArgument(methodSignature, 'path', path, ['string']);
 }
 exports.validateInput = validateInput;
-;
 // ---------------------------------------------------------
 // Sync
 // ---------------------------------------------------------
@@ -32,7 +31,6 @@ function sync(path) {
     return false;
 }
 exports.sync = sync;
-;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
@@ -60,5 +58,4 @@ function async(path) {
     });
 }
 exports.async = async;
-;
 //# sourceMappingURL=exists.js.map

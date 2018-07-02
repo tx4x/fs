@@ -9,7 +9,6 @@ function validateInput(methodName, path) {
     validate_1.validateArgument(methodSignature, 'path', path, ['string', 'undefined']);
 }
 exports.validateInput = validateInput;
-;
 function _readdirSync(path) {
     // Mac: uses NFD unicode form on disk, but we want NFC
     // See also https://github.com/nodejs/node/issues/2165
@@ -35,7 +34,6 @@ function sync(path) {
     }
 }
 exports.sync = sync;
-;
 // ---------------------------------------------------------
 // Async
 // ---------------------------------------------------------
@@ -68,5 +66,4 @@ function async(path) {
     });
 }
 exports.async = async;
-;
 //# sourceMappingURL=list.js.map

@@ -9,7 +9,7 @@ export async function async(from: string, options: IBaseOptions): Promise<ArrayI
 		if (options.matching) {
 			options.filter = matcher(from, options.matching);
 		} else {
-			options.filter = () => { return true; };
+			options.filter = () => true;
 		}
 	}
 	const collectorSync = function (path: string, item: INode) {
@@ -24,7 +24,7 @@ export async function async(from: string, options: IBaseOptions): Promise<ArrayI
 			});
 		}
 	};
-	let nodes: IProcessingNode[] = [];
+	const nodes: IProcessingNode[] = [];
 	return new Promise<ArrayIterator<IProcessingNode>>((resolve, reject) => {
 		treeWalkerSync(from, {
 			inspectOptions: {

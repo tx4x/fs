@@ -1,4 +1,4 @@
-import * as  pathUtil from "path";
+import * as  pathUtil from 'path';
 import { sync as treeWalkerSync, stream as treeWalkerStream } from './utils/tree_walker';
 import { sync as inspectSync, async as inspectASync } from './inspect';
 import { create as matcher } from './utils/matcher';
@@ -22,10 +22,10 @@ export function validateInput(methodName: string, path: string, options?: IOptio
 		directories: ['boolean'],
 		recursive: ['boolean']
 	});
-};
+}
 
 const defaults = (options?: IOptions): IOptions => {
-	let opts = options || {} as IOptions;
+	const opts = options || {} as IOptions;
 	// defaults:
 	if (opts.files === undefined) {
 		opts.files = true;
@@ -44,7 +44,6 @@ const processFoundObjects = (foundObjects: any, cwd: string): string[] => {
 		return pathUtil.relative(cwd, inspectObj.absolutePath);
 	});
 };
-
 
 // ---------------------------------------------------------
 // Sync
@@ -66,7 +65,7 @@ function findSync(path: string, options: IOptions): string[] {
 		}
 	});
 	return processFoundObjects(foundInspectObjects, options.cwd);
-};
+}
 
 export function sync(path: string, options: IOptions): string[] {
 	const entryPointInspect = inspectSync(path);
@@ -76,7 +75,7 @@ export function sync(path: string, options: IOptions): string[] {
 		throw ErrIsNotDirectory(path);
 	}
 	return findSync(path, defaults(options));
-};
+}
 
 // ---------------------------------------------------------
 // Async
@@ -106,7 +105,7 @@ function findAsync(path: string, options: IOptions): Promise<string[]> {
 				resolve(processFoundObjects(foundInspectObjects, options.cwd));
 			});
 	});
-};
+}
 
 export function async(path: string, options: IOptions): Promise<string[]> {
 	return inspectASync(path)
@@ -118,4 +117,4 @@ export function async(path: string, options: IOptions): Promise<string[]> {
 			}
 			return findAsync(path, defaults(options));
 		});
-};
+}

@@ -19,7 +19,7 @@ const trash = require('trash');
 export function validateInput(methodName: string, path: string) {
 	const methodSignature = methodName + '([path])';
 	validateArgument(methodSignature, 'path', path, ['string', 'undefined']);
-};
+}
 
 const parseOptions = (options: any | null, path: string): IDeleteOptions => {
 	const opts: IDeleteOptions = options || {} as IDeleteOptions;
@@ -59,7 +59,7 @@ export function sync(path: string, options?: IDeleteOptions): void {
 	} else {
 		throw ErrNoFileOrDir(path);
 	}
-};
+}
 const rmTrash = (path: string) => {
 	return trash([path]);
 };
@@ -136,7 +136,7 @@ export function resolveConflict(path: string, resolveMode: EResolveMode): boolea
 		return true;
 	}
 	return false;
-};
+}
 const visitor = (path: string, vars: IVisitorArgs, item: IProcessingNode): Promise<void> => {
 	const options = vars.options;
 
@@ -343,4 +343,4 @@ export async function async(path: string, options?: IDeleteOptions): Promise<TDe
 				});
 		});
 	}
-};
+}

@@ -38,9 +38,9 @@ const defaults = (options?: IOptions): IOptions => {
 // Sync
 // ---------------------------------------------------------
 const dirStatsSync = (path: string): Stats => {
-	let stat: Stats;
+	let _stat: Stats;
 	try {
-		stat = statSync(path);
+		_stat = statSync(path);
 	} catch (err) {
 		// Detection if path already exists
 		if (err.code !== EError.NOEXISTS) {
@@ -48,19 +48,19 @@ const dirStatsSync = (path: string): Stats => {
 		}
 	}
 
-	if (stat && !stat.isDirectory()) {
+	if (_stat && !_stat.isDirectory()) {
 		throw ErrNoDirectory(path);
 	}
 
-	return stat;
+	return _stat;
 };
 
 function mkdirSync(path: string, criteria: IOptions) {
 	mkdirp.sync(path, { mode: criteria.mode as number, fs: null });
-};
+}
 
-function checkDirSync(path: string, stat: Stats, options: IOptions) {
-	const checkMode = function () {
+function checkDirSync(path: string, _stat: Stats, options: IOptions) {
+	const check = function () {
 		if (options.mode !== undefined) {
 			fs.chmodSync(path, options.mode);
 		}
@@ -75,15 +75,15 @@ function checkDirSync(path: string, stat: Stats, options: IOptions) {
 			});
 		}
 	};
-	checkMode();
+	check();
 	checkEmptiness();
-};
+}
 
 export const sync = (path: string, options?: IOptions) => {
 	const criteria = defaults(options);
-	const stat = dirStatsSync(path);
-	if (stat) {
-		checkDirSync(path, stat, criteria);
+	const _stat = dirStatsSync(path);
+	if (_stat) {
+		checkDirSync(path, _stat, criteria);
 	} else {
 		mkdirSync(path, criteria);
 	}
@@ -97,9 +97,9 @@ const promisedReaddir = promisify(readdir);
 const dirStatAsync = (path: string): Promise<Stats> => {
 	return new Promise<Stats>((resolve, reject) => {
 		promisedStat(path)
-			.then((stat: any) => {
-				if (stat.isDirectory()) {
-					resolve(stat);
+			.then((_stat: any) => {
+				if (_stat.isDirectory()) {
+					resolve(_stat);
 				} else {
 					reject(ErrNoDirectory(path));
 				}
@@ -129,14 +129,14 @@ const emptyAsync = (path: string) => {
 	});
 };
 
-const checkMode = function (criteria: IOptions, stat: Stats, path: string): Promise<any> {
+const checkMode = function (criteria: IOptions, _stat: Stats, path: string): Promise<any> {
 	if (criteria.mode !== undefined) {
 		return promisify(fs.chmod)(path, criteria.mode);
 	}
 	return Promise.resolve(null);
 };
 
-const checkDirAsync = (path: string, stat: Stats, options: IOptions) => {
+const checkDirAsync = (path: string, _stat: Stats, options: IOptions) => {
 	return new Promise((resolve, reject) => {
 		const checkEmptiness = function (): Promise<any> {
 			if (options.empty) {
@@ -144,7 +144,7 @@ const checkDirAsync = (path: string, stat: Stats, options: IOptions) => {
 			}
 			return Promise.resolve();
 		};
-		checkMode(options, stat, path)
+		checkMode(options, _stat, path)
 			.then(checkEmptiness)
 			.then(resolve, reject);
 	});
@@ -187,9 +187,9 @@ export const async = (path: string, passedCriteria?: IOptions) => {
 	const criteria = defaults(passedCriteria);
 	return new Promise((resolve, reject) => {
 		dirStatAsync(path)
-			.then((stat: Stats) => {
-				if (stat !== undefined) {
-					return checkDirAsync(path, stat, criteria);
+			.then((_stat: Stats) => {
+				if (_stat !== undefined) {
+					return checkDirAsync(path, _stat, criteria);
 				}
 				return mkdirAsync(path, criteria);
 			})

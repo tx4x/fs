@@ -1,2 +1,2 @@
-export {createWriteStream} from 'fs';
-export {createReadStream} from 'fs';
+export { createWriteStream } from 'fs';
+export { createReadStream } from 'fs';

@@ -25,12 +25,12 @@ export function sync(path: string, options: IOptions, callback: (path: string, i
 	const hasChildren: boolean = item && item.type === ENodeType.DIR && currentLevel < options.maxLevelsDeep;
 	if (hasChildren) {
 		children = listSync(path);
-	};
+	}
 	callback(path, item);
 	if (hasChildren) {
 		children.forEach(child => sync(path + pathUtil.sep + child, options, callback, currentLevel + 1));
 	}
-};
+}
 
 // ---------------------------------------------------------
 // STREAM
@@ -42,7 +42,7 @@ interface IPrivateNode {
 	nextSibling?: IPrivateNode;
 	inspected?: INode;
 	item?: INode;
-};
+}
 export function stream(path: string, options: IOptions) {
 	const rs = new Readable({ objectMode: true });
 	let nextTreeNode: IPrivateNode = {

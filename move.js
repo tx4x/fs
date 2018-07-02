@@ -96,6 +96,7 @@ exports.async = (from, to) => {
                     }
                     else {
                         ensureDestinationPathExistsAsync(to)
+                            // Retry the attempt
                             .then(() => util_1.promisify(fs_1.rename)(from, to))
                             .then(resolve, reject);
                     }
